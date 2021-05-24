@@ -1,7 +1,9 @@
 package vrptwfl.metaheuristic.data;
 
+import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.utils.DebugUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Data {
@@ -9,6 +11,7 @@ public class Data {
     private String instanceName;
     private int nVehicles;
     private int vehicleCapacity;
+    private int[] customers;
     private int[] xcoords;
     private int[] ycoords;
     private int[] demands;
@@ -16,13 +19,26 @@ public class Data {
     private int[] latestStartTimes;
     private int[] serviceDurations;
     private double[][] distanceMatrix;
+    private double endOfPlanningHorizon;
+
+    public double getEndOfPlanningHorizon() {
+        return endOfPlanningHorizon;
+    }
+
+    public int[] getCustomers() {
+        return customers;
+    }
+
+    public void setCustomers(int[] customers) {
+        this.customers = customers;
+    }
+
+    public double[][] getDistanceMatrix() {
+        return distanceMatrix;
+    }
 
     public String getInstanceName() {
         return instanceName;
-    }
-
-    public void setInstanceName(String instanceName) {
-        this.instanceName = instanceName;
     }
 
     public int getnVehicles() {
@@ -90,18 +106,21 @@ public class Data {
         this.serviceDurations = serviceDurations;
     }
 
-    public Data(String instanceName, int nVehicles, int vehicleCapacity,
+    public Data(String instanceName, int nVehicles, int vehicleCapacity, int[] customers,
                 int[] xcoords, int[] ycoords, int[] demands,
                 int[] earliestStartTimes, int[] latestStartTimes, int[] serviceDurations) {
         this.instanceName = instanceName;
         this.nVehicles = nVehicles;
         this.vehicleCapacity = vehicleCapacity;
+        this.customers = customers;
         this.xcoords = xcoords;
         this.ycoords = ycoords;
         this.demands = demands;
         this.earliestStartTimes = earliestStartTimes;
         this.latestStartTimes = latestStartTimes;
         this.serviceDurations = serviceDurations;
+
+        this.endOfPlanningHorizon = this.latestStartTimes[0] + this.serviceDurations[0];
 
         this.createDistanceMatrix();
 //        DebugUtils.printNumericMatrix(this.distanceMatrix);  // TODO Debug Methode wieder raus
@@ -132,4 +151,15 @@ public class Data {
     }
 
 
+    public ArrayList<Vehicle> initializeVehicles() {
+
+        ArrayList<Vehicle> vehicles = new ArrayList<>();
+
+        for (int i = 0; i < this.nVehicles; i++) {
+            vehicles.add(new Vehicle(i, this.vehicleCapacity, this.endOfPlanningHorizon));
+        }
+
+        return vehicles;
+
+    }
 }

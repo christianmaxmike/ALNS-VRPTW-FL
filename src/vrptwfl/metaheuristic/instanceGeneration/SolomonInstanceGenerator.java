@@ -8,6 +8,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class SolomonInstanceGenerator {
 
@@ -47,10 +49,15 @@ public class SolomonInstanceGenerator {
             serviceDurations.add(lineCustomer.get(6));
         }
 
+        List<Integer> customerIds = IntStream.rangeClosed(1, nCustomers)
+                .boxed()
+                .collect(Collectors.toList());
+
         return new Data(
                 instanceName,
                 nVehicles,
                 vehicleCapacity,
+                DataUtils.convertListToArray(customerIds),
                 DataUtils.convertListToArray(xcoords),
                 DataUtils.convertListToArray(ycoords),
                 DataUtils.convertListToArray(demands),
