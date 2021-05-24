@@ -48,6 +48,9 @@ public class SolomonInstanceGenerator {
         }
 
         return new Data(
+                instanceName,
+                nVehicles,
+                vehicleCapacity,
                 DataUtils.convertListToArray(xcoords),
                 DataUtils.convertListToArray(ycoords),
                 DataUtils.convertListToArray(demands),
@@ -78,6 +81,7 @@ public class SolomonInstanceGenerator {
         return intArrayList;
     }
 
+    // TODO main wieder entfernen
     public static void main(String[] args) throws IOException {
 
         SolomonInstanceGenerator generator = new SolomonInstanceGenerator();
