@@ -6,4 +6,6 @@ public class SolomonInstanceGeneratorTest {
 
     // test, dass falls Pfad gueltig ist, die richtigen Infos an der richtigen Stelle stehen
     // hier brauchen wir ein Datenobjekt
+
+    // test, wenn zwar pfad passt, aber zu viele jobs, dass dann nur 100 zurueckgegebe werden
 }
