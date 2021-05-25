@@ -2,6 +2,9 @@ package vrptwfl.metaheuristic.functionalityChecks;
 
 // Code based on example presented on Udemy: "Practical Data Structures & Algorithms in Java"
 
+import java.util.Enumeration;
+import java.util.Hashtable;
+
 public class EmployHashTables {
 
     String[] hashArray; // underlying container
@@ -119,6 +122,38 @@ public class EmployHashTables {
         System.out.println(table.find("Feeling"));
 
         table.displayTable();
+
+        // https://docs.oracle.com/javase/8/docs/api/java/util/Hashtable.html
+        System.out.println("\n\nUsing 'java.util.Hashtable'");
+        Hashtable<String, String> table2 = new Hashtable<>(100);
+        table2.put("Apple", "Apple");
+        table2.put("Hello", "Hello");
+        table2.put("Feeling", "Feeling");
+        table2.put("Water", "Water");
+        table2.put("Africa", "Africa");
+        table2.put("Speed", "Speed");
+        table2.put("Phone", "Phone");
+        table2.put("September", "September");
+        table2.put("Micheal", "Micheal");
+        table2.put("Milk", "Milk");
+        table2.put("Huge", "Huge");
+        table2.put("Dogs", "Dogs");
+
+        System.out.println("\n------FIND ELEMENTS------");
+        System.out.println(table2.get("Apple"));
+        System.out.println(table2.get("Zebra"));
+        System.out.println(table2.get("Feeling"));
+        System.out.println(table2.get("Water"));
+        System.out.println(table2.get("Africa"));
+        System.out.println(table2.get("Feeling"));
+
+        System.out.println("\nprint table: ");
+        Enumeration<String> keys = table2.keys();
+
+        while(keys.hasMoreElements()){
+            System.out.println(keys.nextElement());
+        }
+
     }
 
     public void displayTable() {

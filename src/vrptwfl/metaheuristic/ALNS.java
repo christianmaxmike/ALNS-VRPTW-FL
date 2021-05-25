@@ -14,19 +14,22 @@ public class ALNS {
 
 
         ConstructionHeuristicRegret construction = new ConstructionHeuristicRegret(data);
+        long startTimeConstruction = System.currentTimeMillis();
         Solution solutionConstr = construction.solve(2);
-
-        // TODO 1: Zeitmessen construction
-        // TODO 1b: Hash tables || Hashtables for OR algorithms example (youtube, google?)
-        //  hashtable in collections ?
-        // TODO 1c: Logik ALNS anfangen
+        long finishTimeConstruction = System.currentTimeMillis();
+        long timeElapsed = (finishTimeConstruction - startTimeConstruction);
+        System.out.println("Time for construction " + timeElapsed + " ms.");
 
         // TODO Mittwoch 26.05. morgens
         // TODO 2: tests für geladene instanzen
         // TODO 3: nachdem die Tests da sind, refactring
         // TODO 4: wie funktioniert logger?
 
+        // TODO 1c: Logik ALNS anfangen
 
+        // TODO moegliches hashing
+        //  - bereits generierte Loesungen
+        //  - ggf. earliest, latest possible starts in partial routes (pred_id, pred_time,)
         return 0.0;
     }
 

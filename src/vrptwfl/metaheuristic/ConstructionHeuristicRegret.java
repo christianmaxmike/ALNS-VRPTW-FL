@@ -87,19 +87,22 @@ public class ConstructionHeuristicRegret {
 
             }
 
-            System.out.println(); // TODO wieder raus
-            for (Vehicle veh: vehicles) {
-                if (veh.isUsed()) {
-                    veh.printTour();
-                }
-            }
-            // TODO wieder raus
-            System.out.println(notAssignedCustomers);
-            System.out.println(infeasibleCustomers);
-            // TODO Loesungsobjekt erzeugen
+
         }
 
+        System.out.println(); // TODO wieder raus
+        for (Vehicle veh: vehicles) {
+            if (veh.isUsed()) {
+                veh.printTour();
+            }
+        }
+        // TODO wieder raus
+        System.out.println(notAssignedCustomers);
+        System.out.println(infeasibleCustomers);
+
+        // create solution object
         Solution solution = new Solution(vehicles);
+
         System.out.println("Total route costs:\t" + solution.getTotalCosts());
 
 
