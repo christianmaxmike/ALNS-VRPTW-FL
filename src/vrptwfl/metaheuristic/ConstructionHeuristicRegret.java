@@ -18,6 +18,8 @@ public class ConstructionHeuristicRegret {
     //  e.g. k=3 means difference between best insertion and 3rd best insertion
     public Solution solve(int k) {
 
+//        if (k <= 1) throw Error TODO was genau fuer Fehler, soll geworfen werden,
+
         ArrayList<Integer> notAssignedCustomers = new ArrayList<>() {{ for (int i : data.getCustomers()) add(i); }};
         ArrayList<Integer> infeasibleCustomers = new ArrayList<>(); // needed to store customer that cannot be assigned to any route
         ArrayList<Vehicle> vehicles = data.initializeVehicles();

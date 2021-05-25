@@ -9,12 +9,12 @@ public class ALNS {
     public double runALNS() {
 
         SolomonInstanceGenerator generator = new SolomonInstanceGenerator();
-        Data data = generator.loadInstance("R101.txt", 100);
+        Data data = generator.loadInstance("R102.txt", 100);
 
         // TODO test für geladene instanzen
 
         ConstructionHeuristicRegret construction = new ConstructionHeuristicRegret(data);
-        construction.solve(3);
+        construction.solve(2);
 
         return 0.0;
     }
