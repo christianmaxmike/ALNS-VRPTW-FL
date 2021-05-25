@@ -162,4 +162,8 @@ public class Data {
         return vehicles;
 
     }
+
+    public double getDistanceBetweenCustomers(int customer1, int customer2) {
+        return this.distanceMatrix[customer1][customer2];
+    }
 }
