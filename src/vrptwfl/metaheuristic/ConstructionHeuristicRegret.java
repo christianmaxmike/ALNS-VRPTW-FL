@@ -46,6 +46,9 @@ public class ConstructionHeuristicRegret {
                 for (Vehicle vehicle: vehicles) {
                     ArrayList<double[]> insertions = vehicle.getPossibleInsertions(customer, this.data);
                     possibleInsertionsForCustomer.addAll(insertions);
+
+                    // generate insertion for unused vehicle only once, otherwise regrets between all unused vehicles will be zero
+                    if (!vehicle.isUsed()) break;
                 }
 
                 // if list is empty, no feasible assignment to any route exists for that customer
@@ -96,8 +99,11 @@ public class ConstructionHeuristicRegret {
             // TODO Loesungsobjekt erzeugen
         }
 
+        Solution solution = new Solution(vehicles);
+        System.out.println("Total route costs:\t" + solution.getTotalCosts());
 
-        return null;
+
+        return solution;
     }
 
 }

@@ -15,6 +15,10 @@ public class Vehicle {
     private ArrayList<Double> endOfServices;
     private boolean isUsed;
 
+    public double getTourLength() {
+        return tourLength;
+    }
+
     public int getId() {
         return id;
     }
@@ -44,7 +48,6 @@ public class Vehicle {
 
         this.isUsed = false;
     }
-
 
     public ArrayList<double[]> getPossibleInsertions(int customer, Data data) {
 

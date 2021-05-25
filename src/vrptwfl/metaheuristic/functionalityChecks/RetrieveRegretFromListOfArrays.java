@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
-public class retrieveRegretFromListOfArrays {
+public class RetrieveRegretFromListOfArrays {
 
     /*
      * Get Diff between best and k-best element in list of arrays
