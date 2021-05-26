@@ -1,6 +1,7 @@
 package vrptwfl.metaheuristic.instanceGeneration;
 
 import vrptwfl.metaheuristic.data.Data;
+import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
 import vrptwfl.metaheuristic.utils.DataUtils;
 
 import java.io.IOException;
@@ -13,20 +14,25 @@ import java.util.stream.IntStream;
 
 public class SolomonInstanceGenerator {
 
-    public Data loadInstance(String fileName, int nCustomers) {
-
+    private String[] readInstanceTextFile(String fileName) throws IOException {
         String locationOfSolomonInstances = "resources/Instances-Solomon/";
 
-        String entireTextFile = null;
-        try {
-            entireTextFile = Files.readString(Path.of(locationOfSolomonInstances + fileName));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        String[] lines = entireTextFile.split("\n");
+        String entireTextFile = Files.readString(Path.of(locationOfSolomonInstances + fileName));
+        return entireTextFile.split("\r\n");
+    }
+
+    public Data loadInstance(String fileName, int nCustomers) throws ArgumentOutOfBoundsException, IOException {
+
+        String[] lines = readInstanceTextFile(fileName);
 
         // get general information
-        String instanceName = lines[0].replaceAll(" ", "");  // remove white space at end of name
+        String instanceName = lines[0];
+
+        if (lines.length != 110) throw new ArgumentOutOfBoundsException("Expected that " + fileName + " is 110 lines long. However, found "  + lines.length + " lines.");
+
+        // get customer information
+        if (nCustomers < 1) throw new ArgumentOutOfBoundsException("At least one customer must exists (you passed " + nCustomers + ")");
+        if (lines.length < nCustomers + 10) throw new ArgumentOutOfBoundsException("Number of customers (" + nCustomers + ") less than entries for customers (" + (lines.length-10) + ") in instance " + instanceName + ".");
 
         // get vehicle information
         List<Integer> lineVehicleInfo = getIntegerArrayFromLine(lines[4]);
@@ -38,7 +44,8 @@ public class SolomonInstanceGenerator {
         List<Integer> earliestStartTimes = new ArrayList<>();
         List<Integer> latestStartTimes = new ArrayList<>();
         List<Integer> serviceDurations = new ArrayList<>();
-        // get customer information
+
+
         for (int i=9; i < 10 + nCustomers; i++ ) { // nCustomers + one additional for depot
             List<Integer> lineCustomer = getIntegerArrayFromLine(lines[i]);
             xcoords.add(lineCustomer.get(1));
@@ -93,7 +100,12 @@ public class SolomonInstanceGenerator {
 
         SolomonInstanceGenerator generator = new SolomonInstanceGenerator();
 //        generator.loadInstance("R101.txt", 25);
-        generator.loadInstance("C106.txt", 25);
+        try {
+            generator.loadInstance("C106.txt", 125);
+//            generator.loadInstance("GibtEsNicht.txt", 125);
+        } catch (ArgumentOutOfBoundsException e) {
+            e.printStackTrace();
+        }
     }
 
 }

@@ -2,7 +2,10 @@ package vrptwfl.metaheuristic;
 
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.data.Data;
+import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
 import vrptwfl.metaheuristic.instanceGeneration.SolomonInstanceGenerator;
+
+import java.io.IOException;
 
 public class ALNS {
 
@@ -10,7 +13,12 @@ public class ALNS {
     public double runALNS() {
 
         SolomonInstanceGenerator generator = new SolomonInstanceGenerator();
-        Data data = generator.loadInstance("R104.txt", 100);
+        Data data = null;
+        try {
+            data = generator.loadInstance("R104.txt", 100);
+        } catch (ArgumentOutOfBoundsException | IOException e) {
+            e.printStackTrace();
+        }
 
 
         ConstructionHeuristicRegret construction = new ConstructionHeuristicRegret(data);
@@ -20,7 +28,6 @@ public class ALNS {
         long timeElapsed = (finishTimeConstruction - startTimeConstruction);
         System.out.println("Time for construction " + timeElapsed + " ms.");
 
-        // TODO Mittwoch 26.05. morgens
         // TODO 2: tests für geladene instanzen
         // TODO 3: nachdem die Tests da sind, refactring
         // TODO 4: wie funktioniert logger?
