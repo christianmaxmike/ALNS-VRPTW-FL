@@ -28,9 +28,15 @@ public class ALNS {
         System.out.println("Time for construction " + timeElapsed + " ms.");
 
 
-        // TODO 2: tests für geladene instanzen
-        // TODO 3: nachdem die Tests da sind, refactring
+        // TODO wieder raus
+        System.out.println(construction.getNotAssignedCustomers());
+        System.out.println(construction.getInfeasibleCustomers());
+        solutionConstr.printSolution();
 
+        // TODO 2: tests für geladene instanzen
+
+        // TODO config file nutzbar machen. (bigMRegret, auf 1 nachkommastelle runden etc)
+        //  (wenn runden moeglich ist, dann auch tour kosten runden; vielleicht auch nicht, kann spaeter probleme geben)
         // TODO 1c: Logik ALNS anfangen
 
         // TODO moegliches hashing

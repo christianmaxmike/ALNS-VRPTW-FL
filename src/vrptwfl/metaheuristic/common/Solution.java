@@ -18,13 +18,21 @@ public class Solution {
     public Solution( ArrayList<Vehicle> vehicles) {
         this.vehicles = vehicles;
         this.calculateCostsFromVehicles();
-
     }
 
     private void calculateCostsFromVehicles() {
         this.totalCosts = 0.;
         for (Vehicle veh: vehicles) {
             this.totalCosts += veh.getTourLength();
+        }
+    }
+
+    public void printSolution() {
+        System.out.println("Solution total costs: " + this.totalCosts); // TODO logger debug!
+        for (Vehicle veh: this.vehicles) {
+            if (veh.isUsed()) {
+                veh.printTour();
+            }
         }
     }
 

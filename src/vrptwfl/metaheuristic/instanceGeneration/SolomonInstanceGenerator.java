@@ -15,7 +15,7 @@ import java.util.stream.IntStream;
 public class SolomonInstanceGenerator {
 
     private String[] readInstanceTextFile(String fileName) throws IOException {
-        String locationOfSolomonInstances = "resources/Instances-Solomon/";
+        String locationOfSolomonInstances = "instances/Instances-Solomon/";
 
         String entireTextFile = Files.readString(Path.of(locationOfSolomonInstances + fileName));
         return entireTextFile.split("\r\n");

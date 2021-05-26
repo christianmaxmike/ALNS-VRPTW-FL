@@ -99,11 +99,10 @@ public class Vehicle {
         this.capacityUsed += demand;
         this.tourLength += additionCosts;
         this.isUsed = true;
-
     }
 
     public void printTour() {
-        System.out.println("Tour of vehicle " + this.id + ":");
+        System.out.println("Tour of vehicle " + this.id + ":"); // TODO logger debug
         for (int i = 0; i < this.customers.size() -1; i++) {
             System.out.print(this.customers.get(i) + " -> ");
         }

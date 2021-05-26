@@ -25,4 +25,8 @@ public class ConstructionHeuristicRegretTest {
     public void rejectInvalidK() throws ArgumentOutOfBoundsException {
         construction.solve(1);
     }
+
+    // TODO Test, ob possibleInsertionsForCustomer auch wirklich nach groesstem Regret sortiert ist (ist das was vorne steht wirklich groesser?)?
+
+    // TODO checken, ob die Touren wirklich feasible sind (zumindest exemplarisch)
 }
