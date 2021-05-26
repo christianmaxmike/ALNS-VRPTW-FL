@@ -3,6 +3,7 @@ package vrptwfl.metaheuristic;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
+import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
 
 import java.util.*;
 
@@ -16,9 +17,10 @@ public class ConstructionHeuristicRegret {
 
     // k defines what regret measure to use
     //  e.g. k=3 means difference between best insertion and 3rd best insertion
-    public Solution solve(int k) {
+    public Solution solve(int k) throws ArgumentOutOfBoundsException {
 
-//        if (k <= 1) throw Error TODO was genau fuer Fehler, soll geworfen werden,
+        // enforce k > 1. otherwise, no regret measure possible
+        if (k <= 1) throw new ArgumentOutOfBoundsException("regret parameter k must be greater than one. Value passed was " + k + ".");
 
         ArrayList<Integer> notAssignedCustomers = new ArrayList<>() {{ for (int i : data.getCustomers()) add(i); }};
         ArrayList<Integer> infeasibleCustomers = new ArrayList<>(); // needed to store customer that cannot be assigned to any route

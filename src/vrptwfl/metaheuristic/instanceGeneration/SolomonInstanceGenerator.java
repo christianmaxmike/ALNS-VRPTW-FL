@@ -29,8 +29,6 @@ public class SolomonInstanceGenerator {
         String instanceName = lines[0];
 
         if (lines.length != 110) throw new ArgumentOutOfBoundsException("Expected that " + fileName + " is 110 lines long. However, found "  + lines.length + " lines.");
-
-        // get customer information
         if (nCustomers < 1) throw new ArgumentOutOfBoundsException("At least one customer must exists (you passed " + nCustomers + ")");
         if (lines.length < nCustomers + 10) throw new ArgumentOutOfBoundsException("Number of customers (" + nCustomers + ") less than entries for customers (" + (lines.length-10) + ") in instance " + instanceName + ".");
 
@@ -45,7 +43,7 @@ public class SolomonInstanceGenerator {
         List<Integer> latestStartTimes = new ArrayList<>();
         List<Integer> serviceDurations = new ArrayList<>();
 
-
+        // get customer information
         for (int i=9; i < 10 + nCustomers; i++ ) { // nCustomers + one additional for depot
             List<Integer> lineCustomer = getIntegerArrayFromLine(lines[i]);
             xcoords.add(lineCustomer.get(1));
@@ -72,7 +70,6 @@ public class SolomonInstanceGenerator {
                 DataUtils.convertListToArray(latestStartTimes),
                 DataUtils.convertListToArray(serviceDurations)
         );
-
     }
 
     private List<Integer> getIntegerArrayFromLine(String line) {

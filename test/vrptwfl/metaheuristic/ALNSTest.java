@@ -1,13 +1,14 @@
 package vrptwfl.metaheuristic;
 
 import org.junit.Test;
+import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
 
 import static org.junit.Assert.*;
 
 public class ALNSTest {
 
     @Test
-    public void checkThatALNSReturnsCorrectInformation() {
+    public void checkThatALNSReturnsCorrectInformation() throws ArgumentOutOfBoundsException {
         ALNS alns = new ALNS();
         double obj = alns.runALNS();
 

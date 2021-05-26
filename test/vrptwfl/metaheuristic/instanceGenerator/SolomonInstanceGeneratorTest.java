@@ -14,7 +14,6 @@ import static org.junit.Assert.fail;
 
 public class SolomonInstanceGeneratorTest {
 
-
     private SolomonInstanceGenerator generator;
 
     @Before
@@ -41,10 +40,6 @@ public class SolomonInstanceGeneratorTest {
     public void textFilesHaveCorrectLength()  throws ArgumentOutOfBoundsException, IOException {
         generator.loadInstance("wrong_number_of_lines.txt", 25);
     }
-
-    // test, dass falls Pfad gueltig ist, die richtigen Infos an der richtigen Stelle stehen
-    // hier brauchen wir ein Datenobjekt
-
 
     @Test
     public void dataOutputIsCalculatedCorrectly() throws ArgumentOutOfBoundsException, IOException {

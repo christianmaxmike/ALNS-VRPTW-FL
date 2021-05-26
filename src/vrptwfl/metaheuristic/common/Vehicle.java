@@ -44,8 +44,6 @@ public class Vehicle {
         this.endOfServices.add(0.0);
         this.endOfServices.add(latestEndOfService);
 
-        // TODO add Test, dass dummy jobs korrekt drin sind, (wirklich auch bei 0 vorbei sind und bei was auch immer enden)
-
         this.isUsed = false;
     }
 
@@ -57,7 +55,6 @@ public class Vehicle {
         ArrayList<double[]> possibleInsertions = new ArrayList<>();
 
         // if capacity limit would be reached, the customer cannot be inserted
-        // TODO add Test, dass wir hier rausfliegen, wenn Capa zu hoch
         if (this.capacityUsed + data.getDemands()[customer] > this.capacityLimit) return possibleInsertions;
 
         double earliestStartCustomer = data.getEarliestStartTimes()[customer];
