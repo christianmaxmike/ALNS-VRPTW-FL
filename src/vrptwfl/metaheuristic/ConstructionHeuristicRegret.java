@@ -10,9 +10,17 @@ import java.util.*;
 public class ConstructionHeuristicRegret {
 
     private Data data;
+    private final ArrayList<Integer> notAssignedCustomers;
+    private final ArrayList<Integer> infeasibleCustomers;
+    private final ArrayList<Vehicle> vehicles;
 
     public ConstructionHeuristicRegret(Data data) {
         this.data = data;
+        // initally add all customers to list of not assigned customers
+        notAssignedCustomers = new ArrayList<>() {{ for (int i : data.getCustomers()) add(i); }};
+        // needed to store customer that cannot be assigned to any route
+        infeasibleCustomers = new ArrayList<>();
+        vehicles = data.initializeVehicles();
     }
 
     // k defines what regret measure to use
@@ -22,18 +30,11 @@ public class ConstructionHeuristicRegret {
         // enforce k > 1. otherwise, no regret measure possible
         if (k <= 1) throw new ArgumentOutOfBoundsException("regret parameter k must be greater than one. Value passed was " + k + ".");
 
-        ArrayList<Integer> notAssignedCustomers = new ArrayList<>() {{ for (int i : data.getCustomers()) add(i); }};
-        ArrayList<Integer> infeasibleCustomers = new ArrayList<>(); // needed to store customer that cannot be assigned to any route
-        ArrayList<Vehicle> vehicles = data.initializeVehicles();
-
-        // FIRST STEP OF k-regret --> TODO in eigene Methode
-
         while (!notAssignedCustomers.isEmpty()) {
             // initialize values
             double maxRegret = -1;
             double[] nextInsertion = new double[5]; // [customerId, vehicleId, positionInRoute, startTime, additionalCosts]
-            // positionInRoute is defined as the position at which the customer will be inserted
-            nextInsertion[4] = -1;
+            nextInsertion[4] = -1; // positionInRoute is defined as the position at which the customer will be inserted
 
             ListIterator<Integer> iter = notAssignedCustomers.listIterator();
 

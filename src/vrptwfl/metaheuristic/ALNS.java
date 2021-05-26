@@ -30,7 +30,6 @@ public class ALNS {
 
         // TODO 2: tests für geladene instanzen
         // TODO 3: nachdem die Tests da sind, refactring
-        // TODO 4: wie funktioniert logger?
 
         // TODO 1c: Logik ALNS anfangen
 
