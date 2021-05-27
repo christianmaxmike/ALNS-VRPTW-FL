@@ -53,7 +53,7 @@ public class ConstructionHeuristicRegret {
         }
 
         // create solution object, then return it
-        return new Solution(vehicles);
+        return new Solution(vehicles, notAssignedCustomers);
     }
 
     private double[] getNextInsertion(int k) {

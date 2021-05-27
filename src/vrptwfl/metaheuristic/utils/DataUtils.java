@@ -13,4 +13,8 @@ public class DataUtils {
         return result;
     }
 
+    public static double calculateGap(double valueOptimal, double compValue) {
+        return Math.abs(compValue - valueOptimal) / compValue;
+    }
+
 }

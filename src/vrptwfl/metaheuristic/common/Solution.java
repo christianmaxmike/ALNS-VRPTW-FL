@@ -4,8 +4,20 @@ import java.util.ArrayList;
 
 public class Solution {
 
+    private ArrayList<Integer> notAssignedCustomers;
     private double totalCosts;
     private ArrayList<Vehicle> vehicles;
+    private boolean isFeasible = false;
+
+    public Solution(ArrayList<Vehicle> vehicles, ArrayList<Integer> notAssignedCustomers) {
+        this.vehicles = vehicles;
+        this.calculateCostsFromVehicles();
+        this.notAssignedCustomers = notAssignedCustomers;
+
+        if (notAssignedCustomers.isEmpty()) { // TODO brauchen wir einen Test dafür (?) --> eher wenn Lösung in ALNS bearbeitet wurde, ob dann noch alles passt
+            this.isFeasible = true;
+        }
+    }
 
     public double getTotalCosts() {
         return totalCosts;
@@ -15,10 +27,6 @@ public class Solution {
         return vehicles;
     }
 
-    public Solution( ArrayList<Vehicle> vehicles) {
-        this.vehicles = vehicles;
-        this.calculateCostsFromVehicles();
-    }
 
     private void calculateCostsFromVehicles() {
         this.totalCosts = 0.;

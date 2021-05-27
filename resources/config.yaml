@@ -1,6 +1,6 @@
 
 # ALNS configurations
-alns_iterations: 10_000   # TODO wie heißt das im Paper (Omega?)
+alns_iterations: 50_000   # TODO wie heißt das im Paper (Omega?)
 
 # calculation
 rounding_precision: 1     # number of decimal places

@@ -74,6 +74,7 @@ public class OptimalSolutions {
             entry("RC108", new int[] {3, 6, 11})
     );
 
+    // TODO wieder raus
     public static void main(String[] args) {
         System.out.println(optimalObjFuncValue.get("R101")[1]);
     }
