@@ -1,3 +1,7 @@
+
+# ALNS configurations
+alns_iterations: 10_000   # TODO wie heißt das im Paper (Omega?)
+
 # calculation
 rounding_precision: 1     # number of decimal places
 epsilon: 0.0001           # precision for double comparision

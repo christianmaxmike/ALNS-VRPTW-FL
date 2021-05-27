@@ -97,6 +97,7 @@ public class ConstructionHeuristicRegretTest {
 
     @Test
     public void secondCustomerToDifferentRoute() {
+        // TODO: hier Fall konstruieren, wo man wirklich die andere Route nehmen sollte (ggf. über Mocks, dass distance matrix ueberschrieben wird)
         int firstCustomer = 17;
         int secondCustomer = 23; // 17 is far away from 1 in instance
 

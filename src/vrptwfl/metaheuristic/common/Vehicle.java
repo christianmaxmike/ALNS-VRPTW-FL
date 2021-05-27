@@ -1,5 +1,6 @@
 package vrptwfl.metaheuristic.common;
 
+import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.data.Data;
 
 import java.util.ArrayList;
@@ -65,9 +66,6 @@ public class Vehicle {
 
     public ArrayList<double[]> getPossibleInsertions(int customer, Data data) {
 
-        // TODO epsilon in config file
-        double epsilon = 0.0001;
-
         ArrayList<double[]> possibleInsertions = new ArrayList<>();
 
         // if capacity limit would be reached, the customer cannot be inserted
@@ -88,10 +86,10 @@ public class Vehicle {
             double latestStartAtInsertion = Math.min(this.startOfServices.get(i+1) - distFromCustomer - data.getServiceDurations()[customer], latestStartCustomer);
 
             // if latest start of customer is less than earliest start at position, later position will also not be possible
-            if (latestStartCustomer < earliestStartAtInsertion - epsilon) break;
+            if (latestStartCustomer < earliestStartAtInsertion - Config.epsilon) break;
 
             // check if time window feasible (if enough time between customers already in route
-            if (latestStartAtInsertion - earliestStartAtInsertion > epsilon) {
+            if (latestStartAtInsertion - earliestStartAtInsertion > Config.epsilon) {
                 double additionTravelCosts = distToCustomer + distFromCustomer - data.getDistanceBetweenCustomers(pred, succ);
                 possibleInsertions.add(new double[] {customer, this.id, i+1, earliestStartAtInsertion, additionTravelCosts});
             }

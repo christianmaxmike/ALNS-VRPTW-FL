@@ -13,6 +13,7 @@ public class Config {
     public static double epsilon;
     public static int bigMRegret;
     public static double roundingPrecisionFactor;
+    public static int alnsIterations;
 
     private static Config conf = new Config();
 
@@ -38,6 +39,8 @@ public class Config {
         bigMRegret = (int) obj.get("bigM_regret");
         roundingPrecisionFactor = Math.pow(10, ((int) obj.get("rounding_precision")));
 
+        // ALNS configurations
+        alnsIterations = (int) obj.get("alns_iterations");
     }
 
     // TODO wieder raus

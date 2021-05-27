@@ -167,4 +167,9 @@ public class Data {
     public double getDistanceBetweenCustomers(int customer1, int customer2) {
         return this.distanceMatrix[customer1][customer2];
     }
+
+    // FOR TESTING ONLY
+    public void setDemandOfCustomer(int customer, int demand) {
+        this.demands[customer] = demand;
+    }
 }

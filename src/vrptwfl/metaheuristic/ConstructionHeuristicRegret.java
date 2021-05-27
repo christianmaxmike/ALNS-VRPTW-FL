@@ -14,8 +14,6 @@ public class ConstructionHeuristicRegret {
     private final ArrayList<Integer> infeasibleCustomers;
     private final ArrayList<Vehicle> vehicles;
 
-
-
     public ArrayList<Integer> getNotAssignedCustomers() {
         return notAssignedCustomers;
     }
