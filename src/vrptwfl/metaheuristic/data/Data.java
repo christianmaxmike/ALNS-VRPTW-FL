@@ -1,5 +1,6 @@
 package vrptwfl.metaheuristic.data;
 
+import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.utils.DebugUtils;
 
@@ -146,7 +147,7 @@ public class Data {
 
         double distance = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY,2));
         // round to
-        distance = Math.round(distance*10.0)/10.0;
+        distance = Math.round(distance* Config.roundingPrecisionFactor)/Config.roundingPrecisionFactor;
         return distance;
     }
 

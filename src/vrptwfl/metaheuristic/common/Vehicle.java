@@ -15,6 +15,22 @@ public class Vehicle {
     private ArrayList<Double> endOfServices;
     private boolean isUsed;
 
+    public int getCapacityUsed() {
+        return capacityUsed;
+    }
+
+    public ArrayList<Integer> getCustomers() {
+        return customers;
+    }
+
+    public ArrayList<Double> getStartOfServices() {
+        return startOfServices;
+    }
+
+    public ArrayList<Double> getEndOfServices() {
+        return endOfServices;
+    }
+
     public double getTourLength() {
         return tourLength;
     }

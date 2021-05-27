@@ -5,6 +5,7 @@ import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
 import vrptwfl.metaheuristic.instanceGeneration.SolomonInstanceGenerator;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class ALNS {
@@ -33,11 +34,11 @@ public class ALNS {
         System.out.println(construction.getInfeasibleCustomers());
         solutionConstr.printSolution();
 
-        // TODO 2: tests für geladene instanzen
 
-        // TODO config file nutzbar machen. (bigMRegret, auf 1 nachkommastelle runden etc)
-        //  (wenn runden moeglich ist, dann auch tour kosten runden; vielleicht auch nicht, kann spaeter probleme geben)
-        // TODO 1c: Logik ALNS anfangen
+        // TODO 2: tests für geladene instanzen
+        // TODO 3: Logik ALNS anfangen (50_000 iteration random destroy, und regret repairs)
+
+        // TODO 4: greedy repair
 
         // TODO moegliches hashing
         //  - bereits generierte Loesungen
@@ -46,7 +47,10 @@ public class ALNS {
     }
 
     public static void main(String[] args) throws ArgumentOutOfBoundsException {
+
         ALNS algo = new ALNS();
         algo.runALNS();
+
+        // Add TimeLimit (?)
     }
 }
