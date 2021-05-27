@@ -64,7 +64,7 @@ public class ConstructionHeuristicRegretTest {
         assertTrue("Vehicle is used", vehicle1.isUsed());
     }
 
-        @Test
+    @Test
     public void secondCustomerHasTwoPossibleInsertions() {
         int firstCustomer = 1;
         int secondCustomer = 69; // 69 is very close to 1 in instance
@@ -93,6 +93,32 @@ public class ConstructionHeuristicRegretTest {
         calculateRegret = construction.calculateRegret(k, possibleInsertions);
         manualValue = Config.bigMRegret - (4.5 + 12.2 - 15.2);
         assertEquals("Regret value (k=3)", manualValue, calculateRegret, Config.epsilon);
+    }
+
+    @Test
+    public void secondCustomerToDifferentRoute() {
+        int firstCustomer = 17;
+        int secondCustomer = 23; // 17 is far away from 1 in instance
+
+        // first customer 17
+        ArrayList<double[]> possibleInsertions =  construction.getPossibleInsertionsForCustomer(firstCustomer);
+        double[] insertion = possibleInsertions.get(0);
+        construction.getVehicles().get((int) insertion[1]).applyInsertion(insertion, data);
+
+        // second customer 23
+        possibleInsertions =  construction.getPossibleInsertionsForCustomer(secondCustomer);
+
+        // there should be two insertions possible (vehicle 0 (with customer 1) and vehicle 1 (empty))
+        assertEquals("Number of possible insertions:", 2, possibleInsertions.size());
+
+        // for k = 2
+        int k = 2;
+        double calculateRegret = construction.calculateRegret(k, possibleInsertions);
+        // insertion vehicle 2 (after cust 17): dist(17,23) + dist(23,depot) - dist(17,depot)
+        // insertion vehicle 1 (empty): 2x distance to depot (36.1)
+        double manualValue = 36.1*2 - (55.9 + 36.1 - 30.4);
+        assertEquals("Regret value (k=2)", manualValue, calculateRegret, Config.epsilon);
+
     }
 
     // TODO Test, ob possibleInsertionsForCustomer auch wirklich nach groesstem Regret sortiert ist (ist das was vorne steht wirklich groesser?)?
