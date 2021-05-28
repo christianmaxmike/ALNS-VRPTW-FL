@@ -77,6 +77,7 @@ public class ALNSCore {
                     System.out.println("removeFromTour " + removeFromTour);
                     int removedCustomer = vehicle.applyRemoval(removeFromTour, this.data);
                     solution.addCustomerToNotAssignedCustomers(removedCustomer);
+                    // TODO solution cost muessen auch noch upgedated werden
                     nCustomersAlreadyRemovedInTour++;
                     break;
                 }

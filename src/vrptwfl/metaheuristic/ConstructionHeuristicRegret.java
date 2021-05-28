@@ -111,12 +111,18 @@ public class ConstructionHeuristicRegret {
     // method is public such that logic can be tested
     public ArrayList<double[]> getPossibleInsertionsForCustomer(int customer) {
         ArrayList<double[]> possibleInsertionsForCustomer = new ArrayList<>();
+
+        boolean triedUnusedVehicle = false;
         for (Vehicle vehicle: vehicles) {
+            // generate insertion for unused vehicle only once, otherwise regrets between all unused vehicles will be zero
+            if (!vehicle.isUsed()) {
+                if (triedUnusedVehicle) continue;
+                triedUnusedVehicle = true;
+            }
+
             ArrayList<double[]> insertions = vehicle.getPossibleInsertions(customer, this.data);
             possibleInsertionsForCustomer.addAll(insertions);
 
-            // generate insertion for unused vehicle only once, otherwise regrets between all unused vehicles will be zero
-            if (!vehicle.isUsed()) break;
         }
         return possibleInsertionsForCustomer;
     }
