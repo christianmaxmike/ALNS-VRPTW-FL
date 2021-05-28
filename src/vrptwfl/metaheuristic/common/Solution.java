@@ -19,6 +19,9 @@ public class Solution {
         }
     }
 
+    public ArrayList<Integer> getNotAssignedCustomers() {
+        return notAssignedCustomers;
+    }
     public double getTotalCosts() {
         return totalCosts;
     }

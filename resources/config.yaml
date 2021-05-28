@@ -1,6 +1,9 @@
 
 # ALNS configurations
-alns_iterations: 50_000   # TODO wie heißt das im Paper (Omega?)
+alns_iterations: 50_000
+lower_bound_nr_of_removals: 4
+upper_bound_nr_of_removals: 100
+upper_bound_factor_nr_of_removals: 0.4
 
 # calculation
 rounding_precision: 1     # number of decimal places

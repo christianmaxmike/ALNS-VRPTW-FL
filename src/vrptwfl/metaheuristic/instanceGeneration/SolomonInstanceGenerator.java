@@ -60,6 +60,7 @@ public class SolomonInstanceGenerator {
 
         return new Data(
                 instanceName,
+                nCustomers,
                 nVehicles,
                 vehicleCapacity,
                 DataUtils.convertListToArray(customerIds),

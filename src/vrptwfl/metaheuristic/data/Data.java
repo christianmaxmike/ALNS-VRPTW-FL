@@ -10,6 +10,7 @@ import java.util.Arrays;
 public class Data {
 
     private String instanceName;
+    private int nCustomers;
     private int nVehicles;
     private int vehicleCapacity;
     private int[] customers;
@@ -21,6 +22,10 @@ public class Data {
     private int[] serviceDurations;
     private double[][] distanceMatrix;
     private double endOfPlanningHorizon;
+
+    public int getnCustomers() {
+        return nCustomers;
+    }
 
     public double getEndOfPlanningHorizon() {
         return endOfPlanningHorizon;
@@ -107,10 +112,11 @@ public class Data {
         this.serviceDurations = serviceDurations;
     }
 
-    public Data(String instanceName, int nVehicles, int vehicleCapacity, int[] customers,
+    public Data(String instanceName, int nCustomers, int nVehicles, int vehicleCapacity, int[] customers,
                 int[] xcoords, int[] ycoords, int[] demands,
                 int[] earliestStartTimes, int[] latestStartTimes, int[] serviceDurations) {
         this.instanceName = instanceName;
+        this.nCustomers = nCustomers;
         this.nVehicles = nVehicles;
         this.vehicleCapacity = vehicleCapacity;
         this.customers = customers;
