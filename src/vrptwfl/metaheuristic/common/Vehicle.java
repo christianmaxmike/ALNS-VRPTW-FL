@@ -15,6 +15,11 @@ public class Vehicle {
     private ArrayList<Double> startOfServices;
     private ArrayList<Double> endOfServices;
     private boolean isUsed;
+    private int nCustomersInTour;
+
+    public int getnCustomersInTour() {
+        return nCustomersInTour;
+    }
 
     public int getCapacityUsed() {
         return capacityUsed;
@@ -54,13 +59,13 @@ public class Vehicle {
         this.customers = new ArrayList<>();
         this.customers.add(0);
         this.customers.add(0);
+        this.nCustomersInTour = 0;
         this.startOfServices = new ArrayList<>();
         this.startOfServices.add(0.0);
         this.startOfServices.add(latestEndOfService);
         this.endOfServices = new ArrayList<>();
         this.endOfServices.add(0.0);
         this.endOfServices.add(latestEndOfService);
-
         this.isUsed = false;
     }
 
@@ -99,6 +104,12 @@ public class Vehicle {
         return possibleInsertions;
     }
 
+
+
+    // TODO methode für cost increase und reduction (tour laenge)
+
+
+
     public void applyInsertion(double[] insertion, Data data) {
         int pos = (int) insertion[2];
         int customer = (int) insertion[0];
@@ -108,18 +119,49 @@ public class Vehicle {
         double additionCosts = insertion[4];
 
         this.customers.add(pos, customer);
+        this.nCustomersInTour++;
         this.startOfServices.add(pos, start);
         this.endOfServices.add(pos, start+duration);
         this.capacityUsed += demand;
         this.tourLength += additionCosts;
         this.isUsed = true;
     }
+    public void applyRemoval(int removePosition, Data data) {
+
+        System.out.println("Apply removal (v=" + this.id + ", remove=" + removePosition + ")");
+
+        int customer =this.customers.get(removePosition);
+
+        int demand = data.getDemands()[customer];
+        this.capacityUsed -= demand;
+
+        this.customers.remove(removePosition);
+        this.startOfServices.remove(removePosition);
+        this.endOfServices.remove(removePosition);
+
+        this.nCustomersInTour--;
+        if (this.nCustomersInTour == 0) {
+            this.isUsed = false;
+        }
+
+        // tour costs
+        int pred = this.customers.get(removePosition - 1);
+        int succ = this.customers.get(removePosition + 1);
+
+        double distToCustomer = data.getDistanceBetweenCustomers(pred, customer);
+        double distFromCustomer = data.getDistanceBetweenCustomers(customer, succ);
+
+        double reductionTravelCosts = distToCustomer + distFromCustomer - data.getDistanceBetweenCustomers(pred, succ);
+        this.tourLength -= reductionTravelCosts;
+
+    }
 
     public void printTour() {
-        System.out.println("Tour of vehicle " + this.id + ":"); // TODO logger debug
+        System.out.println("Tour of vehicle " + this.id + " (n=" +  this.nCustomersInTour +  ")" + ":"); // TODO logger debug
         for (int i = 0; i < this.customers.size() -1; i++) {
             System.out.print(this.customers.get(i) + " -> ");
         }
         System.out.println(this.customers.get(this.customers.size() -1) + "");
     }
+
 }

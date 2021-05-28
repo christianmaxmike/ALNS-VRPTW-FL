@@ -58,6 +58,7 @@ public class ConstructionHeuristicRegretTest {
 
         assertEquals("Number of nodes in tour", 3, vehicle1.getCustomers().size()); // 2x depot, 1x customer 12
         assertEquals("Customer is customer 12", 12, (int) vehicle1.getCustomers().get(1)); // 0 is depot, 1 is customer, 2 is depot
+        assertEquals("Number of customers in tour", 1, vehicle1.getnCustomersInTour());
         assertEquals("Start time", 15., vehicle1.getStartOfServices().get(1), Config.epsilon);
         assertEquals("End time", 25., vehicle1.getEndOfServices().get(1), Config.epsilon); // start time 15 + duration 10
         assertEquals("Tour length", 30., vehicle1.getTourLength(), Config.epsilon);

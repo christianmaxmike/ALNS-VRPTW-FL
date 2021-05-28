@@ -1,3 +1,5 @@
+# General
+random_seed: 123  # if null, no random seed will be used
 
 # ALNS configurations
 alns_iterations: 50_000
