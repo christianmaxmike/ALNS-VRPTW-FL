@@ -126,7 +126,9 @@ public class Vehicle {
         this.tourLength += additionCosts;
         this.isUsed = true;
     }
-    public void applyRemoval(int removePosition, Data data) {
+
+    // returns customer id
+    public int applyRemoval(int removePosition, Data data) {
 
         System.out.println("Apply removal (v=" + this.id + ", remove=" + removePosition + ")");
 
@@ -153,6 +155,8 @@ public class Vehicle {
 
         double reductionTravelCosts = distToCustomer + distFromCustomer - data.getDistanceBetweenCustomers(pred, succ);
         this.tourLength -= reductionTravelCosts;
+
+        return customer;
 
     }
 

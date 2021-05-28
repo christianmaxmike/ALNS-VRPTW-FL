@@ -22,6 +22,11 @@ public class Solution {
     public ArrayList<Integer> getNotAssignedCustomers() {
         return notAssignedCustomers;
     }
+
+    public void addCustomerToNotAssignedCustomers(int customer) {
+        this.notAssignedCustomers.add(customer);
+    }
+
     public double getTotalCosts() {
         return totalCosts;
     }

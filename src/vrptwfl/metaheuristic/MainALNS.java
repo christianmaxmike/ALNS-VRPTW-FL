@@ -42,6 +42,8 @@ public class MainALNS {
         long timeElapsed = (finishTimeConstruction - startTimeConstruction);
         System.out.println("Time for construction " + timeElapsed + " ms.");
 
+        // TODO WICHTIG FEHLER SUCHEN BEI REMOVAL !!!
+
         // TODO brauchen irgendwas, um Lösung zu speichern (ZF und Touren startzeiten etc.)
 
         // TODO wieder raus

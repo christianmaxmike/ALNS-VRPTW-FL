@@ -54,30 +54,33 @@ public class ALNSCore {
         int runningPositionNr = 0;
         int nVehicles = solution.getVehicles().size(); // e.g. 25
         int vStart = 0; // initially start with vehicle at position 0 in list of vehicles
-        int nCustomersAlreadyRemoved = 0; // needed to map correct positions after customers were already removed from tour
 
+        int nCustomersAlreadyRemovedInTour = 0; // needed to map correct positions after customers were already removed from tour
         for (Integer removePosition: positionsToRemove) { // e.g. [29, 34, 38, 53, 56, 66, 91, 93]
             System.out.println("\nRemove position: " + removePosition); // TODO wieder raus
             for (int v = vStart; v < nVehicles; v++){
                 Vehicle vehicle = solution.getVehicles().get(v);
                 int nCustomersInTourBeforeRemoval = vehicle.getnCustomersInTour();
 
-                if ( runningPositionNr + nCustomersInTourBeforeRemoval < removePosition) {
+                if ( runningPositionNr + nCustomersInTourBeforeRemoval  < removePosition) {
                     runningPositionNr += nCustomersInTourBeforeRemoval;
                     vStart++;  // (0), 9, 7, 11, 8 : --> 9, 16, 27, 35
                 } else {
 
                     // iterate over all customers in list
-                    int removeFromTour = removePosition - (runningPositionNr - nCustomersAlreadyRemoved);
+                    int removeFromTour = removePosition - runningPositionNr - nCustomersAlreadyRemovedInTour + 1; // +1 because first node in tour is dummy for leaving depot
                     // TODO print outs wieder raus
-                    System.out.println("vehicle jobs: " + vehicle.getCustomers().size() + "\t" + nCustomersInTourBeforeRemoval);
+                    System.out.println("vehicle jobs: " + vehicle.getnCustomersInTour() + "\t" + nCustomersInTourBeforeRemoval);
                     System.out.println("removePosition " + removePosition);
                     System.out.println("runningPositionNr " + runningPositionNr);
-                    System.out.println("nCustomersAlreadyRemoved " + nCustomersAlreadyRemoved);
-                    vehicle.applyRemoval(removeFromTour, this.data);
-                    nCustomersAlreadyRemoved++;
+                    System.out.println("nCustomersAlreadyRemoved " + nCustomersAlreadyRemovedInTour);
+                    System.out.println("removeFromTour " + removeFromTour);
+                    int removedCustomer = vehicle.applyRemoval(removeFromTour, this.data);
+                    solution.addCustomerToNotAssignedCustomers(removedCustomer);
+                    nCustomersAlreadyRemovedInTour++;
                     break;
                 }
+                nCustomersAlreadyRemovedInTour = 0;
             }
 
         }
