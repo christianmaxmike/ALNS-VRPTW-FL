@@ -1,6 +1,7 @@
 package vrptwfl.metaheuristic.common;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Solution {
 
@@ -52,6 +53,15 @@ public class Solution {
         }
     }
 
+    public void updateSolution(List<Integer> removedCustomers) {
+
+        this.calculateCostsFromVehicles();
+
+        if (!removedCustomers.isEmpty()) {
+            this.notAssignedCustomers.addAll(removedCustomers);
+            isFeasible = false;
+        }
+    }
 
 
 }
