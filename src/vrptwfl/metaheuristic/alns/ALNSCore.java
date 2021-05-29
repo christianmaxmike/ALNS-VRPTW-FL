@@ -6,6 +6,7 @@ import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.utils.CalcUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ALNSCore {
@@ -52,35 +53,53 @@ public class ALNSCore {
 
         // TODO mehr Beschreibung, was generelle Idee hier ist
         int runningPositionNr = 0;
-        int nVehicles = solution.getVehicles().size(); // e.g. 25
+        ArrayList<Vehicle> vehicles = solution.getVehicles();
+        int nVehicles = vehicles.size(); // e.g. 25
+        int[] nCustomersInTourBeforeRemoval = new int[nVehicles];
+        for (Vehicle vehicle: vehicles) {
+            nCustomersInTourBeforeRemoval[vehicle.getId()] = vehicle.getnCustomersInTour();
+        }
+
+
+//        ArrayList<Vehicle> vehicles = solution.getVehicles();
+//        for (Vehicle vehicle: vehicles) {
+
+//        nCustomersInTourBeforeRemoval
+
         int vStart = 0; // initially start with vehicle at position 0 in list of vehicles
 
         int nCustomersAlreadyRemovedInTour = 0; // needed to map correct positions after customers were already removed from tour
-        for (Integer removePosition: positionsToRemove) { // e.g. [29, 34, 38, 53, 56, 66, 91, 93]
+//        int correctIndexWithinTour = 1; // dummy out is at position 0 in tour
+
+        for (Integer removePosition: positionsToRemove) { // e.g. [1, 2, 5, 8, 15, 18, 26, 31, 34, 46, 51, 59, ...]
             System.out.println("\nRemove position: " + removePosition); // TODO wieder raus
             for (int v = vStart; v < nVehicles; v++){
-                Vehicle vehicle = solution.getVehicles().get(v);
-                int nCustomersInTourBeforeRemoval = vehicle.getnCustomersInTour();
+                Vehicle vehicle = vehicles.get(v);
+                int vId = vehicle.getId();
 
-                if ( runningPositionNr + nCustomersInTourBeforeRemoval  < removePosition) {
-                    runningPositionNr += nCustomersInTourBeforeRemoval;
+//                int nCustomersInTourBeforeRemoval = vehicle.getnCustomersInTour(); // TODO das darf nicht upgedated werden
+
+                if ( runningPositionNr + nCustomersInTourBeforeRemoval[vId] - nCustomersAlreadyRemovedInTour < removePosition) {
+                    runningPositionNr += nCustomersInTourBeforeRemoval[vId];
                     vStart++;  // (0), 9, 7, 11, 8 : --> 9, 16, 27, 35
                 } else {
 
-                    // iterate over all customers in list
                     int removeFromTour = removePosition - runningPositionNr - nCustomersAlreadyRemovedInTour + 1; // +1 because first node in tour is dummy for leaving depot
                     // TODO print outs wieder raus
-                    System.out.println("vehicle jobs: " + vehicle.getnCustomersInTour() + "\t" + nCustomersInTourBeforeRemoval);
+                    System.out.println("vehicle jobs: " + vehicle.getnCustomersInTour() + "\t" + nCustomersInTourBeforeRemoval[vId]);
                     System.out.println("removePosition " + removePosition);
                     System.out.println("runningPositionNr " + runningPositionNr);
-                    System.out.println("nCustomersAlreadyRemoved " + nCustomersAlreadyRemovedInTour);
+//                    System.out.println("correctIndexWithinTour " + correctIndexWithinTour);
+                                        System.out.println("nCustomersAlreadyRemoved " + nCustomersAlreadyRemovedInTour);
                     System.out.println("removeFromTour " + removeFromTour);
                     int removedCustomer = vehicle.applyRemoval(removeFromTour, this.data);
                     solution.addCustomerToNotAssignedCustomers(removedCustomer);
                     // TODO solution cost muessen auch noch upgedated werden
+//                    correctIndexWithinTour--;
                     nCustomersAlreadyRemovedInTour++;
                     break;
                 }
+//                correctIndexWithinTour = 1; // dummy out is at position 0 in tour
                 nCustomersAlreadyRemovedInTour = 0;
             }
 
@@ -114,7 +133,7 @@ public class ALNSCore {
         //  Frage: wohin muessen generische methoden ausgelagert werden?
 
 
-
     }
+
 
 }

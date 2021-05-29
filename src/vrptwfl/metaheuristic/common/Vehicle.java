@@ -132,8 +132,15 @@ public class Vehicle {
 
         System.out.println("Apply removal (v=" + this.id + ", remove=" + removePosition + ")");
 
+        // gather information
         int customer =this.customers.get(removePosition);
+        System.out.println(customer); // TODO wieder raus
+        System.out.println(this.customers); // TODO wieder raus
 
+        int pred = this.customers.get(removePosition - 1);
+        int succ = this.customers.get(removePosition + 1);
+
+        // update information in tour
         int demand = data.getDemands()[customer];
         this.capacityUsed -= demand;
 
@@ -145,11 +152,7 @@ public class Vehicle {
         if (this.nCustomersInTour == 0) {
             this.isUsed = false;
         }
-
         // tour costs
-        int pred = this.customers.get(removePosition - 1);
-        int succ = this.customers.get(removePosition + 1);
-
         double distToCustomer = data.getDistanceBetweenCustomers(pred, customer);
         double distFromCustomer = data.getDistanceBetweenCustomers(customer, succ);
 
