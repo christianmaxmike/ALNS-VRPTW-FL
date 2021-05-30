@@ -49,7 +49,7 @@ public class MainALNS {
         // TODO wieder raus
         System.out.println(construction.getNotAssignedCustomers());
         System.out.println(construction.getInfeasibleCustomers());
-        solutionConstr.printSolution();
+        solutionALNS.printSolution();
 
         // TODO check, ob es key ueberhaupt gibt, auch checken, ob es 25, 50 oder 100 Kunden sind
         double optimalObjFuncVal = OptimalSolutions.optimalObjFuncValue.get(instanceName)[2];

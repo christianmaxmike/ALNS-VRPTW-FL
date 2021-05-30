@@ -10,6 +10,26 @@ public class Solution {
     private ArrayList<Vehicle> vehicles;
     private boolean isFeasible = false;
 
+    public boolean isFeasible() {
+        return isFeasible;
+    }
+
+    public void setNotAssignedCustomers(ArrayList<Integer> notAssignedCustomers) {
+        this.notAssignedCustomers = notAssignedCustomers;
+    }
+
+    public void setTotalCosts(double totalCosts) {
+        this.totalCosts = totalCosts;
+    }
+
+    public void setVehicles(ArrayList<Vehicle> vehicles) {
+        this.vehicles = vehicles;
+    }
+
+    public void setFeasible(boolean feasible) {
+        isFeasible = feasible;
+    }
+
     public Solution(ArrayList<Vehicle> vehicles, ArrayList<Integer> notAssignedCustomers) {
         this.vehicles = vehicles;
         this.calculateCostsFromVehicles();
@@ -18,6 +38,40 @@ public class Solution {
         if (notAssignedCustomers.isEmpty()) { // TODO brauchen wir einen Test dafür (?) --> eher wenn Lösung in ALNS bearbeitet wurde, ob dann noch alles passt
             this.isFeasible = true;
         }
+    }
+
+    public Solution() {
+
+    }
+
+    public Solution copyDeep() {
+
+        Solution sol = new Solution();
+        sol.setNotAssignedCustomers(new ArrayList<>(this.notAssignedCustomers));
+        sol.setTotalCosts(this.totalCosts);
+        sol.setFeasible(this.isFeasible);
+
+        ArrayList<Vehicle> newVehicles = new ArrayList<>();
+        for (Vehicle veh: this.vehicles) {
+            newVehicles.add(veh.copyDeep());
+        }
+        sol.setVehicles(newVehicles);
+
+        return sol;
+    }
+
+    public void setSolution(Solution solutionTemp) {
+        this.notAssignedCustomers = new ArrayList<>(solutionTemp.getNotAssignedCustomers());
+        this.totalCosts = solutionTemp.getTotalCosts();
+        this.isFeasible = solutionTemp.isFeasible();
+
+        ArrayList<Vehicle> newVehicles = new ArrayList<>();
+        for (Vehicle veh: solutionTemp.getVehicles()) {
+            newVehicles.add(veh.copyDeep());
+        }
+
+        this.setVehicles(newVehicles);
+
     }
 
     public ArrayList<Integer> getNotAssignedCustomers() {
@@ -62,6 +116,7 @@ public class Solution {
             isFeasible = false;
         }
     }
+
 
 
 }

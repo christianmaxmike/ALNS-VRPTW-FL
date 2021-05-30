@@ -17,6 +17,42 @@ public class Vehicle {
     private boolean isUsed;
     private int nCustomersInTour;
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setCapacityLimit(int capacityLimit) {
+        this.capacityLimit = capacityLimit;
+    }
+
+    public void setCapacityUsed(int capacityUsed) {
+        this.capacityUsed = capacityUsed;
+    }
+
+    public void setTourLength(double tourLength) {
+        this.tourLength = tourLength;
+    }
+
+    public void setCustomers(ArrayList<Integer> customers) {
+        this.customers = customers;
+    }
+
+    public void setStartOfServices(ArrayList<Double> startOfServices) {
+        this.startOfServices = startOfServices;
+    }
+
+    public void setEndOfServices(ArrayList<Double> endOfServices) {
+        this.endOfServices = endOfServices;
+    }
+
+    public void setUsed(boolean used) {
+        isUsed = used;
+    }
+
+    public void setnCustomersInTour(int nCustomersInTour) {
+        this.nCustomersInTour = nCustomersInTour;
+    }
+
     public int getnCustomersInTour() {
         return nCustomersInTour;
     }
@@ -67,6 +103,25 @@ public class Vehicle {
         this.endOfServices.add(0.0);
         this.endOfServices.add(latestEndOfService);
         this.isUsed = false;
+    }
+
+
+    public Vehicle() {
+    }
+
+    public Vehicle copyDeep() {
+        Vehicle veh = new Vehicle();
+        veh.setId(this.id);
+        veh.setCapacityLimit(this.capacityLimit);
+        veh.setCapacityUsed(this.capacityUsed);
+        veh.setTourLength(this.tourLength);
+        veh.setCustomers(new ArrayList<>(this.customers));
+        veh.setStartOfServices(new ArrayList<>(this.startOfServices));
+        veh.setEndOfServices(new ArrayList<>(this.endOfServices));
+        veh.setUsed(this.isUsed);
+        veh.setnCustomersInTour(this.nCustomersInTour);
+
+        return veh;
     }
 
     public ArrayList<double[]> getPossibleInsertions(int customer, Data data) {
