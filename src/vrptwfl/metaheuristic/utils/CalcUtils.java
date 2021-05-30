@@ -18,7 +18,7 @@ public class CalcUtils {
         return Config.randomGenerator.nextInt((upperBound - lowerBound)) + lowerBound;
     }
 
-    public static List<Integer> getUniqueRandomNumbersInRange(int nNumbers, int rangeLowerBound, int rangeUpperBound) {
+    public static List<Integer> getSortedUniqueRandomNumbersInRange(int nNumbers, int rangeLowerBound, int rangeUpperBound) {
         // add all numbers in range to list (numbers will be sorted in ascending order)
         List<Integer> numbersInRange = new ArrayList<>() {{ for (int i = rangeLowerBound; i <= rangeUpperBound; i++) add(i); }};
 
