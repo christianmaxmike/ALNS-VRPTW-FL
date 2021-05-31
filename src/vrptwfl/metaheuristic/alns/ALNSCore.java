@@ -4,6 +4,7 @@ import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
+import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
 import vrptwfl.metaheuristic.utils.CalcUtils;
 
 import java.util.ArrayList;
@@ -17,14 +18,14 @@ public class ALNSCore {
         this.data = data;
     }
 
-    public Solution runALNS(Solution solutionConstr) {
+    public Solution runALNS(Solution solutionConstr) throws ArgumentOutOfBoundsException {
 
         // init ALNS
         Solution solutionCurrent = solutionConstr.copyDeep();
         Solution solutionBestGlobal = solutionConstr.copyDeep();
 
-//        for (int iteration = 1; iteration <= Config.alnsIterations; iteration++) {
-        for (int iteration = 1; iteration <= 2; iteration++) {
+        for (int iteration = 1; iteration <= Config.alnsIterations; iteration++) {
+//        for (int iteration = 1; iteration <= 10_000; iteration++) {
 
             Solution solutionTemp = solutionCurrent.copyDeep();
 
@@ -35,17 +36,21 @@ public class ALNSCore {
 
             // repair solution
             // TODO erstmal nur mit k=2
-            this.repairRegret(solutionTemp, 2);
+            solutionTemp = this.repairRegret(solutionTemp, 2);
 
-            System.out.println("Cost temp " + solutionTemp.getTotalCosts());
-            System.out.println("Cost curr " + solutionCurrent.getTotalCosts());
-            System.out.println("Cost glob " + solutionBestGlobal.getTotalCosts());
+            if (iteration % 1000 == 0) {
+                System.out.println("\n\nIteration " + iteration);
+                System.out.println("Cost temp " + solutionTemp.getTotalCosts());
+                System.out.println("Cost curr " + solutionCurrent.getTotalCosts());
+                System.out.println("Cost glob " + solutionBestGlobal.getTotalCosts());
+            }
 
             solutionCurrent = this.checkImprovement(solutionTemp, solutionCurrent, solutionBestGlobal);
-
-            System.out.println("Cost curr " + solutionCurrent.getTotalCosts());
-            System.out.println("Cost glob " + solutionBestGlobal.getTotalCosts());
-
+            if (iteration % 1000 == 0) {
+                System.out.println();
+                System.out.println("Cost curr " + solutionCurrent.getTotalCosts());
+                System.out.println("Cost glob " + solutionBestGlobal.getTotalCosts());
+            }
 
         }
 
@@ -168,7 +173,7 @@ public class ALNSCore {
 
         // Update the solution object.  The tours of the vehicle are already update by the removals.  However, global
         // information such as the total costs and list of notAssignedCustomers still need to be updated.
-        solution.updateSolution(removedCustomers);
+        solution.updateSolutionAfterRemoval(removedCustomers);
     }
 
     //        // access all customers assigned to vehicles (only these can be removed)
@@ -210,10 +215,14 @@ public class ALNSCore {
 //                [ 1,  2,  5,  8, 15, 18, 26, 31, 34, 46, 51, 59, 60, 61, 77, 81, 82, 98]
 //[26, 28, 12, 68, 34, 91, 58, 74, 73, 44, 37, 54, 46, 45, 29, 30, 90, 94]
 
-    private void repairRegret(Solution solution, int k) {
+    private Solution repairRegret(Solution solution, int k) throws ArgumentOutOfBoundsException {
         // TODO analog zu dem Regret in Construction
         //  Frage: wohin muessen generische methoden ausgelagert werden?
 
+        RegretInsertion inserter = new RegretInsertion(k, this.data);
+        solution = inserter.solve(solution);
+
+        return solution;
 
     }
 

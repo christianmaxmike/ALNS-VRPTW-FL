@@ -27,11 +27,11 @@ public class MainALNS {
 
         ConstructionHeuristicRegret construction = new ConstructionHeuristicRegret(data);
         long startTimeConstruction = System.currentTimeMillis();
-        Solution solutionConstr = construction.solve(2);
+        Solution solutionConstr = construction.constructSolution(2);
 
         // TODO wieder raus
-        System.out.println(construction.getNotAssignedCustomers());
-        System.out.println(construction.getInfeasibleCustomers());
+        System.out.println(solutionConstr.getNotAssignedCustomers());
+        System.out.println(solutionConstr.getTempInfeasibleCustomers());
         solutionConstr.printSolution();
 
         // ALNS
@@ -47,8 +47,8 @@ public class MainALNS {
         // TODO brauchen irgendwas, um Lösung zu speichern (ZF und Touren startzeiten etc.)
 
         // TODO wieder raus
-        System.out.println(construction.getNotAssignedCustomers());
-        System.out.println(construction.getInfeasibleCustomers());
+        System.out.println(solutionALNS.getNotAssignedCustomers());
+        System.out.println(solutionALNS.getTempInfeasibleCustomers());
         solutionALNS.printSolution();
 
         // TODO check, ob es key ueberhaupt gibt, auch checken, ob es 25, 50 oder 100 Kunden sind
@@ -93,4 +93,7 @@ public class MainALNS {
 
         // Add TimeLimit (?)
     }
+
+    // TODO performance
+    // - LRU cache (last recent usage)
 }

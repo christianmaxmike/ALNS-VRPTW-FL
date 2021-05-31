@@ -185,12 +185,13 @@ public class Vehicle {
     // returns customer id
     public int applyRemoval(int removePosition, Data data) {
 
-        System.out.println("Apply removal (v=" + this.id + ", remove=" + removePosition + ")");
+        // TODO wieder raus
+//        System.out.println("Apply removal (v=" + this.id + ", remove=" + removePosition + ")");
 
         // gather information
         int customer =this.customers.get(removePosition);
-        System.out.println(customer); // TODO wieder raus
-        System.out.println(this.customers); // TODO wieder raus
+//        System.out.println(customer); // TODO wieder raus
+//        System.out.println(this.customers); // TODO wieder raus
 
         int pred = this.customers.get(removePosition - 1);
         int succ = this.customers.get(removePosition + 1);

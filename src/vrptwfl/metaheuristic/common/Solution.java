@@ -6,9 +6,18 @@ import java.util.List;
 public class Solution {
 
     private ArrayList<Integer> notAssignedCustomers;
+    private ArrayList<Integer> tempInfeasibleCustomers; // needed to store customer that cannot be assigned to any route
     private double totalCosts;
     private ArrayList<Vehicle> vehicles;
     private boolean isFeasible = false;
+
+    public ArrayList<Integer> getTempInfeasibleCustomers() {
+        return tempInfeasibleCustomers;
+    }
+
+    public void setTempInfeasibleCustomers(ArrayList<Integer> tempInfeasibleCustomers) {
+        this.tempInfeasibleCustomers = tempInfeasibleCustomers;
+    }
 
     public boolean isFeasible() {
         return isFeasible;
@@ -30,15 +39,16 @@ public class Solution {
         isFeasible = feasible;
     }
 
-    public Solution(ArrayList<Vehicle> vehicles, ArrayList<Integer> notAssignedCustomers) {
-        this.vehicles = vehicles;
-        this.calculateCostsFromVehicles();
-        this.notAssignedCustomers = notAssignedCustomers;
-
-        if (notAssignedCustomers.isEmpty()) { // TODO brauchen wir einen Test dafür (?) --> eher wenn Lösung in ALNS bearbeitet wurde, ob dann noch alles passt
-            this.isFeasible = true;
-        }
-    }
+//    public Solution(ArrayList<Vehicle> vehicles, ArrayList<Integer> notAssignedCustomers) {
+//        // TODO muss hier auch infeasible rein?
+//        this.vehicles = vehicles;
+//        this.calculateCostsFromVehicles();
+//        this.notAssignedCustomers = notAssignedCustomers;
+//
+//        if (notAssignedCustomers.isEmpty()) { // TODO brauchen wir einen Test dafür (?) --> eher wenn Lösung in ALNS bearbeitet wurde, ob dann noch alles passt
+//            this.isFeasible = true;
+//        }
+//    }
 
     public Solution() {
 
@@ -48,6 +58,7 @@ public class Solution {
 
         Solution sol = new Solution();
         sol.setNotAssignedCustomers(new ArrayList<>(this.notAssignedCustomers));
+        sol.setTempInfeasibleCustomers(new ArrayList<>(this.tempInfeasibleCustomers));
         sol.setTotalCosts(this.totalCosts);
         sol.setFeasible(this.isFeasible);
 
@@ -107,7 +118,7 @@ public class Solution {
         }
     }
 
-    public void updateSolution(List<Integer> removedCustomers) {
+    public void updateSolutionAfterRemoval(List<Integer> removedCustomers) {
 
         this.calculateCostsFromVehicles();
 
@@ -115,6 +126,19 @@ public class Solution {
             this.notAssignedCustomers.addAll(removedCustomers);
             isFeasible = false;
         }
+    }
+
+    public void updateSolutionAfterInsertion() {
+        this.calculateCostsFromVehicles();
+        this.addInfeasiblesToNotAssigned();
+    }
+
+    private void addInfeasiblesToNotAssigned() {
+
+        this.notAssignedCustomers.addAll(this.tempInfeasibleCustomers);
+        this.tempInfeasibleCustomers.clear();
+
+        this.isFeasible = this.notAssignedCustomers.isEmpty();
     }
 
 
