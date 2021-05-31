@@ -1,5 +1,7 @@
 package vrptwfl.metaheuristic.common;
 
+import vrptwfl.metaheuristic.data.Data;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +12,7 @@ public class Solution {
     private double totalCosts;
     private ArrayList<Vehicle> vehicles;
     private boolean isFeasible = false;
+    private Data data;
 
     public ArrayList<Integer> getTempInfeasibleCustomers() {
         return tempInfeasibleCustomers;
@@ -50,13 +53,13 @@ public class Solution {
 //        }
 //    }
 
-    public Solution() {
-
+    public Solution(Data data) {
+        this.data = data;
     }
 
     public Solution copyDeep() {
 
-        Solution sol = new Solution();
+        Solution sol = new Solution(this.data);
         sol.setNotAssignedCustomers(new ArrayList<>(this.notAssignedCustomers));
         sol.setTempInfeasibleCustomers(new ArrayList<>(this.tempInfeasibleCustomers));
         sol.setTotalCosts(this.totalCosts);
@@ -139,6 +142,26 @@ public class Solution {
         this.tempInfeasibleCustomers.clear();
 
         this.isFeasible = this.notAssignedCustomers.isEmpty();
+    }
+
+
+    // method is public such that logic can be tested
+    public ArrayList<double[]> getPossibleInsertionsForCustomer(int customer) {
+        ArrayList<double[]> possibleInsertionsForCustomer = new ArrayList<>();
+
+        boolean triedUnusedVehicle = false;
+        for (Vehicle vehicle: this.getVehicles()) {
+            // generate insertion for unused vehicle only once, otherwise regrets between all unused vehicles will be zero
+            if (!vehicle.isUsed()) {
+                if (triedUnusedVehicle) continue;
+                triedUnusedVehicle = true;
+            }
+
+            ArrayList<double[]> insertions = vehicle.getPossibleInsertions(customer, this.data);
+            possibleInsertionsForCustomer.addAll(insertions);
+
+        }
+        return possibleInsertionsForCustomer;
     }
 
 

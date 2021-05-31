@@ -36,7 +36,15 @@ public class ALNSCore {
 
             // repair solution
             // TODO erstmal nur mit k=2
-            solutionTemp = this.repairRegret(solutionTemp, 2);
+            double randomNr = Config.randomGenerator.nextFloat();
+            if (randomNr < .2) {
+                solutionTemp = this.repairRegret(solutionTemp, 2);
+            } else if (randomNr < .90) {
+                solutionTemp = this.repairRegret(solutionTemp, 3);
+            } else {
+                solutionTemp = this.repairGreedy(solutionTemp);
+            }
+
 
             if (iteration % 1000 == 0) {
                 System.out.println("\n\nIteration " + iteration);
@@ -224,6 +232,13 @@ public class ALNSCore {
 
         return solution;
 
+    }
+
+    private Solution repairGreedy(Solution solution) {
+        GreedyInsertion inserter = new GreedyInsertion(this.data);
+        solution = inserter.solve(solution);
+
+        return  solution;
     }
 
 

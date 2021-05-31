@@ -18,7 +18,7 @@ public class ConstructionHeuristicRegret {
 
     private Solution getEmptySolution() {
 
-        Solution start = new Solution();
+        Solution start = new Solution(this.data);
         start.setVehicles(this.data.initializeVehicles());
         // initially add all customers to list of not assigned customers
         start.setNotAssignedCustomers(new ArrayList<>() {{ for (int i : data.getCustomers()) add(i); }});

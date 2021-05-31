@@ -2,7 +2,7 @@
 random_seed: 42  # if null, no random seed will be used
 
 # ALNS configurations
-alns_iterations: 10_000  # 50_000
+alns_iterations: 50_000  # 50_000
 lower_bound_nr_of_removals: 4
 upper_bound_nr_of_removals: 100
 upper_bound_factor_nr_of_removals: 0.4
