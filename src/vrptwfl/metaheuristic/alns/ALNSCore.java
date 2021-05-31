@@ -14,11 +14,20 @@ public class ALNSCore {
 
     private Data data;
 
-    public ALNSCore(Data data) {
+    private RegretInsertion inserterRegret2;
+    private RegretInsertion inserterRegret3;
+    private GreedyInsertion inserterGreedy;
+
+    public ALNSCore(Data data) throws ArgumentOutOfBoundsException {
         this.data = data;
+
+        // TODO ueber config steuern, welche ueberhaupt genutzt werden
+        this.inserterGreedy = new GreedyInsertion(data);
+        this.inserterRegret2 = new RegretInsertion(2, data);
+        this.inserterRegret3 = new RegretInsertion(3, data);
     }
 
-    public Solution runALNS(Solution solutionConstr) throws ArgumentOutOfBoundsException {
+    public Solution runALNS(Solution solutionConstr) {
 
         // init ALNS
         Solution solutionCurrent = solutionConstr.copyDeep();
@@ -38,9 +47,9 @@ public class ALNSCore {
             // TODO erstmal nur mit k=2
             double randomNr = Config.randomGenerator.nextFloat();
             if (randomNr < .2) {
-                solutionTemp = this.repairRegret(solutionTemp, 2);
+                solutionTemp = repairRegret2(solutionTemp);
             } else if (randomNr < .90) {
-                solutionTemp = this.repairRegret(solutionTemp, 3);
+                solutionTemp = repairRegret3(solutionTemp);
             } else {
                 solutionTemp = this.repairGreedy(solutionTemp);
             }
@@ -223,22 +232,16 @@ public class ALNSCore {
 //                [ 1,  2,  5,  8, 15, 18, 26, 31, 34, 46, 51, 59, 60, 61, 77, 81, 82, 98]
 //[26, 28, 12, 68, 34, 91, 58, 74, 73, 44, 37, 54, 46, 45, 29, 30, 90, 94]
 
-    private Solution repairRegret(Solution solution, int k) throws ArgumentOutOfBoundsException {
-        // TODO analog zu dem Regret in Construction
-        //  Frage: wohin muessen generische methoden ausgelagert werden?
+    private Solution repairRegret2(Solution solution) {
+        return inserterRegret2.solve(solution);
+    }
 
-        RegretInsertion inserter = new RegretInsertion(k, this.data);
-        solution = inserter.solve(solution);
-
-        return solution;
-
+    private Solution repairRegret3(Solution solution) {
+        return inserterRegret3.solve(solution);
     }
 
     private Solution repairGreedy(Solution solution) {
-        GreedyInsertion inserter = new GreedyInsertion(this.data);
-        solution = inserter.solve(solution);
-
-        return  solution;
+        return inserterGreedy.solve(solution);
     }
 
 
