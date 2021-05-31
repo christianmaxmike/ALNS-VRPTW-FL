@@ -1,9 +1,9 @@
-package vrptwfl.metaheuristic.alns;
+package vrptwfl.metaheuristic.alns.insertions;
 
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.data.Data;
 
-abstract class AbstractInsertion {
+public abstract class AbstractInsertion {
 
     private Data data;
 
@@ -11,7 +11,8 @@ abstract class AbstractInsertion {
         this.data = data;
     }
 
-    public Solution solve(Solution solution) {
+    // final such that method cannot be accidentally overridden in subclass
+    public final Solution solve(Solution solution) {
 
         while (!solution.getNotAssignedCustomers().isEmpty()) {
             double[] nextInsertion = this.getNextInsertion(solution);

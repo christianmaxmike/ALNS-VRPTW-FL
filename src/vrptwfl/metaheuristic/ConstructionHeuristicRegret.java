@@ -1,6 +1,6 @@
 package vrptwfl.metaheuristic;
 
-import vrptwfl.metaheuristic.alns.RegretInsertion;
+import vrptwfl.metaheuristic.alns.insertions.RegretInsertion;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;

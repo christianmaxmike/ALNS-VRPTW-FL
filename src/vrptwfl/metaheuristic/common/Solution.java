@@ -101,7 +101,7 @@ public class Solution {
     }
 
     public ArrayList<Vehicle> getVehicles() {
-        return vehicles;
+        return vehicles; // TODO how to handle escaping reference ?
     }
 
 

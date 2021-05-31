@@ -87,7 +87,7 @@ public class MainALNS {
 
     public static void main(String[] args) throws ArgumentOutOfBoundsException {
 
-        MainALNS algo = new MainALNS();
+        final MainALNS algo = new MainALNS();
         algo.runALNS("R104", 100);
 
 

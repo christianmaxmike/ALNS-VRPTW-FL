@@ -1,4 +1,4 @@
-package vrptwfl.metaheuristic.alns;
+package vrptwfl.metaheuristic.alns.insertions;
 
 import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.common.Solution;
