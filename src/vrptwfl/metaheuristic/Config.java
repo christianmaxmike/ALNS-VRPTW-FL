@@ -26,6 +26,10 @@ public class Config {
     public static double upperBoundRemovalsFactor;
     public static int upperBoundRemovalsMax;
 
+    // alns operators
+    public static int worstRemovalExponent;
+
+
     private static Config conf = new Config();
 
     // private to prevent anyone else from instantiating
@@ -56,6 +60,9 @@ public class Config {
 
         // --- ALNS configurations ---
         alnsIterations = (int) obj.get("alns_iterations");
+
+        // - ALNS destroy operators
+        worstRemovalExponent = (int) obj.get("worst_removal_exponent");
 
         // see Ropke & Pisinger 2006, p. 465 (An ALNS Heuristic for the PDPTW)
         // upper bound will be determined instance specific when number of customers is knwon

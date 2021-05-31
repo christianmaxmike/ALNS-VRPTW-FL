@@ -1,11 +1,14 @@
 # General
 random_seed: 42  # if null, no random seed will be used
 
-# ALNS configurations
+##### ALNS configurations #####
 alns_iterations: 15_000  # 50_000
 lower_bound_nr_of_removals: 4
 upper_bound_nr_of_removals: 100
 upper_bound_factor_nr_of_removals: 0.4
+
+### Destroy operators
+worst_removal_exponent: 3
 
 # calculation
 rounding_precision: 1     # number of decimal places

@@ -17,7 +17,7 @@ public class RandomRemoval extends AbstractRemoval{
     public void destroy(Solution solution) {
 
         // get number of removals based on parameters defined in config file
-        int nRemovals = CalcUtils.getRandomNumberInClosedRange(Config.lowerBoundRemovals, Config.upperBoundRemovals); // +1 needed, otherwise UB would not be included
+        int nRemovals = getNRemovals();
 
         // get index positions of the nRemovals customers to be removed (there are nCustomers - number of not assigned customers that can be removed)
         // NOTE: these positions are the positions in the tours (not the customer ids!)

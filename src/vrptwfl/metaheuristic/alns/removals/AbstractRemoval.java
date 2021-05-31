@@ -1,8 +1,10 @@
 package vrptwfl.metaheuristic.alns.removals;
 
+import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
+import vrptwfl.metaheuristic.utils.CalcUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,6 +95,10 @@ public abstract class AbstractRemoval {
         // Update the solution object.  The tours of the vehicle are already update by the removals.  However, global
         // information such as the total costs and list of notAssignedCustomers still need to be updated.
         solution.updateSolutionAfterRemoval(removedCustomers);
+    }
+
+    final int getNRemovals() {
+        return CalcUtils.getRandomNumberInClosedRange(Config.lowerBoundRemovals, Config.upperBoundRemovals);
     }
 
     abstract public void destroy(Solution solution);
