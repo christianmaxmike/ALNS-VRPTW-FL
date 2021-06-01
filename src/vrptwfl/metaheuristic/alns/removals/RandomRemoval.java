@@ -9,6 +9,7 @@ import java.util.List;
 
 
 // Randomly remove customers
+// Ropke and Pisinger 2006, page 460 (Transportation Science)
 public class RandomRemoval extends AbstractRemoval {
 
     public RandomRemoval(Data data) {

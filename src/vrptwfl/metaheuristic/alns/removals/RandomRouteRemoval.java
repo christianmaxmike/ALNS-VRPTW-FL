@@ -1,16 +1,15 @@
 package vrptwfl.metaheuristic.alns.removals;
 
-import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.utils.CalcUtils;
-import vrptwfl.metaheuristic.utils.DataUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 // randomly select routes and then remove customers from the route
+// Mancini 2016, page 107 - (Transportation Research Part C)
 public class RandomRouteRemoval extends AbstractRemoval {
 
     public RandomRouteRemoval(Data data) {
@@ -33,8 +32,8 @@ public class RandomRouteRemoval extends AbstractRemoval {
             if (!vehicle.isUsed()) continue;
 
             for (int c = 1; c < vehicle.getnCustomersInTour()+1; c++) {  // c starts at 1 as first customer is at position 1 (0 is dummy out)
-                vehicle.applyRemoval(c, this.data);
-                removedCustomers.add(vehicle.getCustomers().get(c));
+                int removedCustomer = vehicle.applyRemoval(c, this.data);
+                removedCustomers.add(removedCustomer); // vehicle.getCustomers().get(c));
                 nRemovals--;
                 if (nRemovals == 0) break vehicleIndexLoop;
             }

@@ -28,6 +28,7 @@ public class Config {
 
     // alns operators
     public static int worstRemovalExponent;
+    public static int shawRemovalExponent;
 
 
     private static Config conf = new Config();
@@ -63,6 +64,7 @@ public class Config {
 
         // - ALNS destroy operators
         worstRemovalExponent = (int) obj.get("worst_removal_exponent");
+        shawRemovalExponent = (int) obj.get("shaw_removal_exponent");
 
         // see Ropke & Pisinger 2006, p. 465 (An ALNS Heuristic for the PDPTW)
         // upper bound will be determined instance specific when number of customers is knwon

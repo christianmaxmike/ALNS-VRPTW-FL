@@ -4,10 +4,7 @@ import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.alns.insertions.AbstractInsertion;
 import vrptwfl.metaheuristic.alns.insertions.GreedyInsertion;
 import vrptwfl.metaheuristic.alns.insertions.RegretInsertion;
-import vrptwfl.metaheuristic.alns.removals.AbstractRemoval;
-import vrptwfl.metaheuristic.alns.removals.RandomRemoval;
-import vrptwfl.metaheuristic.alns.removals.RandomRouteRemoval;
-import vrptwfl.metaheuristic.alns.removals.WorstRemoval;
+import vrptwfl.metaheuristic.alns.removals.*;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
@@ -36,7 +33,8 @@ public class ALNSCore {
         destroyOperators = new AbstractRemoval[]{
                 new RandomRemoval(data),
                 new WorstRemoval(data, true),
-                new RandomRouteRemoval(data)
+                new RandomRouteRemoval(data),
+                new ShawSimplifiedRemoval(data, true)
         };
     }
 
@@ -85,16 +83,24 @@ public class ALNSCore {
         // feasible solution ?
         // TODO hier kommt dann wahrscheinlichkeit etc rein, dass trotzdem schlechtere loesung
         //  angenommen wird
-        if (solutionTemp.isFeasible()) {
+        if (solutionCurrent.isFeasible()) {
+            if (solutionTemp.isFeasible()) {
+                // improvement
+                if (solutionCurrent.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon) {
+                    // check if also better than best global
+                    if (solutionBestGlobal.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon) {
+                        solutionBestGlobal.setSolution(solutionTemp);
+                    }
+                    return solutionTemp;
+                }
+            }
+        } else { // if no feasible solution found yet
             // improvement
             if (solutionCurrent.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon) {
-                // check if also better than best global
-                if (solutionBestGlobal.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon) {
-                    solutionBestGlobal.setSolution(solutionTemp);
-                }
                 return solutionTemp;
             }
         }
+
 
         // no improvement
         return solutionCurrent;

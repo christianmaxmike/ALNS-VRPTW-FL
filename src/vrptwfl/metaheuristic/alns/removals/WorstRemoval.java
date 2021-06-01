@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Random;
 
 // remove customers which yield highest cost reduction if they are removed
+// Ropke and Pisinger 2006, page 460 (Transportation Science)
 public class WorstRemoval extends AbstractRemoval {
 
     private boolean randomize;
@@ -41,9 +42,11 @@ public class WorstRemoval extends AbstractRemoval {
 
             // TODO cache already calculated removals [pred, cust, succ]; wenn es das schon gibt, nicht neu rechnen
 
-            double rand = Config.randomGenerator.nextDouble();
             int idx = 0;
-            if (this.randomize) idx = (int) Math.floor(Math.pow(rand, Config.worstRemovalExponent) * possibleRemovals.size());
+            if (this.randomize) {
+                double rand = Config.randomGenerator.nextDouble();
+                idx = (int) Math.floor(Math.pow(rand, Config.worstRemovalExponent) * possibleRemovals.size());
+            }
 //            System.out.println(possibleRemovals.get(0)[3] +"\t"+ possibleRemovals.get(possibleRemovals.size()-1)[3]); // TODO wieder raus
             double[] removal = possibleRemovals.get(idx);
 

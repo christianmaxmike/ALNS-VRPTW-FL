@@ -252,6 +252,13 @@ public class Vehicle {
         return customer;
 
     }
+    public int applyRemovalForCustomer(int customer, Data data) {
+
+        // find position of customer in tour
+        int position = this.customers.indexOf(customer);
+        return this.applyRemoval(position, data);
+
+    }
 
     public void printTour() {
         System.out.println("Tour of vehicle " + this.id + " (n=" +  this.nCustomersInTour +  ")" + ":"); // TODO logger debug
