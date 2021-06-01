@@ -7,7 +7,9 @@ import vrptwfl.metaheuristic.utils.CalcUtils;
 
 import java.util.List;
 
-public class RandomRemoval extends AbstractRemoval{
+
+// Randomly remove customers
+public class RandomRemoval extends AbstractRemoval {
 
     public RandomRemoval(Data data) {
         super(data);

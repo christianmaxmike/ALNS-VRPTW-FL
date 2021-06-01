@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+// remove customers which yield highest cost reduction if they are removed
 public class WorstRemoval extends AbstractRemoval {
 
     private boolean randomize;
