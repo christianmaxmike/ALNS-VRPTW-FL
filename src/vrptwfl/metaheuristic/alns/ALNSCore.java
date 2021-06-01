@@ -6,6 +6,7 @@ import vrptwfl.metaheuristic.alns.insertions.GreedyInsertion;
 import vrptwfl.metaheuristic.alns.insertions.RegretInsertion;
 import vrptwfl.metaheuristic.alns.removals.AbstractRemoval;
 import vrptwfl.metaheuristic.alns.removals.RandomRemoval;
+import vrptwfl.metaheuristic.alns.removals.WorstRemoval;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
@@ -27,7 +28,7 @@ public class ALNSCore {
 
         // TODO ueber config steuern, welche ueberhaupt genutzt werden
         repairOperators = new AbstractInsertion[]{new GreedyInsertion(data), new RegretInsertion(2, data), new RegretInsertion(3, data)};
-        destroyOperators = new AbstractRemoval[]{new RandomRemoval(data)};
+        destroyOperators = new AbstractRemoval[]{new RandomRemoval(data), new WorstRemoval(data, true)};
     }
 
     public Solution runALNS(Solution solutionConstr) {

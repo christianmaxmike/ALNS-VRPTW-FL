@@ -3,6 +3,8 @@ package vrptwfl.metaheuristic.common;
 import vrptwfl.metaheuristic.data.Data;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class Solution {
@@ -164,6 +166,18 @@ public class Solution {
         return possibleInsertionsForCustomer;
     }
 
+    public ArrayList<double[]> getPossibleRemovalsSortedByCostReduction() {
+        ArrayList<double[]> possibleRemovals = new ArrayList<>();
 
+        for (Vehicle vehicle: this.getVehicles()) {
+            if (vehicle.isUsed()) {
+                ArrayList<double[]> removals = vehicle.getPossibleRemovals(this.data);
+                possibleRemovals.addAll(removals);
+            }
+        }
+
+        possibleRemovals.sort(Comparator.comparing(a -> a[3], Collections.reverseOrder())); // sort by travelTimeReduction
+        return possibleRemovals;
+    }
 
 }

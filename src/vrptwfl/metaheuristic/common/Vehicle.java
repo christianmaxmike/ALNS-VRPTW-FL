@@ -1,5 +1,6 @@
 package vrptwfl.metaheuristic.common;
 
+import org.w3c.dom.ls.LSOutput;
 import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.data.Data;
 
@@ -159,6 +160,38 @@ public class Vehicle {
         return possibleInsertions;
     }
 
+    public ArrayList<double[]> getPossibleRemovals(Data data) {
+        ArrayList<double[]> possibleRemovals = new ArrayList<>();
+
+        if (!this.isUsed) return possibleRemovals;
+
+        // init values
+        int pred;
+        int customer = this.customers.get(0);
+        int succ = this.customers.get(1);
+
+//        for (int i = 1; i < this.customers.size() - 1; i++) {
+        int i = 1; // start with first customer (position i=0 is dummy depot out)
+        do {
+            // update for next iteration
+            pred = customer;
+            customer = succ;
+            succ = this.customers.get(i+1);
+
+            // TODO den Teil vorher ueber globalen Cache probieren
+            double distToCustomer = data.getDistanceBetweenCustomers(pred, customer);
+            double distFromCustomer = data.getDistanceBetweenCustomers(customer, succ);
+            double distWithoutCustomer = data.getDistanceBetweenCustomers(pred, succ);
+
+            double travelTimeReduction = distToCustomer + distFromCustomer - distWithoutCustomer;
+            possibleRemovals.add(new double[] {customer, this.id, i, travelTimeReduction});
+            i++;
+
+        } while (i < this.customers.size() - 1);
+
+        return possibleRemovals;
+    }
+
 
 
     // TODO methode für cost increase und reduction (tour laenge)
@@ -213,6 +246,7 @@ public class Vehicle {
         double distFromCustomer = data.getDistanceBetweenCustomers(customer, succ);
 
         double reductionTravelCosts = distToCustomer + distFromCustomer - data.getDistanceBetweenCustomers(pred, succ);
+        // TODO hier koennte man auch den Cache nutzen
         this.tourLength -= reductionTravelCosts;
 
         return customer;
