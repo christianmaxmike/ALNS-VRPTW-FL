@@ -192,6 +192,34 @@ public class Vehicle {
         return possibleRemovals;
     }
 
+    public ArrayList<double[]> getPossibleRemovals(double[][] neighborGraph) {
+
+        ArrayList<double[]> possibleRemovals = new ArrayList<>();
+
+        if (!this.isUsed) return possibleRemovals;
+
+        // init values
+        int pred;
+        int customer = this.customers.get(0);
+        int succ = this.customers.get(1);
+
+//        for (int i = 1; i < this.customers.size() - 1; i++) {
+        int i = 1; // start with first customer (position i=0 is dummy depot out)
+        do {
+            // update for next iteration
+            pred = customer;
+            customer = succ;
+            succ = this.customers.get(i+1);
+
+            double score = neighborGraph[pred][customer] + neighborGraph[customer][succ];
+            possibleRemovals.add(new double[] {customer, this.id, i, score});
+            i++;
+
+        } while (i < this.customers.size() - 1);
+
+        return possibleRemovals;
+    }
+
 
 
     // TODO methode für cost increase und reduction (tour laenge)
@@ -267,5 +295,6 @@ public class Vehicle {
         }
         System.out.println(this.customers.get(this.customers.size() -1) + "");
     }
+
 
 }

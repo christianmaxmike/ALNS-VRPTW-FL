@@ -6,10 +6,13 @@ import vrptwfl.metaheuristic.alns.insertions.GreedyInsertion;
 import vrptwfl.metaheuristic.alns.insertions.RegretInsertion;
 import vrptwfl.metaheuristic.alns.removals.*;
 import vrptwfl.metaheuristic.common.Solution;
+import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
+import vrptwfl.metaheuristic.utils.DebugUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ALNSCore {
@@ -18,6 +21,13 @@ public class ALNSCore {
 
     private AbstractInsertion[] repairOperators;
     private AbstractRemoval[] destroyOperators;
+
+    //if useNeighborGraphRemoval, then this graph contains information about the best solution in which the edge (i,j) was used
+    private double[][] neighborGraph;
+
+    public double[][] getNeighborGraph() {
+        return neighborGraph;
+    }
 
     public ALNSCore(Data data) throws ArgumentOutOfBoundsException {
         this.data = data;
@@ -29,15 +39,28 @@ public class ALNSCore {
     private void initDestroyOperators() {
         List<AbstractRemoval> destroyList = new ArrayList<>();
 
+        if (Config.useNeighborGraphRemovalDeterministic) destroyList.add(new NeighborGraphRemoval(data, this,false));
+        if (Config.useNeighborGraphRemovalRandom) destroyList.add(new NeighborGraphRemoval(data, this, true));
+        if (Config.useNeighborGraphRemovalDeterministic || Config.useNeighborGraphRemovalRandom) this.initNeighborGraph();
+
         if (Config.useRandomRemoval) destroyList.add(new RandomRemoval(data));
-        if (Config.useWorstRemovalRandom) destroyList.add(new WorstRemoval(data, true));
-        if (Config.useWorstRemovalDeterministic) destroyList.add(new WorstRemoval(data, false));
         if (Config.useRandomRouteRemoval) destroyList.add(new RandomRouteRemoval(data));
-        if (Config.useShawSimplifiedRandom) destroyList.add(new ShawSimplifiedRemoval(data, true));
+        if (Config.useRequestGraphRemoval) destroyList.add(new RequestGraphRemoval(data));
         if (Config.useShawSimplifiedDeterministic) destroyList.add(new ShawSimplifiedRemoval(data, false));
+        if (Config.useShawSimplifiedRandom) destroyList.add(new ShawSimplifiedRemoval(data, true));
+        if (Config.useWorstRemovalDeterministic) destroyList.add(new WorstRemoval(data, false));
+        if (Config.useWorstRemovalRandom) destroyList.add(new WorstRemoval(data, true));
 
         this.destroyOperators = new AbstractRemoval[destroyList.size()];
         this.destroyOperators = destroyList.toArray(this.destroyOperators);
+    }
+
+    private void initNeighborGraph() {
+        // complete, directed, weighted graph
+        this.neighborGraph = new double[this.data.getnCustomers() + 1][this.data.getnCustomers() + 1];
+
+        // edges are initially set to infinity (or a reasonably high value)
+        Arrays.stream(this.neighborGraph).forEach(row -> Arrays.fill(row, Config.bigMRegret));
     }
 
 
@@ -61,6 +84,10 @@ public class ALNSCore {
         Solution solutionCurrent = solutionConstr.copyDeep();
         Solution solutionBestGlobal = solutionConstr.copyDeep();
 
+        // add information from construction to neighbor graph
+        if (Config.useNeighborGraphRemovalRandom || Config.useNeighborGraphRemovalDeterministic) this.updateNeighborGraph(solutionConstr);
+
+
         for (int iteration = 1; iteration <= Config.alnsIterations; iteration++) {
 //        for (int iteration = 1; iteration <= 10_000; iteration++) {
 
@@ -74,6 +101,9 @@ public class ALNSCore {
             // repair solution
             // returns one repair operator specified in repairOperators
             this.getRepairOperatorAtRandom().solve(solutionTemp);
+
+            // update neighbor graph if new solution was found (TODO check if the solution is really a new one (hashtable?)
+            if (Config.useNeighborGraphRemovalRandom || Config.useNeighborGraphRemovalDeterministic) this.updateNeighborGraph(solutionTemp);
 
             if (iteration % 1000 == 0) {
                 System.out.println("\n\nIteration " + iteration);
@@ -89,9 +119,36 @@ public class ALNSCore {
                 System.out.println("Cost glob " + solutionBestGlobal.getTotalCosts());
             }
 
+//            if (iteration % 5000 == 0) {
+//                DebugUtils.printNumericMatrix(this.neighborGraph);
+//            }
+
         }
 
         return solutionBestGlobal;
+    }
+
+    // TODO Testcase um zu checken, ob auch die richtigen werte upgdated werden
+    private void updateNeighborGraph(Solution solution) {
+
+        double obj = solution.getTotalCosts();
+
+        for (Vehicle vehicle: solution.getVehicles()) {
+            if (vehicle.isUsed()) {
+                ArrayList<Integer> customers = vehicle.getCustomers();
+
+                int pred = customers.get(0);
+                int succ = -1;
+                for (int c = 1; c < customers.size(); c++) {
+                    succ = customers.get(c);
+
+                    if (this.neighborGraph[pred][succ] > obj + Config.epsilon) this.neighborGraph[pred][succ] = obj;
+
+                    pred = succ;
+                }
+            }
+        }
+
     }
 
     // TODO hier brauchen wir auch noch Test cases

@@ -180,4 +180,16 @@ public class Solution {
         return possibleRemovals;
     }
 
+    public ArrayList<double[]> getPossibleRemovalsSortedByNeighborGraph(double[][] neighborGraph) {
+        ArrayList<double[]> possibleRemovals = new ArrayList<>();
+        for (Vehicle vehicle: this.getVehicles()) {
+            if (vehicle.isUsed()) {
+                ArrayList<double[]> removals = vehicle.getPossibleRemovals(neighborGraph);
+                possibleRemovals.addAll(removals);
+            }
+        }
+
+        possibleRemovals.sort(Comparator.comparing(a -> a[3], Collections.reverseOrder())); // sort by travelTimeReduction
+        return possibleRemovals;
+    }
 }

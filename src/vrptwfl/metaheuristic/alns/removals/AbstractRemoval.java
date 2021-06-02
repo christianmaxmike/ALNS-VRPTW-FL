@@ -113,4 +113,6 @@ public abstract class AbstractRemoval {
     }
 
     abstract List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals);
+
+
 }

@@ -8,12 +8,15 @@ upper_bound_nr_of_removals: 100
 upper_bound_factor_nr_of_removals: 0.4
 
 ### Define active operators
+use_neighbor_graph_removal_deterministic: false
+use_neighbor_graph_removal_random: true
 use_random_removal: true
 use_random_route_removal: true
-use_worst_removal_random: true
-use_worst_removal_deterministic: false
-use_shaw_simplified_random: true
+use_request_graph_removal: false
 use_shaw_simplified_deterministic: false
+use_shaw_simplified_random: true
+use_worst_removal_deterministic: false
+use_worst_removal_random: true
 
 use_greedy_insert: true
 use_nregret_2: true
@@ -23,8 +26,9 @@ use_nregret_5: false
 use_nregret_6: false
 
 ### Destroy operators parameters
-worst_removal_exponent: 3
+neighbor_graph_removal_exponent: 3
 shaw_removal_exponent: 6
+worst_removal_exponent: 3
 
 # calculation
 rounding_precision: 1     # number of decimal places

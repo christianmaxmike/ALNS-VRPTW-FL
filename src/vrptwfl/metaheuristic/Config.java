@@ -27,12 +27,15 @@ public class Config {
     public static int upperBoundRemovalsMax;
 
     // alns operators to use
+    public static boolean useNeighborGraphRemovalDeterministic;
+    public static boolean useNeighborGraphRemovalRandom;
     public static boolean useRandomRemoval;
     public static boolean useRandomRouteRemoval;
-    public static boolean useWorstRemovalRandom;
-    public static boolean useWorstRemovalDeterministic;
-    public static boolean useShawSimplifiedRandom;
+    public static boolean useRequestGraphRemoval;
     public static boolean useShawSimplifiedDeterministic;
+    public static boolean useShawSimplifiedRandom;
+    public static boolean useWorstRemovalDeterministic;
+    public static boolean useWorstRemovalRandom;
 
     public static boolean useGreedyInsert;
     public static boolean useNRegret2;
@@ -42,8 +45,9 @@ public class Config {
     public static boolean useNRegret6;
 
     // alns operator parameters
-    public static int worstRemovalExponent;
+    public static int neighborGraphRemovalExponent;
     public static int shawRemovalExponent;
+    public static int worstRemovalExponent;
 
 
     private static Config conf = new Config();
@@ -77,12 +81,15 @@ public class Config {
         // --- ALNS configurations ---
         alnsIterations = (int) obj.get("alns_iterations");
 
+        useNeighborGraphRemovalDeterministic = (boolean) obj.get("use_neighbor_graph_removal_deterministic");
+        useNeighborGraphRemovalRandom = (boolean) obj.get("use_neighbor_graph_removal_random");
         useRandomRemoval = (boolean) obj.get("use_random_removal");
         useRandomRouteRemoval = (boolean) obj.get("use_random_route_removal");
-        useWorstRemovalRandom = (boolean) obj.get("use_worst_removal_random");
-        useWorstRemovalDeterministic = (boolean) obj.get("use_worst_removal_deterministic");
-        useShawSimplifiedRandom = (boolean) obj.get("use_shaw_simplified_random");
+        useRequestGraphRemoval = (boolean) obj.get("use_request_graph_removal");
         useShawSimplifiedDeterministic = (boolean) obj.get("use_shaw_simplified_deterministic");
+        useShawSimplifiedRandom = (boolean) obj.get("use_shaw_simplified_random");
+        useWorstRemovalDeterministic = (boolean) obj.get("use_worst_removal_deterministic");
+        useWorstRemovalRandom = (boolean) obj.get("use_worst_removal_random");
 
         useGreedyInsert = (boolean) obj.get("use_greedy_insert");
         useNRegret2 = (boolean) obj.get("use_nregret_2");
@@ -92,8 +99,9 @@ public class Config {
         useNRegret6 = (boolean) obj.get("use_nregret_6");
 
         // - ALNS destroy operators
-        worstRemovalExponent = (int) obj.get("worst_removal_exponent");
+        neighborGraphRemovalExponent = (int) obj.get("neighbor_graph_removal_exponent");
         shawRemovalExponent = (int) obj.get("shaw_removal_exponent");
+        worstRemovalExponent = (int) obj.get("worst_removal_exponent");
 
         // see Ropke & Pisinger 2006, p. 465 (An ALNS Heuristic for the PDPTW)
         // upper bound will be determined instance specific when number of customers is knwon
