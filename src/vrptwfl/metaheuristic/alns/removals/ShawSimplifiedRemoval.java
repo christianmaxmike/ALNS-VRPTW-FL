@@ -21,10 +21,9 @@ public class ShawSimplifiedRemoval extends AbstractRemoval {
     }
 
     @Override
-    public void destroy(Solution solution) {
+    // TODO hier nochmal drüber gehen und vereinfachen und kommentieren
+    public List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) {
 
-        // get number of removals based on parameters defined in config file
-        int nRemovals = getNRemovals();
         List<Integer> removedCustomers = new ArrayList<>();
 
         // choose the first customer to be removed at random
@@ -76,10 +75,8 @@ public class ShawSimplifiedRemoval extends AbstractRemoval {
 
         // TODO wenn es locations gibt, geht die Logik so nicht komplett
 
+        return removedCustomers;
 
-        // Update the solution object.  The tours of the vehicle are already update by the removals.  However, global
-        // information such as the total costs and list of notAssignedCustomers still need to be updated.
-        solution.updateSolutionAfterRemoval(removedCustomers);
     }
 
     public static void main(String[] args) {

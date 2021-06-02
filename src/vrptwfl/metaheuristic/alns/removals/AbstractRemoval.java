@@ -39,7 +39,7 @@ public abstract class AbstractRemoval {
      * @param solution Solution object from which customers will be removed.
      * @param sortedPositionsToRemove Sorted list of positions of customers (in the 'giant tour') that will be removed.
      */
-    public final void removeCustomersFromTours(Solution solution, List<Integer> sortedPositionsToRemove) {
+    public final List<Integer> removeCustomersFromTours(Solution solution, List<Integer> sortedPositionsToRemove) {
         List<Integer> removedCustomers = new ArrayList<>();
 
         ArrayList<Vehicle> vehicles = solution.getVehicles();
@@ -92,14 +92,25 @@ public abstract class AbstractRemoval {
             }
         }
 
-        // Update the solution object.  The tours of the vehicle are already update by the removals.  However, global
-        // information such as the total costs and list of notAssignedCustomers still need to be updated.
-        solution.updateSolutionAfterRemoval(removedCustomers);
+        return removedCustomers;
     }
 
     final int getNRemovals() {
         return CalcUtils.getRandomNumberInClosedRange(Config.lowerBoundRemovals, Config.upperBoundRemovals);
     }
 
-    abstract public void destroy(Solution solution);
+    public final void destroy(Solution solution) {
+
+        // get number of removals based on parameters defined in config file
+        int nRemovals = getNRemovals();
+
+        List<Integer> removedCustomers = this.operatorSpecificDestroy(solution, nRemovals);
+
+        // Update the solution object.  The tours of the vehicle are already update by the removals.  However, global
+        // information such as the total costs and list of notAssignedCustomers still need to be updated.
+        solution.updateSolutionAfterRemoval(removedCustomers);
+
+    }
+
+    abstract List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals);
 }

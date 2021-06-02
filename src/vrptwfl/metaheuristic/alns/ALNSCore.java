@@ -6,10 +6,8 @@ import vrptwfl.metaheuristic.alns.insertions.GreedyInsertion;
 import vrptwfl.metaheuristic.alns.insertions.RegretInsertion;
 import vrptwfl.metaheuristic.alns.removals.*;
 import vrptwfl.metaheuristic.common.Solution;
-import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
-import vrptwfl.metaheuristic.utils.CalcUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,18 +22,37 @@ public class ALNSCore {
     public ALNSCore(Data data) throws ArgumentOutOfBoundsException {
         this.data = data;
 
-        // TODO ueber config steuern, welche ueberhaupt genutzt werden
-        repairOperators = new AbstractInsertion[]{
-                new GreedyInsertion(data),
-                new RegretInsertion(2, data),
-                new RegretInsertion(3, data)
-        };
-        destroyOperators = new AbstractRemoval[]{
-                new RandomRemoval(data),
-                new WorstRemoval(data, true),
-                new RandomRouteRemoval(data),
-                new ShawSimplifiedRemoval(data, true)
-        };
+        this.initRepairOperators();
+        this.initDestroyOperators();
+    }
+
+    private void initDestroyOperators() {
+        List<AbstractRemoval> destroyList = new ArrayList<>();
+
+        if (Config.useRandomRemoval) destroyList.add(new RandomRemoval(data));
+        if (Config.useWorstRemovalRandom) destroyList.add(new WorstRemoval(data, true));
+        if (Config.useWorstRemovalDeterministic) destroyList.add(new WorstRemoval(data, false));
+        if (Config.useRandomRouteRemoval) destroyList.add(new RandomRouteRemoval(data));
+        if (Config.useShawSimplifiedRandom) destroyList.add(new ShawSimplifiedRemoval(data, true));
+        if (Config.useShawSimplifiedDeterministic) destroyList.add(new ShawSimplifiedRemoval(data, false));
+
+        this.destroyOperators = new AbstractRemoval[destroyList.size()];
+        this.destroyOperators = destroyList.toArray(this.destroyOperators);
+    }
+
+
+    private void initRepairOperators() throws ArgumentOutOfBoundsException {
+        List<AbstractInsertion> repairList = new ArrayList<>();
+
+        if (Config.useGreedyInsert) repairList.add(new GreedyInsertion(data));
+        if (Config.useNRegret2) repairList.add(new RegretInsertion(2 ,data));
+        if (Config.useNRegret3) repairList.add(new RegretInsertion(3 ,data));
+        if (Config.useNRegret4) repairList.add(new RegretInsertion(4 ,data));
+        if (Config.useNRegret5) repairList.add(new RegretInsertion(5 ,data));
+        if (Config.useNRegret6) repairList.add(new RegretInsertion(6 ,data));
+
+        this.repairOperators = new AbstractInsertion[repairList.size()];
+        this.repairOperators = repairList.toArray(this.repairOperators);
     }
 
     public Solution runALNS(Solution solutionConstr) {

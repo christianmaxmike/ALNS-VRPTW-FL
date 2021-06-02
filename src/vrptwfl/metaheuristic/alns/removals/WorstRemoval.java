@@ -22,10 +22,8 @@ public class WorstRemoval extends AbstractRemoval {
 
     // see Ropke & Pisinger 2006, p. 460 Algorithm 3 (An ALNS Heuristic for the PDPTW)
     @Override
-    public void destroy(Solution solution) {
+    public List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) {
 
-        // get number of removals based on parameters defined in config file
-        int nRemovals = getNRemovals();
         List<Integer> removedCustomers = new ArrayList<>();
 
 //        Map<int[], Double> myCache; // TODO hier gehts mitm Guava Cache weiter
@@ -59,10 +57,7 @@ public class WorstRemoval extends AbstractRemoval {
             nRemovals--;
         }
 
-        // Update the solution object.  The tours of the vehicle are already update by the removals.  However, global
-        // information such as the total costs and list of notAssignedCustomers still need to be updated.
-        solution.updateSolutionAfterRemoval(removedCustomers);
-
+        return removedCustomers;
     }
 
 }

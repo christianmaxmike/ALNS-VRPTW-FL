@@ -17,10 +17,7 @@ public class RandomRemoval extends AbstractRemoval {
     }
 
     @Override
-    public void destroy(Solution solution) {
-
-        // get number of removals based on parameters defined in config file
-        int nRemovals = getNRemovals();
+    public List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) {
 
         // get index positions of the nRemovals customers to be removed (there are nCustomers - number of not assigned customers that can be removed)
         // NOTE: these positions are the positions in the tours (not the customer ids!)
@@ -30,7 +27,7 @@ public class RandomRemoval extends AbstractRemoval {
 //        System.out.println("\n\nRemovals " + nRemovals + "\t[" + Config.lowerBoundRemovals + ", " + Config.upperBoundRemovals + "]");
 //        System.out.println(sortedPositionsToRemove);
 
-        this.removeCustomersFromTours(solution, sortedPositionsToRemove);
+        return this.removeCustomersFromTours(solution, sortedPositionsToRemove);
 
     }
 

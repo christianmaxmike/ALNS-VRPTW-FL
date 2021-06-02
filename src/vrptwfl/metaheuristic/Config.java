@@ -26,7 +26,22 @@ public class Config {
     public static double upperBoundRemovalsFactor;
     public static int upperBoundRemovalsMax;
 
-    // alns operators
+    // alns operators to use
+    public static boolean useRandomRemoval;
+    public static boolean useRandomRouteRemoval;
+    public static boolean useWorstRemovalRandom;
+    public static boolean useWorstRemovalDeterministic;
+    public static boolean useShawSimplifiedRandom;
+    public static boolean useShawSimplifiedDeterministic;
+
+    public static boolean useGreedyInsert;
+    public static boolean useNRegret2;
+    public static boolean useNRegret3;
+    public static boolean useNRegret4;
+    public static boolean useNRegret5;
+    public static boolean useNRegret6;
+
+    // alns operator parameters
     public static int worstRemovalExponent;
     public static int shawRemovalExponent;
 
@@ -62,6 +77,20 @@ public class Config {
         // --- ALNS configurations ---
         alnsIterations = (int) obj.get("alns_iterations");
 
+        useRandomRemoval = (boolean) obj.get("use_random_removal");
+        useRandomRouteRemoval = (boolean) obj.get("use_random_route_removal");
+        useWorstRemovalRandom = (boolean) obj.get("use_worst_removal_random");
+        useWorstRemovalDeterministic = (boolean) obj.get("use_worst_removal_deterministic");
+        useShawSimplifiedRandom = (boolean) obj.get("use_shaw_simplified_random");
+        useShawSimplifiedDeterministic = (boolean) obj.get("use_shaw_simplified_deterministic");
+
+        useGreedyInsert = (boolean) obj.get("use_greedy_insert");
+        useNRegret2 = (boolean) obj.get("use_nregret_2");
+        useNRegret3 = (boolean) obj.get("use_nregret_3");
+        useNRegret4 = (boolean) obj.get("use_nregret_4");
+        useNRegret5 = (boolean) obj.get("use_nregret_5");
+        useNRegret6 = (boolean) obj.get("use_nregret_6");
+
         // - ALNS destroy operators
         worstRemovalExponent = (int) obj.get("worst_removal_exponent");
         shawRemovalExponent = (int) obj.get("shaw_removal_exponent");
@@ -71,6 +100,7 @@ public class Config {
         lowerBoundRemovals = (int) obj.get("lower_bound_nr_of_removals");
         upperBoundRemovalsFactor = (double) obj.get("upper_bound_factor_nr_of_removals");
         upperBoundRemovalsMax = (int) obj.get("upper_bound_nr_of_removals");
+
 
     }
 

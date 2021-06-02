@@ -52,7 +52,12 @@ public class MainALNS {
         solutionALNS.printSolution();
 
         // TODO check, ob es key ueberhaupt gibt, auch checken, ob es 25, 50 oder 100 Kunden sind
-        double optimalObjFuncVal = OptimalSolutions.optimalObjFuncValue.get(instanceName)[2];
+
+        int i = -1;
+        if (nCustomers == 100) i = 2;
+        else if (nCustomers == 50) i = 1;
+        else if (nCustomers == 25) i = 0;
+        double optimalObjFuncVal = OptimalSolutions.optimalObjFuncValue.get(instanceName)[i];
         double gap = CalcUtils.calculateGap(optimalObjFuncVal, solutionALNS.getTotalCosts());
         System.out.println("Gap: " + gap);
 
