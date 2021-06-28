@@ -5,6 +5,7 @@ import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.data.Data;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.ListIterator;
 
 public class GreedyInsertion extends AbstractInsertion {
@@ -37,6 +38,7 @@ public class GreedyInsertion extends AbstractInsertion {
                 solution.getTempInfeasibleCustomers().add(customer);
                 iter.remove();
             } else {
+                possibleInsertionsForCustomer.sort(Comparator.comparing(a -> a[4])); // sort by additional costs
                 double[] possibleInsertion = possibleInsertionsForCustomer.get(0);
 
                 // compare cost increase to currently best (lowest) cost increase

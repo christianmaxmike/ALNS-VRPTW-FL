@@ -43,12 +43,13 @@ public class Config {
     public static boolean useNRegret4;
     public static boolean useNRegret5;
     public static boolean useNRegret6;
+    public static boolean regretConsiderAllPossibleInsertionPerRoute;
+    public static boolean regretSumOverAllNRegret;
 
     // alns operator parameters
     public static int neighborGraphRemovalExponent;
     public static int shawRemovalExponent;
     public static int worstRemovalExponent;
-
 
     private static Config conf = new Config();
 
@@ -97,6 +98,8 @@ public class Config {
         useNRegret4 = (boolean) obj.get("use_nregret_4");
         useNRegret5 = (boolean) obj.get("use_nregret_5");
         useNRegret6 = (boolean) obj.get("use_nregret_6");
+        regretConsiderAllPossibleInsertionPerRoute = (boolean) obj.get("regret_consider_all_possible_insertion_per_route");
+        regretSumOverAllNRegret = (boolean) obj.get("regret_sum_over_all_n_regret");
 
         // - ALNS destroy operators
         neighborGraphRemovalExponent = (int) obj.get("neighbor_graph_removal_exponent");

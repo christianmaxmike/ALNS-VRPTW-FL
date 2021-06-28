@@ -1,5 +1,6 @@
 package vrptwfl.metaheuristic.common;
 
+import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.data.Data;
 
 import java.util.ArrayList;
@@ -115,12 +116,22 @@ public class Solution {
     }
 
     public void printSolution() {
-        System.out.println("Solution total costs: " + this.totalCosts); // TODO logger debug!
+        int nActiveVehicles = this.getNActiveVehicles();
+        System.out.println("Solution total costs: " + this.totalCosts + "\tn vehicles used: " + nActiveVehicles); // TODO logger debug!
         for (Vehicle veh: this.vehicles) {
             if (veh.isUsed()) {
                 veh.printTour();
             }
         }
+    }
+
+    private int getNActiveVehicles() {
+
+        int count = 0;
+        for (Vehicle v: this.vehicles) {
+            if (v.isUsed()) count++;
+        }
+        return count;
     }
 
     public void updateSolutionAfterRemoval(List<Integer> removedCustomers) {
@@ -160,8 +171,15 @@ public class Solution {
             }
 
             ArrayList<double[]> insertions = vehicle.getPossibleInsertions(customer, this.data);
-            possibleInsertionsForCustomer.addAll(insertions);
 
+
+            if (Config.regretConsiderAllPossibleInsertionPerRoute) { // add all possible position (can be multiple per route)
+                possibleInsertionsForCustomer.addAll(insertions);
+            } else if (!insertions.isEmpty()){
+                // only consider the best possible insertion in this route (as described in Ropke & Pisinger 2007 C&OR §5.2.2 p. 2415)
+                insertions.sort(Comparator.comparing(a -> a[4])); // sort by additional costs
+                possibleInsertionsForCustomer.add(insertions.get(0));
+            }
         }
         return possibleInsertionsForCustomer;
     }

@@ -148,12 +148,13 @@ public class Data {
     }
 
     private double getDistanceValue(int i, int j) {
+        System.out.println(j);
         double diffX = this.xcoords[i] - this.xcoords[j];
         double diffY = this.ycoords[i] - this.ycoords[j];
 
         double distance = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY,2));
         // round to
-        distance = Math.round(distance* Config.roundingPrecisionFactor)/Config.roundingPrecisionFactor;
+        distance = Math.round(distance * Config.roundingPrecisionFactor)/Config.roundingPrecisionFactor;
         return distance;
     }
 

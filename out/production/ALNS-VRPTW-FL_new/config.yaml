@@ -1,5 +1,5 @@
 # General
-random_seed: 42  # if null, no random seed will be used
+random_seed: null #42  # if null, no random seed will be used
 
 ##### ALNS configurations #####
 alns_iterations: 25_000  # 50_000
@@ -24,9 +24,11 @@ use_nregret_3: true
 use_nregret_4: false
 use_nregret_5: false
 use_nregret_6: false
+regret_consider_all_possible_insertion_per_route: false  # default in Ropke C&OR §5.2.2 p. 2415: false
+regret_sum_over_all_n_regret: true  # default in Ropke C&OR §5.2.2 p. 2415: true (e.g. only consider 4th - best or (4th - best) + (3rd - best) + (2nd - best))
 
 ### Destroy operators parameters
-neighbor_graph_removal_exponent: 3
+neighbor_graph_removal_exponent: 6
 shaw_removal_exponent: 6
 worst_removal_exponent: 3
 
