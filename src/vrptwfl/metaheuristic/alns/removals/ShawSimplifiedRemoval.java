@@ -48,7 +48,7 @@ public class ShawSimplifiedRemoval extends AbstractRemoval {
         if (firstCustomer == -1) return removedCustomers;
 
         // --- main loop ---
-        // choose an already selected customer i, and select customer j which is closest to i
+        // (randomly) choose an already selected customer i, and select customer j which is closest to i
         while (nRemovals > 0) {
 
             // 1) choose already selected customer i (reference customer)
@@ -64,7 +64,6 @@ public class ShawSimplifiedRemoval extends AbstractRemoval {
             for (Vehicle vehicle: solution.getVehicles()) {
                 if (!vehicle.isUsed()) continue;
                 for (int customer: vehicle.getCustomers()) {
-//            for (int c = 1; c < vehicle.getnCustomersInTour()+1; c++) {
                     if (customer == 0) continue;
                     closest.add(new double[] {customer, vehicle.getId(), distanceToFirstCustomer[customer]});
                 }
@@ -86,6 +85,7 @@ public class ShawSimplifiedRemoval extends AbstractRemoval {
             if (nRemovals == 0) break;
         } // end while (nRemovals > 0)
 
+        // TODO entferne alten Teil, wenn man es nicht mehr braucht
 //        // get customers closest to the first one
 //        // get row form travel time matrix
 //        double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[firstCustomer];

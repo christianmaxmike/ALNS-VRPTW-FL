@@ -26,6 +26,9 @@ public class Config {
     public static double upperBoundRemovalsFactor;
     public static int upperBoundRemovalsMax;
 
+    public static int costFactorUnservedCustomer;
+    public static double penaltyUnservedCustomer;
+
     // alns operators to use
     public static boolean useNeighborGraphRemovalDeterministic;
     public static boolean useNeighborGraphRemovalRandom;
@@ -81,6 +84,8 @@ public class Config {
 
         // --- ALNS configurations ---
         alnsIterations = (int) obj.get("alns_iterations");
+
+        costFactorUnservedCustomer = (int) obj.get("cost_factor_unserved_customer");
 
         useNeighborGraphRemovalDeterministic = (boolean) obj.get("use_neighbor_graph_removal_deterministic");
         useNeighborGraphRemovalRandom = (boolean) obj.get("use_neighbor_graph_removal_random");

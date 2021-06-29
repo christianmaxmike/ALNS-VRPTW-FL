@@ -113,6 +113,7 @@ public class ALNSCore {
             }
 
             solutionCurrent = this.checkImprovement(solutionTemp, solutionCurrent, solutionBestGlobal);
+
             if (iteration % 1000 == 0) {
                 System.out.println();
                 System.out.println("Cost curr " + solutionCurrent.getTotalCosts());
@@ -153,6 +154,8 @@ public class ALNSCore {
 
     // TODO hier brauchen wir auch noch Test cases
     private Solution checkImprovement(Solution solutionTemp, Solution solutionCurrent, Solution solutionBestGlobal) {
+
+        // TODO: feasible nur relevant fuer beste globale loesung
 
         // feasible solution ?
         // TODO hier kommt dann wahrscheinlichkeit etc rein, dass trotzdem schlechtere loesung

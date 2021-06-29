@@ -142,11 +142,18 @@ public class Solution {
             this.notAssignedCustomers.addAll(removedCustomers);
             isFeasible = false;
         }
+
+        this.addCostsForUnservedCustomers();
     }
 
     public void updateSolutionAfterInsertion() {
         this.calculateCostsFromVehicles();
         this.addInfeasiblesToNotAssigned();
+        this.addCostsForUnservedCustomers();
+    }
+
+    private void addCostsForUnservedCustomers() {
+        this.totalCosts += this.notAssignedCustomers.size() * Config.penaltyUnservedCustomer;
     }
 
     private void addInfeasiblesToNotAssigned() {

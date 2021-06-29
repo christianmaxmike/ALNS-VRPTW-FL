@@ -21,7 +21,13 @@ public class Data {
     private int[] latestStartTimes;
     private int[] serviceDurations;
     private double[][] distanceMatrix;
+    private double maxDistanceInGraph;
     private double endOfPlanningHorizon;
+
+    public double getMaxDistanceInGraph() {
+        return maxDistanceInGraph;
+    }
+
 
     public int getnCustomers() {
         return nCustomers;
@@ -135,6 +141,7 @@ public class Data {
 
     private void createDistanceMatrix() {
         this.distanceMatrix = new double[this.xcoords.length][this.xcoords.length];
+        this.maxDistanceInGraph = 0.;
 
         for (int i = 0; i < this.xcoords.length -1; i++) {
             this.distanceMatrix[i][i] = 0;
@@ -142,6 +149,10 @@ public class Data {
                 double distance = this.getDistanceValue(i,j);
                 this.distanceMatrix[i][j] = distance;
                 this.distanceMatrix[j][i] = distance;
+
+                if (distance > this.maxDistanceInGraph + Config.epsilon) {
+                    this.maxDistanceInGraph = distance;
+                }
             }
         }
 

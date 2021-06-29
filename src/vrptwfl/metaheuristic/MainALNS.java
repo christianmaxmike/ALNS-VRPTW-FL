@@ -23,7 +23,7 @@ public class MainALNS {
             e.printStackTrace();
         }
 
-        this.setInstanceSpecificParameters(nCustomers);
+        this.setInstanceSpecificParameters(nCustomers, data.getMaxDistanceInGraph());
 
         ConstructionHeuristicRegret construction = new ConstructionHeuristicRegret(data);
         long startTimeConstruction = System.currentTimeMillis();
@@ -80,13 +80,16 @@ public class MainALNS {
         return 0.0;
     }
 
-    private void setInstanceSpecificParameters(int nCustomers) {
+    private void setInstanceSpecificParameters(int nCustomers, double maxDistance) {
 
         // set upper bound for number of removals in each ALNS iteration
         // (see Ropke & Pisinger 2006, p. 465 (An ALNS Heuristic for the PDPTW))
         int ub1 = Config.upperBoundRemovalsMax;
         int ub2 = (int) Math.round(nCustomers * Config.upperBoundRemovalsFactor);
         Config.upperBoundRemovals = Math.min(ub1,  ub2);
+
+        // set penalty (costs) for unserved customers
+        Config.penaltyUnservedCustomer = maxDistance * Config.costFactorUnservedCustomer;
 
     }
 
