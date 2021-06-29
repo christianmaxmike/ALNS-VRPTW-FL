@@ -143,12 +143,16 @@ public class Solution {
             isFeasible = false;
         }
 
-        this.addCostsForUnservedCustomers();
+//        this.calculatePenaltyCosts(); // TODO kann ggf raus, da penalties er nach Insertion berechnet werden muessen
     }
 
     public void updateSolutionAfterInsertion() {
         this.calculateCostsFromVehicles();
         this.addInfeasiblesToNotAssigned();
+        this.calculatePenaltyCosts();
+    }
+
+    private void calculatePenaltyCosts() {
         this.addCostsForUnservedCustomers();
     }
 

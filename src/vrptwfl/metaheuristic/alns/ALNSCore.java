@@ -155,32 +155,50 @@ public class ALNSCore {
     // TODO hier brauchen wir auch noch Test cases
     private Solution checkImprovement(Solution solutionTemp, Solution solutionCurrent, Solution solutionBestGlobal) {
 
-        // TODO: feasible nur relevant fuer beste globale loesung
-
-        // feasible solution ?
-        // TODO hier kommt dann wahrscheinlichkeit etc rein, dass trotzdem schlechtere loesung
-        //  angenommen wird
-        if (solutionCurrent.isFeasible()) {
-            if (solutionTemp.isFeasible()) {
-                // improvement
-                if (solutionCurrent.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon) {
-                    // check if also better than best global
-                    if (solutionBestGlobal.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon) {
-                        solutionBestGlobal.setSolution(solutionTemp);
-                    }
-                    return solutionTemp;
-                }
-            }
-        } else { // if no feasible solution found yet
-            // improvement
-            if (solutionCurrent.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon) {
-                return solutionTemp;
+        // check if improvement of global best
+        if (solutionTemp.isFeasible()) {
+            if (solutionBestGlobal.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon) {
+                solutionBestGlobal.setSolution(solutionTemp);
             }
         }
 
-
-        // no improvement
+        // check if temporary solution become new current solution
+        if (this.tempSolutionIsAccepted(solutionTemp, solutionCurrent)) {
+            return solutionTemp;
+        }
         return solutionCurrent;
+
+//        // check if temporary solution become new current solution
+//        if (solutionCurrent.isFeasible()) {
+//            if (solutionTemp.isFeasible()) {
+//                // improvement
+//                if (solutionCurrent.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon) {
+//                    // check if also better than best global
+////                    if (solutionBestGlobal.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon) {
+////                        solutionBestGlobal.setSolution(solutionTemp);
+////                    }
+//                    return solutionTemp;
+//                }
+//            }
+//        } else { // if no feasible solution found yet
+//            // improvement
+//            if (solutionCurrent.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon) {
+//                return solutionTemp;
+//            }
+//        }
+//
+//        // TODO: feasible nur relevant fuer beste globale loesung
+//        // was current solution feasible ?
+//        // TODO hier kommt dann wahrscheinlichkeit etc rein, dass trotzdem schlechtere loesung
+//        //  angenommen wird
+//
+//        // no improvement
+//        return solutionCurrent;
+    }
+
+    private boolean tempSolutionIsAccepted(Solution solutionTemp, Solution solutionCurrent) {
+        // improvement ?
+        return solutionCurrent.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon;
     }
 
     private AbstractInsertion getRepairOperatorAtRandom() {

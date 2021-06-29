@@ -159,7 +159,6 @@ public class Data {
     }
 
     private double getDistanceValue(int i, int j) {
-        System.out.println(j);
         double diffX = this.xcoords[i] - this.xcoords[j];
         double diffY = this.ycoords[i] - this.ycoords[j];
 

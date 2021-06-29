@@ -83,7 +83,12 @@ public class MainALNS {
     private void setInstanceSpecificParameters(int nCustomers, double maxDistance) {
 
         // set upper bound for number of removals in each ALNS iteration
-        // (see Ropke & Pisinger 2006, p. 465 (An ALNS Heuristic for the PDPTW))
+        // (see Pisinger & Ropke 2007, C&OR §6.1.1 p. 2417)
+
+        int lb1 = Config.lowerBoundRemovalsMax;
+        int lb2 = (int) Math.round(nCustomers * Config.lowerBoundRemovalsFactor);
+        Config.lowerBoundRemovals = Math.min(lb1,  lb2);
+
         int ub1 = Config.upperBoundRemovalsMax;
         int ub2 = (int) Math.round(nCustomers * Config.upperBoundRemovalsFactor);
         Config.upperBoundRemovals = Math.min(ub1,  ub2);

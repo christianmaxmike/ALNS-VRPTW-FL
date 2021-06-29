@@ -22,11 +22,13 @@ public class Config {
     // ALNS
     public static int alnsIterations;
     public static int lowerBoundRemovals;
+    public static double lowerBoundRemovalsFactor;
+    public static int lowerBoundRemovalsMax;
     public static int upperBoundRemovals;
     public static double upperBoundRemovalsFactor;
     public static int upperBoundRemovalsMax;
 
-    public static int costFactorUnservedCustomer;
+    public static double costFactorUnservedCustomer;
     public static double penaltyUnservedCustomer;
 
     // alns operators to use
@@ -85,7 +87,7 @@ public class Config {
         // --- ALNS configurations ---
         alnsIterations = (int) obj.get("alns_iterations");
 
-        costFactorUnservedCustomer = (int) obj.get("cost_factor_unserved_customer");
+        costFactorUnservedCustomer = (double) obj.get("cost_factor_unserved_customer");
 
         useNeighborGraphRemovalDeterministic = (boolean) obj.get("use_neighbor_graph_removal_deterministic");
         useNeighborGraphRemovalRandom = (boolean) obj.get("use_neighbor_graph_removal_random");
@@ -111,9 +113,10 @@ public class Config {
         shawRemovalExponent = (int) obj.get("shaw_removal_exponent");
         worstRemovalExponent = (int) obj.get("worst_removal_exponent");
 
-        // see Ropke & Pisinger 2006, p. 465 (An ALNS Heuristic for the PDPTW)
-        // upper bound will be determined instance specific when number of customers is knwon
-        lowerBoundRemovals = (int) obj.get("lower_bound_nr_of_removals");
+        // see Røpke C&OR §6.1.1 p. 2417
+        // upper bound will be determined instance specific when number of customers is known
+        lowerBoundRemovalsFactor = (double) obj.get("lower_bound_factor_nr_of_removals");
+        lowerBoundRemovalsMax = (int) obj.get("lower_bound_nr_of_removals");
         upperBoundRemovalsFactor = (double) obj.get("upper_bound_factor_nr_of_removals");
         upperBoundRemovalsMax = (int) obj.get("upper_bound_nr_of_removals");
 

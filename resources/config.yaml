@@ -3,11 +3,13 @@ random_seed: null #42  # if null, no random seed will be used
 
 ##### ALNS configurations #####
 alns_iterations: 25_000  # 50_000
-lower_bound_nr_of_removals: 4
-upper_bound_nr_of_removals: 100
+# Upper bound and lower bound values taken from Ropke C&OR §6.1.1 p. 2417
+lower_bound_nr_of_removals: 30
+lower_bound_factor_nr_of_removals: 0.1
+upper_bound_nr_of_removals: 60
 upper_bound_factor_nr_of_removals: 0.4
 
-cost_factor_unserved_customer: 4  # cost for unserviced customers is equal to this number times the maximum distance in the graph
+cost_factor_unserved_customer: 5.0  # cost for unserviced customers is equal to this number times the maximum distance in the graph
 
 ### Define active operators (destroy and repair)
 use_neighbor_graph_removal_deterministic: false
