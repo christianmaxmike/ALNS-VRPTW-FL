@@ -26,9 +26,11 @@ public class ShawSimplifiedRemoval extends AbstractRemoval {
 
         List<Integer> removedCustomers = new ArrayList<>();
 
-        // choose the first customer to be removed at random
-        int firstCustomer = -1;
+        // --- choose the first customer to be removed at random ---
+        int firstCustomer = -1; // set dummy value to see later if customer could be removed
         int posFirstRemoval = CalcUtils.getRandomNumberInClosedRange(0, this.data.getnCustomers() - solution.getNotAssignedCustomers().size() - 1);
+
+        // go through all vehicles and count the customers until the count corresponds to the position to remove
         for (Vehicle vehicle: solution.getVehicles()) {
             if (!vehicle.isUsed()) continue;
 
@@ -42,42 +44,85 @@ public class ShawSimplifiedRemoval extends AbstractRemoval {
             }
         }
 
-        // get customers closest to the first one
-        // get row form travel time matrix
-        double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[firstCustomer];
-        ArrayList<double[]> closest = new ArrayList<>();
+        // if no customer could be removed (no one was in tour), then return empty list
+        if (firstCustomer == -1) return removedCustomers;
 
-        // add all customers in vehicles
-        for (Vehicle vehicle: solution.getVehicles()) {
-            if (!vehicle.isUsed()) continue;
-            for (int customer: vehicle.getCustomers()) {
-//            for (int c = 1; c < vehicle.getnCustomersInTour()+1; c++) {
-                if (customer == 0) continue;
-                closest.add(new double[] {customer, vehicle.getId(), distanceToFirstCustomer[customer]});
-            }
-        }
-        closest.sort(Comparator.comparing(v->v[2]));  // sort according to distance (smallest distance first)
-
+        // --- main loop ---
+        // choose an already selected customer i, and select customer j which is closest to i
         while (nRemovals > 0) {
-            nRemovals--;
-            int idx = 0;
+
+            // 1) choose already selected customer i (reference customer)
+            int idxI = CalcUtils.getRandomNumberInClosedRange(0, removedCustomers.size() - 1);
+            int customerI = removedCustomers.get(idxI);
+
+            // 2) get customers closest to the reference customer
+            // get row form travel time matrix
+            double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[customerI];
+            ArrayList<double[]> closest = new ArrayList<>();
+
+            // add all customers already assigned to the vehicles
+            for (Vehicle vehicle: solution.getVehicles()) {
+                if (!vehicle.isUsed()) continue;
+                for (int customer: vehicle.getCustomers()) {
+//            for (int c = 1; c < vehicle.getnCustomersInTour()+1; c++) {
+                    if (customer == 0) continue;
+                    closest.add(new double[] {customer, vehicle.getId(), distanceToFirstCustomer[customer]});
+                }
+            }
+            closest.sort(Comparator.comparing(v->v[2]));  // sort according to distance (smallest distance first)
+
+            // select next customer to be removed
+            int idxJ = 0;
             if (this.randomize) {
                 double rand = Config.randomGenerator.nextDouble();
-                idx = (int) Math.floor(Math.pow(rand, Config.shawRemovalExponent) * closest.size());
+                idxJ = (int) Math.floor(Math.pow(rand, Config.shawRemovalExponent) * closest.size());
             }
-            double[] removal = closest.get(idx);
+            double[] removal = closest.get(idxJ);
             removedCustomers.add((int) removal[0]);
             solution.getVehicles().get((int) removal[1]).applyRemovalForCustomer((int) removal[0], this.data);
-            closest.remove(idx);
 
+            // 3) update nRemovals and break loop if desired number of removals has been met
+            nRemovals--;
             if (nRemovals == 0) break;
-        }
+        } // end while (nRemovals > 0)
+
+//        // get customers closest to the first one
+//        // get row form travel time matrix
+//        double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[firstCustomer];
+//        ArrayList<double[]> closest = new ArrayList<>();
+//
+//        // add all customers already assigned to the vehicles
+//        for (Vehicle vehicle: solution.getVehicles()) {
+//            if (!vehicle.isUsed()) continue;
+//            for (int customer: vehicle.getCustomers()) {
+////            for (int c = 1; c < vehicle.getnCustomersInTour()+1; c++) {
+//                if (customer == 0) continue;
+//                closest.add(new double[] {customer, vehicle.getId(), distanceToFirstCustomer[customer]});
+//            }
+//        }
+//        closest.sort(Comparator.comparing(v->v[2]));  // sort according to distance (smallest distance first)
+//
+//        while (nRemovals > 0) {
+//            nRemovals--;
+//            int idx = 0;
+//            if (this.randomize) {
+//                double rand = Config.randomGenerator.nextDouble();
+//                idx = (int) Math.floor(Math.pow(rand, Config.shawRemovalExponent) * closest.size());
+//            }
+//            double[] removal = closest.get(idx);
+//            removedCustomers.add((int) removal[0]);
+//            solution.getVehicles().get((int) removal[1]).applyRemovalForCustomer((int) removal[0], this.data);
+//            closest.remove(idx);
+//
+//            if (nRemovals == 0) break;
+//        }
 
         // TODO wenn es locations gibt, geht die Logik so nicht komplett
 
         return removedCustomers;
 
     }
+
 
     public static void main(String[] args) {
 
