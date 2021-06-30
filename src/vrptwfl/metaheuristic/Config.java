@@ -39,6 +39,8 @@ public class Config {
     public static boolean useRequestGraphRemoval;
     public static boolean useShawSimplifiedDeterministic;
     public static boolean useShawSimplifiedRandom;
+    public static boolean useTimeOrientedDeterministic;
+    public static boolean useTimeOrientedRandom;
     public static boolean useWorstRemovalDeterministic;
     public static boolean useWorstRemovalRandom;
 
@@ -54,6 +56,8 @@ public class Config {
     // alns operator parameters
     public static int neighborGraphRemovalExponent;
     public static int shawRemovalExponent;
+    public static int timeOrientedRemovalExponent;
+    public static int timeOrientedNrOfClosest;
     public static int worstRemovalExponent;
 
     private static Config conf = new Config();
@@ -96,6 +100,8 @@ public class Config {
         useRequestGraphRemoval = (boolean) obj.get("use_request_graph_removal");
         useShawSimplifiedDeterministic = (boolean) obj.get("use_shaw_simplified_deterministic");
         useShawSimplifiedRandom = (boolean) obj.get("use_shaw_simplified_random");
+        useTimeOrientedDeterministic = (boolean) obj.get("use_time_oriented_deterministic");
+        useTimeOrientedRandom = (boolean) obj.get("use_time_oriented_random");
         useWorstRemovalDeterministic = (boolean) obj.get("use_worst_removal_deterministic");
         useWorstRemovalRandom = (boolean) obj.get("use_worst_removal_random");
 
@@ -111,6 +117,8 @@ public class Config {
         // - ALNS destroy operators
         neighborGraphRemovalExponent = (int) obj.get("neighbor_graph_removal_exponent");
         shawRemovalExponent = (int) obj.get("shaw_removal_exponent");
+        timeOrientedRemovalExponent = (int) obj.get("time_oriented_removal_exponent");
+        timeOrientedNrOfClosest = (int) obj.get("time_oriented_nr_of_closest");
         worstRemovalExponent = (int) obj.get("worst_removal_exponent");
 
         // see Røpke C&OR §6.1.1 p. 2417

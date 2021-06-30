@@ -48,6 +48,8 @@ public class ALNSCore {
         if (Config.useRequestGraphRemoval) destroyList.add(new RequestGraphRemoval(data));
         if (Config.useShawSimplifiedDeterministic) destroyList.add(new ShawSimplifiedRemoval(data, false));
         if (Config.useShawSimplifiedRandom) destroyList.add(new ShawSimplifiedRemoval(data, true));
+        if (Config.useTimeOrientedDeterministic) destroyList.add(new TimeOrientedRemovalPisinger(data, false));
+        if (Config.useTimeOrientedRandom) destroyList.add(new TimeOrientedRemovalPisinger(data, true));
         if (Config.useWorstRemovalDeterministic) destroyList.add(new WorstRemoval(data, false));
         if (Config.useWorstRemovalRandom) destroyList.add(new WorstRemoval(data, true));
 
@@ -78,7 +80,7 @@ public class ALNSCore {
         this.repairOperators = repairList.toArray(this.repairOperators);
     }
 
-    public Solution runALNS(Solution solutionConstr) {
+    public Solution runALNS(Solution solutionConstr) throws ArgumentOutOfBoundsException {
 
         // init ALNS
         Solution solutionCurrent = solutionConstr.copyDeep();

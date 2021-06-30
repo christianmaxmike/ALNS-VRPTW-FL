@@ -4,6 +4,7 @@ import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
+import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
 import vrptwfl.metaheuristic.utils.CalcUtils;
 
 import java.util.ArrayList;
@@ -99,7 +100,7 @@ public abstract class AbstractRemoval {
         return CalcUtils.getRandomNumberInClosedRange(Config.lowerBoundRemovals, Config.upperBoundRemovals);
     }
 
-    public final void destroy(Solution solution) {
+    public final void destroy(Solution solution) throws ArgumentOutOfBoundsException {
 
         // get number of removals based on parameters defined in config file
         int nRemovals = getNRemovals();
@@ -112,7 +113,7 @@ public abstract class AbstractRemoval {
 
     }
 
-    abstract List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals);
+    abstract List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) throws ArgumentOutOfBoundsException;
 
 
 }

@@ -13,7 +13,7 @@ import java.util.Random;
 // Ropke and Pisinger 2006, page 460 (Transportation Science)
 public class WorstRemoval extends AbstractRemoval {
 
-    private boolean randomize;
+    private final boolean randomize;
 
     public WorstRemoval(Data data, boolean randomize) {
         super(data);

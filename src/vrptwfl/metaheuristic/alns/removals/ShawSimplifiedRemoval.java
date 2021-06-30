@@ -13,7 +13,7 @@ import java.util.*;
 // Ropke and Pisinger 2006, page 759 (EJOR)
 public class ShawSimplifiedRemoval extends AbstractRemoval {
 
-    private boolean randomize;
+    private final boolean randomize;
 
     public ShawSimplifiedRemoval(Data data, boolean randomize) {
         super(data);
@@ -57,6 +57,8 @@ public class ShawSimplifiedRemoval extends AbstractRemoval {
 
             // 2) get customers closest to the reference customer
             // get row form travel time matrix
+            // TODO wenn mehrere locations, dann die location beruecksichtigen, die am dichtesten ist
+            //  (in distanceToFirstCustomer[customer])
             double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[customerI];
             ArrayList<double[]> closest = new ArrayList<>();
 
