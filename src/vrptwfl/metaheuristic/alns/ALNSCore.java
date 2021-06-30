@@ -9,7 +9,6 @@ import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
-import vrptwfl.metaheuristic.utils.DebugUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,7 +35,7 @@ public class ALNSCore {
         this.initDestroyOperators();
     }
 
-    private void initDestroyOperators() {
+    private void initDestroyOperators() throws ArgumentOutOfBoundsException {
         List<AbstractRemoval> destroyList = new ArrayList<>();
 
         if (Config.useNeighborGraphRemovalDeterministic) destroyList.add(new NeighborGraphRemoval(data, this,false));
@@ -48,8 +47,10 @@ public class ALNSCore {
         if (Config.useRequestGraphRemoval) destroyList.add(new RequestGraphRemoval(data));
         if (Config.useShawSimplifiedDeterministic) destroyList.add(new ShawSimplifiedRemoval(data, false));
         if (Config.useShawSimplifiedRandom) destroyList.add(new ShawSimplifiedRemoval(data, true));
-        if (Config.useTimeOrientedDeterministic) destroyList.add(new TimeOrientedRemovalPisinger(data, false));
-        if (Config.useTimeOrientedRandom) destroyList.add(new TimeOrientedRemovalPisinger(data, true));
+        if (Config.useTimeOrientedJungwirthDeterministic) destroyList.add(new TimeOrientedRemoval(data, false, Config.timeOrientedJungwirthWeightStartTimeIinSolution));
+        if (Config.useTimeOrientedJungwirthRandom) destroyList.add(new TimeOrientedRemoval(data, true, Config.timeOrientedJungwirthWeightStartTimeIinSolution));
+        if (Config.useTimeOrientedPisingerDeterministic) destroyList.add(new TimeOrientedRemoval(data, false, 1.0));
+        if (Config.useTimeOrientedPisingerRandom) destroyList.add(new TimeOrientedRemoval(data, true, 1.0));
         if (Config.useWorstRemovalDeterministic) destroyList.add(new WorstRemoval(data, false));
         if (Config.useWorstRemovalRandom) destroyList.add(new WorstRemoval(data, true));
 

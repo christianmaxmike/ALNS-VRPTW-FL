@@ -39,8 +39,10 @@ public class Config {
     public static boolean useRequestGraphRemoval;
     public static boolean useShawSimplifiedDeterministic;
     public static boolean useShawSimplifiedRandom;
-    public static boolean useTimeOrientedDeterministic;
-    public static boolean useTimeOrientedRandom;
+    public static boolean useTimeOrientedJungwirthDeterministic;
+    public static boolean useTimeOrientedJungwirthRandom;
+    public static boolean useTimeOrientedPisingerDeterministic;
+    public static boolean useTimeOrientedPisingerRandom;
     public static boolean useWorstRemovalDeterministic;
     public static boolean useWorstRemovalRandom;
 
@@ -58,6 +60,7 @@ public class Config {
     public static int shawRemovalExponent;
     public static int timeOrientedRemovalExponent;
     public static int timeOrientedNrOfClosest;
+    public static double timeOrientedJungwirthWeightStartTimeIinSolution;
     public static int worstRemovalExponent;
 
     private static Config conf = new Config();
@@ -100,8 +103,10 @@ public class Config {
         useRequestGraphRemoval = (boolean) obj.get("use_request_graph_removal");
         useShawSimplifiedDeterministic = (boolean) obj.get("use_shaw_simplified_deterministic");
         useShawSimplifiedRandom = (boolean) obj.get("use_shaw_simplified_random");
-        useTimeOrientedDeterministic = (boolean) obj.get("use_time_oriented_deterministic");
-        useTimeOrientedRandom = (boolean) obj.get("use_time_oriented_random");
+        useTimeOrientedJungwirthDeterministic = (boolean) obj.get("use_time_oriented_jungwirth_deterministic");
+        useTimeOrientedJungwirthRandom = (boolean) obj.get("use_time_oriented_jungwirth_random");
+        useTimeOrientedPisingerDeterministic = (boolean) obj.get("use_time_oriented_pisinger_deterministic");
+        useTimeOrientedPisingerRandom = (boolean) obj.get("use_time_oriented_pisinger_random");
         useWorstRemovalDeterministic = (boolean) obj.get("use_worst_removal_deterministic");
         useWorstRemovalRandom = (boolean) obj.get("use_worst_removal_random");
 
@@ -119,6 +124,7 @@ public class Config {
         shawRemovalExponent = (int) obj.get("shaw_removal_exponent");
         timeOrientedRemovalExponent = (int) obj.get("time_oriented_removal_exponent");
         timeOrientedNrOfClosest = (int) obj.get("time_oriented_nr_of_closest");
+        timeOrientedJungwirthWeightStartTimeIinSolution = (double) obj.get("time_oriented_jungwirth_weight_start_time_in_solution");
         worstRemovalExponent = (int) obj.get("worst_removal_exponent");
 
         // see Røpke C&OR §6.1.1 p. 2417

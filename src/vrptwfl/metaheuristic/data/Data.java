@@ -23,11 +23,15 @@ public class Data {
     private double[][] distanceMatrix;
     private double maxDistanceInGraph;
     private double endOfPlanningHorizon;
+    private double[][] averageStartTimes;
+
+    public double getAverageStartTimes(int customerI, int customerJ) {
+        return averageStartTimes[customerI][customerJ];
+    }
 
     public double getMaxDistanceInGraph() {
         return maxDistanceInGraph;
     }
-
 
     public int getnCustomers() {
         return nCustomers;
@@ -136,7 +140,23 @@ public class Data {
         this.endOfPlanningHorizon = this.latestStartTimes[0] + this.serviceDurations[0];
 
         this.createDistanceMatrix();
+
+        this.calculateAverageStartTimes();
 //        DebugUtils.printNumericMatrix(this.distanceMatrix);  // TODO Debug Methode wieder raus
+    }
+
+
+
+    private void calculateAverageStartTimes() {
+        this.averageStartTimes = new double[this.nCustomers + 1][this.nCustomers + 1];  // index 0 is depot
+        for (int i = 1; i < this.nCustomers; i++) {
+            this.averageStartTimes[i][i] = 0.;
+            for (int j = i+1; j <= this.nCustomers; j++) {
+                double averageTime = Math.abs((this.earliestStartTimes[i] + this.latestStartTimes[i])  - (this.earliestStartTimes[j] + this.latestStartTimes[j]))/2.;
+                this.averageStartTimes[i][j] = averageTime;
+                this.averageStartTimes[j][i] = averageTime;
+            }
+        }
     }
 
     private void createDistanceMatrix() {

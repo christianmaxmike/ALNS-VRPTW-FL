@@ -19,8 +19,10 @@ use_random_route_removal: true
 use_request_graph_removal: false
 use_shaw_simplified_deterministic: false
 use_shaw_simplified_random: true
-use_time_oriented_deterministic: false
-use_time_oriented_random: true
+use_time_oriented_jungwirth_deterministic: false
+use_time_oriented_jungwirth_random: true
+use_time_oriented_pisinger_deterministic: false
+use_time_oriented_pisinger_random: false
 use_worst_removal_deterministic: false
 use_worst_removal_random: true
 
@@ -37,7 +39,8 @@ regret_sum_over_all_n_regret: true  # default in Ropke C&OR §5.2.2 p. 2415: tru
 neighbor_graph_removal_exponent: 6
 shaw_removal_exponent: 6
 time_oriented_removal_exponent: 6  # in Pisinger & Ropke C&OR §5.1.5 p. 2414: identical to shaw_removal_exponent
-time_oriented_nr_of_closest: 50  # maximum number of closest customers to consider when applying time oriented removal
+time_oriented_nr_of_closest: 100  # maximum number of closest customers to consider when applying time oriented removal
+time_oriented_jungwirth_weight_start_time_in_solution: .75  # alpha_1 in Jungwirth et al. 2021
 worst_removal_exponent: 3
 
 ##### calculations #####

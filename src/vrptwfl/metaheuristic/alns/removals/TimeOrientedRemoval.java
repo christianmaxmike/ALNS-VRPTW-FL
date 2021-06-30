@@ -14,19 +14,24 @@ import java.util.List;
 
 // removes customers which are "related" in terms of their start times.
 // Pisinger & Ropke 2007, page 2414 (C&OR)
-public class TimeOrientedRemovalPisinger extends AbstractRemoval {
+public class TimeOrientedRemoval extends AbstractRemoval {
 
 
     private final boolean randomize;
 
-    public TimeOrientedRemovalPisinger(Data data, boolean randomize) {
+    private double weightStartTimeInSolution; // [%] in Pisinger & Ropke = 1; in Jungwirth can be between 0 and 1
+
+    public TimeOrientedRemoval(Data data, boolean randomize, double weightStartTimeInSolution) throws ArgumentOutOfBoundsException {
         super(data);
         this.randomize = randomize;
+        if (weightStartTimeInSolution < - Config.epsilon || weightStartTimeInSolution > 1 + Config.epsilon) throw new ArgumentOutOfBoundsException("Weight parameter (alpha_1) for time-oriented destroy must be in interval [0,1]. Given was: " + weightStartTimeInSolution + ".");
+        this.weightStartTimeInSolution = weightStartTimeInSolution;
     }
 
     @Override
     List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) throws ArgumentOutOfBoundsException {
 
+        if (this.weightStartTimeInSolution < -Config.epsilon || this.weightStartTimeInSolution > 1 + Config.epsilon)
         if (nRemovals > Config.timeOrientedNrOfClosest) throw new ArgumentOutOfBoundsException("nRemovals (q=" + nRemovals + ") must be less than or equal to timeOrientedNrOfClosest (B=" + Config.timeOrientedNrOfClosest + ").");
 
         List<Integer> removedCustomers = new ArrayList<>();
@@ -67,7 +72,9 @@ public class TimeOrientedRemovalPisinger extends AbstractRemoval {
                 positionCounter++;
                 if (customer == 0) continue;
                 double timeDiff = Math.abs(startTimeFirstCustomer - vehicle.getStartOfServices().get(positionCounter));
-                closest.add(new double[] {customer, vehicle.getId(), distanceToFirstCustomer[customer], timeDiff});
+                double avgStartTime = data.getAverageStartTimes(firstCustomer, customer);
+                double timeRelatedness = this.weightStartTimeInSolution * timeDiff + (1 - this.weightStartTimeInSolution) * avgStartTime;
+                closest.add(new double[] {customer, vehicle.getId(), distanceToFirstCustomer[customer], timeRelatedness});
             }
         }
         // sort according to distance (smallest distance first)
