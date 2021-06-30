@@ -38,6 +38,8 @@ public class ALNSCore {
     private void initDestroyOperators() throws ArgumentOutOfBoundsException {
         List<AbstractRemoval> destroyList = new ArrayList<>();
 
+        if (Config.useClusterRemovalKruskal) destroyList.add(new ClusterKruskalRemoval(data));
+
         if (Config.useNeighborGraphRemovalDeterministic) destroyList.add(new NeighborGraphRemoval(data, this,false));
         if (Config.useNeighborGraphRemovalRandom) destroyList.add(new NeighborGraphRemoval(data, this, true));
         if (Config.useNeighborGraphRemovalDeterministic || Config.useNeighborGraphRemovalRandom) this.initNeighborGraph();
@@ -45,12 +47,12 @@ public class ALNSCore {
         if (Config.useRandomRemoval) destroyList.add(new RandomRemoval(data));
         if (Config.useRandomRouteRemoval) destroyList.add(new RandomRouteRemoval(data));
         if (Config.useRequestGraphRemoval) destroyList.add(new RequestGraphRemoval(data));
-        if (Config.useShawSimplifiedDeterministic) destroyList.add(new ShawSimplifiedRemoval(data, false));
-        if (Config.useShawSimplifiedRandom) destroyList.add(new ShawSimplifiedRemoval(data, true));
-        if (Config.useTimeOrientedJungwirthDeterministic) destroyList.add(new TimeOrientedRemoval(data, false, Config.timeOrientedJungwirthWeightStartTimeIinSolution));
-        if (Config.useTimeOrientedJungwirthRandom) destroyList.add(new TimeOrientedRemoval(data, true, Config.timeOrientedJungwirthWeightStartTimeIinSolution));
-        if (Config.useTimeOrientedPisingerDeterministic) destroyList.add(new TimeOrientedRemoval(data, false, 1.0));
-        if (Config.useTimeOrientedPisingerRandom) destroyList.add(new TimeOrientedRemoval(data, true, 1.0));
+        if (Config.useShawSimplifiedRemovalDeterministic) destroyList.add(new ShawSimplifiedRemoval(data, false));
+        if (Config.useShawSimplifiedRemovalRandom) destroyList.add(new ShawSimplifiedRemoval(data, true));
+        if (Config.useTimeOrientedRemovalJungwirthDeterministic) destroyList.add(new TimeOrientedRemoval(data, false, Config.timeOrientedJungwirthWeightStartTimeIinSolution));
+        if (Config.useTimeOrientedRemovalJungwirthRandom) destroyList.add(new TimeOrientedRemoval(data, true, Config.timeOrientedJungwirthWeightStartTimeIinSolution));
+        if (Config.useTimeOrientedRemovalPisingerDeterministic) destroyList.add(new TimeOrientedRemoval(data, false, 1.0));
+        if (Config.useTimeOrientedRemovalPisingerRandom) destroyList.add(new TimeOrientedRemoval(data, true, 1.0));
         if (Config.useWorstRemovalDeterministic) destroyList.add(new WorstRemoval(data, false));
         if (Config.useWorstRemovalRandom) destroyList.add(new WorstRemoval(data, true));
 

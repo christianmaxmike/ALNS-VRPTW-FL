@@ -12,6 +12,7 @@ upper_bound_factor_nr_of_removals: 0.4
 cost_factor_unserved_customer: 5.0  # cost for unserviced customers is equal to this number times the maximum distance in the graph
 
 ### Define active operators (destroy and repair)
+use_cluster_removal_kruskal: true
 use_neighbor_graph_removal_deterministic: false
 use_neighbor_graph_removal_random: true
 use_random_removal: true
@@ -19,10 +20,10 @@ use_random_route_removal: true
 use_request_graph_removal: false
 use_shaw_simplified_deterministic: false
 use_shaw_simplified_random: true
-use_time_oriented_jungwirth_deterministic: false
-use_time_oriented_jungwirth_random: true
-use_time_oriented_pisinger_deterministic: false
-use_time_oriented_pisinger_random: true
+use_time_oriented_removal_jungwirth_deterministic: false
+use_time_oriented_removal_jungwirth_random: true
+use_time_oriented_removal_pisinger_deterministic: false
+use_time_oriented_removal_pisinger_random: true
 use_worst_removal_deterministic: false
 use_worst_removal_random: true
 

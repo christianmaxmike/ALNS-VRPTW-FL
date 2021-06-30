@@ -32,17 +32,18 @@ public class Config {
     public static double penaltyUnservedCustomer;
 
     // alns operators to use
+    public static boolean useClusterRemovalKruskal;
     public static boolean useNeighborGraphRemovalDeterministic;
     public static boolean useNeighborGraphRemovalRandom;
     public static boolean useRandomRemoval;
     public static boolean useRandomRouteRemoval;
     public static boolean useRequestGraphRemoval;
-    public static boolean useShawSimplifiedDeterministic;
-    public static boolean useShawSimplifiedRandom;
-    public static boolean useTimeOrientedJungwirthDeterministic;
-    public static boolean useTimeOrientedJungwirthRandom;
-    public static boolean useTimeOrientedPisingerDeterministic;
-    public static boolean useTimeOrientedPisingerRandom;
+    public static boolean useShawSimplifiedRemovalDeterministic;
+    public static boolean useShawSimplifiedRemovalRandom;
+    public static boolean useTimeOrientedRemovalJungwirthDeterministic;
+    public static boolean useTimeOrientedRemovalJungwirthRandom;
+    public static boolean useTimeOrientedRemovalPisingerDeterministic;
+    public static boolean useTimeOrientedRemovalPisingerRandom;
     public static boolean useWorstRemovalDeterministic;
     public static boolean useWorstRemovalRandom;
 
@@ -96,17 +97,18 @@ public class Config {
 
         costFactorUnservedCustomer = (double) obj.get("cost_factor_unserved_customer");
 
+        useClusterRemovalKruskal = (boolean) obj.get("use_cluster_removal_kruskal");
         useNeighborGraphRemovalDeterministic = (boolean) obj.get("use_neighbor_graph_removal_deterministic");
         useNeighborGraphRemovalRandom = (boolean) obj.get("use_neighbor_graph_removal_random");
         useRandomRemoval = (boolean) obj.get("use_random_removal");
         useRandomRouteRemoval = (boolean) obj.get("use_random_route_removal");
         useRequestGraphRemoval = (boolean) obj.get("use_request_graph_removal");
-        useShawSimplifiedDeterministic = (boolean) obj.get("use_shaw_simplified_deterministic");
-        useShawSimplifiedRandom = (boolean) obj.get("use_shaw_simplified_random");
-        useTimeOrientedJungwirthDeterministic = (boolean) obj.get("use_time_oriented_jungwirth_deterministic");
-        useTimeOrientedJungwirthRandom = (boolean) obj.get("use_time_oriented_jungwirth_random");
-        useTimeOrientedPisingerDeterministic = (boolean) obj.get("use_time_oriented_pisinger_deterministic");
-        useTimeOrientedPisingerRandom = (boolean) obj.get("use_time_oriented_pisinger_random");
+        useShawSimplifiedRemovalDeterministic = (boolean) obj.get("use_shaw_simplified_deterministic");
+        useShawSimplifiedRemovalRandom = (boolean) obj.get("use_shaw_simplified_random");
+        useTimeOrientedRemovalJungwirthDeterministic = (boolean) obj.get("use_time_oriented_removal_jungwirth_deterministic");
+        useTimeOrientedRemovalJungwirthRandom = (boolean) obj.get("use_time_oriented_removal_jungwirth_random");
+        useTimeOrientedRemovalPisingerDeterministic = (boolean) obj.get("use_time_oriented_removal_pisinger_deterministic");
+        useTimeOrientedRemovalPisingerRandom = (boolean) obj.get("use_time_oriented_removal_pisinger_random");
         useWorstRemovalDeterministic = (boolean) obj.get("use_worst_removal_deterministic");
         useWorstRemovalRandom = (boolean) obj.get("use_worst_removal_random");
 
