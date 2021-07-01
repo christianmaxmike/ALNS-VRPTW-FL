@@ -17,6 +17,10 @@ public class Solution {
     private boolean isFeasible = false;
     private Data data;
 
+    public int getNrOfAssignedCustomers() {
+        return this.data.getnCustomers() - this.notAssignedCustomers.size();
+    }
+
     public ArrayList<Integer> getTempInfeasibleCustomers() {
         return tempInfeasibleCustomers;
     }

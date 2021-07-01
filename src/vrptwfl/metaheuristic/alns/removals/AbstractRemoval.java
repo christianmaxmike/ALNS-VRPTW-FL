@@ -96,14 +96,17 @@ public abstract class AbstractRemoval {
         return removedCustomers;
     }
 
-    final int getNRemovals() {
-        return CalcUtils.getRandomNumberInClosedRange(Config.lowerBoundRemovals, Config.upperBoundRemovals);
+    final int getNRemovals(Solution solution) {
+        int nRemovals = CalcUtils.getRandomNumberInClosedRange(Config.lowerBoundRemovals, Config.upperBoundRemovals);
+        int nrOfAssignedCustomers = solution.getNrOfAssignedCustomers();
+        if (nRemovals > nrOfAssignedCustomers) nRemovals = nrOfAssignedCustomers;
+        return nRemovals;
     }
 
     public final void destroy(Solution solution) throws ArgumentOutOfBoundsException {
 
         // get number of removals based on parameters defined in config file
-        int nRemovals = getNRemovals();
+        int nRemovals = getNRemovals(solution);
 
         List<Integer> removedCustomers = this.operatorSpecificDestroy(solution, nRemovals);
 

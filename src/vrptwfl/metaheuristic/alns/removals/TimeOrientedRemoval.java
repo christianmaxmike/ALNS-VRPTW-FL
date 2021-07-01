@@ -31,7 +31,6 @@ public class TimeOrientedRemoval extends AbstractRemoval {
     @Override
     List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) throws ArgumentOutOfBoundsException {
 
-        if (this.weightStartTimeInSolution < -Config.epsilon || this.weightStartTimeInSolution > 1 + Config.epsilon)
         if (nRemovals > Config.timeOrientedNrOfClosest) throw new ArgumentOutOfBoundsException("nRemovals (q=" + nRemovals + ") must be less than or equal to timeOrientedNrOfClosest (B=" + Config.timeOrientedNrOfClosest + ").");
 
         List<Integer> removedCustomers = new ArrayList<>();
