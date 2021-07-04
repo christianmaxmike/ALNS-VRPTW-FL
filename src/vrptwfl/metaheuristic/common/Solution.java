@@ -111,6 +111,15 @@ public class Solution {
         return vehicles; // TODO how to handle escaping reference ?
     }
 
+    public ArrayList<Vehicle> getUsedVehicles() {
+        ArrayList<Vehicle> usedVehicles = new ArrayList<>();
+        for (Vehicle veh: this.vehicles) {
+            if (veh.isUsed()) {
+                usedVehicles.add(veh);
+            }
+        }
+        return usedVehicles;
+    }
 
     private void calculateCostsFromVehicles() {
         this.totalCosts = 0.;

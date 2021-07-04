@@ -1,5 +1,6 @@
 package vrptwfl.metaheuristic.alns.removals;
 
+import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
@@ -23,49 +24,107 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
         List<Integer> removedCustomers = new ArrayList<>();
 
         // choose route at random
+        ArrayList<Vehicle> vehicles = new ArrayList<>(solution.getUsedVehicles()); // only vehicle which contain customers
+        if (vehicles.isEmpty()) return removedCustomers; // if no vehicle contains customers
 
-        ArrayList<Vehicle> vehicles = new ArrayList<>(solution.getVehicles());
+        boolean[] triedVehicle = new boolean[solution.getVehicles().size()];
+
         Collections.shuffle(vehicles); // randomly sorted vehicles
+        Vehicle firstVehicle = vehicles.get(0);
+        triedVehicle[firstVehicle.getId()] = true;
 
-        Iterator<Vehicle> vehicleIterator = vehicles.iterator();
-        while (vehicleIterator.hasNext()) {
-            // get vehicle to process
-            Vehicle vehicle = vehicleIterator.next();
-            vehicleIterator.remove();
+        // create first cluster
+        ArrayList<Integer> customersToRemove = getCustomersToRemove(firstVehicle);
+        // TODO wieder raus
+//        System.out.println(customersToRemove);
 
-            // only possible to remove customers if vehicle is used
-            if (vehicle.isUsed()) {
-                if (vehicle.getnCustomersInTour() < 3) {
-                    // TODO loesche alle Kunden aus Tour
-                } else {
-                    // partition customers in route into two clusters
-                    // apply Kruskal's algorithm but stop when two disconnected parts are left
-                    // choose one cluster at random, and remove customers
-                    // TODO nur wenn es mindestens 3 Kunden gibt
-                    this.applyKruskal(vehicle);
+        // apply removals
+        for (Integer customer: customersToRemove) {
+            // TODO wieder raus
+//            System.out.println("Remove customer (first): " + customer);
+            removedCustomers.add(customer);
+            firstVehicle.applyRemovalForCustomer(customer, this.data);
+            nRemovals--;
+        }
+
+        // still more removals needed (nRemovals not yet reached) and there is vehicles left from which customers can be removed
+        while (nRemovals > 0 && !solution.getUsedVehicles().isEmpty()) {
+
+            // randomly select customer already removed
+            int idxC = Config.randomGenerator.nextInt(removedCustomers.size());
+            Integer referenceCustomer = removedCustomers.get(idxC);
+
+            // find customer close to reference customer (however, preferably one from a tour that has not yet been processed)
+            double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[referenceCustomer];
+            ArrayList<double[]> closest = new ArrayList<>();
+
+            // add all customers already assigned to the vehicles
+            // TODO check if vehicle schon angefasst wurde (this new request should come from an untouched route)
+            for (Vehicle vehicle: solution.getVehicles()) {
+                if (!vehicle.isUsed()) continue; // if vehicle is not used
+                if (triedVehicle[vehicle.getId()]) continue; // if cluster has been build from this vehicle already
+                for (int customer: vehicle.getCustomers()) {
+                    if (customer == 0) continue;
+                    closest.add(new double[] {customer, vehicle.getId(), distanceToFirstCustomer[customer]});
                 }
             }
 
-            if (nRemovals <= 0) break;
+            // if no closest customer has been found
+            if (closest.isEmpty()) {
+                // reset tried vehicles (now also vehicles already processed can be used to build another cluster)
+                triedVehicle = new boolean[solution.getVehicles().size()];
+                continue;
+            }
 
-            // still more removals needed (nRemovals not yet reached)
-            //  - pick one of the removed requests
-            //  - find request close to the chosen request (this new request should come from an untouched route)
-            //    - route of new request is partitioned into two and one of the clusters is chosen at random and removed
+            // --- remove customers from vehicle ---
+            closest.sort(Comparator.comparing(v->v[2]));  // sort according to distance (smallest distance first)
+            Vehicle vehicle = solution.getVehicles().get((int) closest.get(0)[1]); // get vehicle of closest customer
+            triedVehicle[vehicle.getId()] = true;
+
+            // create  cluster
+            customersToRemove = getCustomersToRemove(vehicle);
+            // apply removals
+            for (Integer customer: customersToRemove) {
+                removedCustomers.add(customer);
+                // TODO wieder raus
+//                System.out.println("Remove customer (iter): " + customer);
+                vehicle.applyRemovalForCustomer(customer, this.data);
+                nRemovals--;
+                if (nRemovals <= 0) break;
+            }
         }
 
-
-
-
         return removedCustomers;
+    }
+
+    private ArrayList<Integer> getCustomersToRemove(Vehicle vehicle) {
+        ArrayList<Integer> customersToRemove = new ArrayList<>();
+        if (vehicle.getnCustomersInTour() < 3) {
+            // remove all customers in tour
+//            System.out.println("alle raus"); // TODO wieder raus
+            customersToRemove.addAll(vehicle.getRealCustomers());
+        } else {
+            // partition customers in route into two clusters
+            // apply Kruskal's algorithm but stop when two disconnected parts are left
+            // choose one cluster at random, and remove customers
+//            System.out.println("kruskal raus"); // TODO wieder raus
+            customersToRemove = this.applyKruskalToGetCustomersToBeRemoved(vehicle);
+        }
+        return customersToRemove;
     }
 
     // KIT 08: Minimum Spanning Trees
     // slides 257-
     // https://www.youtube.com/watch?v=99FvOZTogzA
-    private void applyKruskal(Vehicle vehicle) {
+    private ArrayList<Integer> applyKruskalToGetCustomersToBeRemoved(Vehicle vehicle) {
+
+        int nNodes = vehicle.getnCustomersInTour();
+        // TODO wieder raus
+//        System.out.println("Vehicle " + vehicle.getId());
+//        System.out.println("nNodes " + nNodes);
+
         // T: UnionFind(n)
-        UnionFind T = new UnionFind(vehicle);
+        UnionFind T = new UnionFind(nNodes);
 
         // sort E in ascending order of weight
         List<Edge> edges = this.createEdges(vehicle);
@@ -73,31 +132,46 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
 
         // kruskal(E)
         // PROCEDURE kruskal(E)
+        int nClusters = nNodes; // initially each node has it own cluster
         //   FOREACH (u,v) \in E DO:
         for (Edge edge: edges) {
             // u' := T.find(u)
             int u2 = T.find(edge.source); // find representative of u
             int v2 = T.find(edge.destination); // find representative of v
             if (u2 != v2) {
-                //       output(u,v) // (u,v) is edge of minimum spanning tree
+                //       output(u,v) // (u,v) is edge of minimum spanning tree (if we needed the edges, we could e.g. add them to a list)
                 //       T.link(u',v')
                 T.link(u2, v2);
 
+                nClusters--; // when two clusters are linked, there is one cluster less
+
                 // check if only two component are left (not needed when looking for MST but here we want two clusters)
-                // more costly than otherwise efficient MST implementation, but routes are rather small
-                if (T.getNumberOfClusters() == 2) break;
+                if (nClusters == 2) break;
             }
         }
 
+        ArrayList<Integer> positionsToBeRemoved = T.getTourPositionsToBeRemoved();
 
+        ArrayList<Integer> customersToRemove = new ArrayList<>();
+        for (Integer pos: positionsToBeRemoved) {
+            customersToRemove.add(vehicle.getRealCustomers().get(pos));
+        }
+
+        return customersToRemove;
     }
 
     // edges consider positions of customers in tour (not the customer id)
     private ArrayList<Edge> createEdges(Vehicle vehicle) {
         ArrayList<Edge> edges = new ArrayList<>();
-        for (int i = 0; i < vehicle.getCustomers().size() - 1; i++) {
-            for (int j = i + 1; j < vehicle.getCustomers().size(); j++) {
-                edges.add(new Edge(i, j, this.data.getDistanceBetweenCustomers(i,j)));
+        for (int i = 0; i < vehicle.getRealCustomers().size() - 1; i++) { // customer 0 and n are dummies
+            for (int j = i + 1; j < vehicle.getRealCustomers().size(); j++) {
+//                edges.add(new Edge(i, j, this.data.getDistanceBetweenCustomers(i,j)));
+                int customerI = vehicle.getRealCustomers().get(i);
+                int customerJ = vehicle.getRealCustomers().get(j);
+                // graph assumes that nodes start at 0
+                Edge edge = new Edge(i, j, this.data.getDistanceBetweenCustomers(customerI,customerJ));
+//                edge.print();
+                edges.add(edge);
             }
         }
         return edges;
@@ -109,9 +183,9 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
         int destination;
         double cost;
 
-        public Edge(int tail, int head, double cost){
-            this.source = tail;
-            this.destination = head;
+        public Edge(int source, int destination, double cost){
+            this.source = source;
+            this.destination = destination;
             this.cost = cost;
         }
 
@@ -119,36 +193,23 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
         public int compareTo(Edge o) {
             return Double.compare(this.cost, o.cost);
         }
+
+        public void print() {
+            System.out.println("<" + this.source + ", " + this.destination + ">");
+        }
     }
 
-    // union-find data structure
+    // union-find data structure (uses path compression and ranks)
     class UnionFind {
 
         int numberOfNodes;
         int[] parent; // parent information of each node
-        ArrayList<Integer> customers;
 
-        public UnionFind(Vehicle vehicle) {
-            this.numberOfNodes = vehicle.getnCustomersInTour();
-            this.customers = vehicle.getCustomers();
+        public UnionFind(int nNodes) {
+            this.numberOfNodes = nNodes;
 
             this.parent = new int[this.numberOfNodes]; // at the beginning each node is its own parent
             Arrays.fill(this.parent, this.numberOfNodes + 1); // these are all representatives with rank 0
-        }
-
-        public int getNumberOfClusters() {
-            int nSelfReferences = 0;
-
-            // all occurrences of n+1 numbers (references to node itself (singleton set))
-            for (Integer i: this.parent) {
-                if (i == this.numberOfNodes + 1) nSelfReferences++;
-            }
-
-            // all unique non n+1 numbers
-            int nUniques = Arrays.stream(this.parent).distinct().toArray().length;
-            if (nSelfReferences > 0) nUniques--; // ignore n+1 in uniques as we have already counted self references
-
-            return nSelfReferences + nUniques;
         }
 
         // find representative of tree: representative = unique identifier for subtree
@@ -173,9 +234,10 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
                 parent[j] = i;
             }
             else {
-                // TODO was genau macht dieser Schritt?
-                parent[j] = i;
-                parent[i]++;
+                // if both parents are equal (e.g. same rank)
+                // if clusters are joined
+                parent[j] = i;  // set parent of j to id of i
+                parent[i]++;    // raise rank of i
             }
         }
 
@@ -183,6 +245,44 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
             if (find(i) != find(j)) link(find(i), find(j));
         }
 
+        public ArrayList<Integer> getTourPositionsToBeRemoved() {
+
+            ArrayList<Integer> positions = new ArrayList<>();
+            // randomly choose either cluster 0 or 1
+            int targetId = (Config.randomGenerator.nextBoolean()) ? 0 : 1;
+
+
+            int[] clusterIds = new int[parent.length];
+            // process position 0 (determine representative for cluster 0)
+//            clusterIds[0] = find(0); // wieder raus?
+//            int origValueFirstCluster = clusterIds[0];
+            int origValueFirstCluster = find(0); // find representative for cluster
+            clusterIds[0] = 0; // set as belonging to cluster 0
+            if (clusterIds[0] == targetId) positions.add(0);
+
+            for (int i = 1; i < this.parent.length; i++) {
+                // call find on each node such that the value is parent is the representative
+//                clusterIds[i] = find(i); // TODO wieder raus
+//                clusterIds[i] = (clusterIds[i] == origValueFirstCluster) ? 0 : 1;
+                clusterIds[i] = (find(i) == origValueFirstCluster) ? 0 : 1;
+                if (clusterIds[i] == targetId) positions.add(i);
+            }
+
+            // TODO wieder raus
+//            // set values for the two clusters to either 0 or 1
+//            int origValueFirstCluster = clusterIds[0];
+//            for (int i = 0; i < clusterIds.length; i++) {
+//                clusterIds[i] = (clusterIds[i] == origValueFirstCluster) ? 0 : 1;
+//            }
+//
+//            // add positions to list
+//            for (int i = 0; i < clusterIds.length; i++) {
+//                if (clusterIds[i] == targetId) positions.add(i);
+//            }
+
+            return  positions;
+
+        }
     }
 
 }

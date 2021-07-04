@@ -54,6 +54,7 @@ public class KruskalTest {
         Collections.sort(this.edges);
 
         // kruskal(E)
+        int nClusters = this.nNodes; // initially each node has it own cluster
         // PROCEDURE kruskal(E)
         //   FOREACH (u,v) \in E DO:
         for (Edge edge: this.edges) {
@@ -74,14 +75,20 @@ public class KruskalTest {
                 //       T.link(u',v')
                 T.link(u2, v2);
 
+                // when two clusters are linked, there is one cluster less
+                nClusters--;
+
                 // print addition information
                 System.out.println("nClusters:\t" + T.getNumberOfClusters());
                 T.printParents();
 
+
+
                 if (stopWhenTwoClustersAreLeft) {
                     // check if only two component are left (not needed when looking for MST but here we want two clusters)
                     // more costly than otherwise efficient MST implementation, but routes are rather small
-                    if (T.getNumberOfClusters() == 2) break;
+//                    if (T.getNumberOfClusters() == 2) break;
+                    if (nClusters == 2) break;
                 }
             }
         }

@@ -1,5 +1,5 @@
 ##### General configurations #####
-random_seed: null #42  # if null, no random seed will be used
+random_seed: 42  # if null, no random seed will be used
 
 ##### ALNS configurations #####
 alns_iterations: 25_000  # 50_000

@@ -59,6 +59,7 @@ public class ShawSimplifiedRemoval extends AbstractRemoval {
             // get row form travel time matrix
             // TODO wenn mehrere locations, dann die location beruecksichtigen, die am dichtesten ist
             //  (in distanceToFirstCustomer[customer])
+            // TODO Methode auslagern, wird auch in ClusterKruskal benutzt
             double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[customerI];
             ArrayList<double[]> closest = new ArrayList<>();
 

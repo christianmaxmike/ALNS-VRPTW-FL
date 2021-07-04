@@ -66,6 +66,10 @@ public class Vehicle {
         return customers;
     }
 
+    public ArrayList<Integer> getRealCustomers() {
+        return new ArrayList(customers.subList(1, customers.size()-1));
+    }
+
     public ArrayList<Double> getStartOfServices() {
         return startOfServices;
     }
