@@ -5,9 +5,9 @@ import vrptwfl.metaheuristic.data.Data;
 
 import java.util.List;
 
-public class RequestGraphRemoval extends AbstractRemoval {
+public class HistoricRequestNodeRemoval extends AbstractRemoval {
 
-    public RequestGraphRemoval(Data data) {
+    public HistoricRequestNodeRemoval(Data data) {
         super(data);
     }
 

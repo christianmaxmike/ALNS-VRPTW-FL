@@ -33,11 +33,11 @@ public class Config {
 
     // alns operators to use
     public static boolean useClusterRemovalKruskal;
-    public static boolean useNeighborGraphRemovalDeterministic;
-    public static boolean useNeighborGraphRemovalRandom;
+    public static boolean useHistoricNodePairRemovalDeterministic;
+    public static boolean useHistoricNodePairRemovalRandom;
+    public static boolean useHistoricRequestPairRemoval;
     public static boolean useRandomRemoval;
     public static boolean useRandomRouteRemoval;
-    public static boolean useRequestGraphRemoval;
     public static boolean useShawSimplifiedRemovalDeterministic;
     public static boolean useShawSimplifiedRemovalRandom;
     public static boolean useTimeOrientedRemovalJungwirthDeterministic;
@@ -57,7 +57,7 @@ public class Config {
     public static boolean regretSumOverAllNRegret;
 
     // alns operator parameters
-    public static int neighborGraphRemovalExponent;
+    public static int historicNodePairRemovalExponent;
     public static int shawRemovalExponent;
     public static int timeOrientedRemovalExponent;
     public static int timeOrientedNrOfClosest;
@@ -98,11 +98,11 @@ public class Config {
         costFactorUnservedCustomer = (double) obj.get("cost_factor_unserved_customer");
 
         useClusterRemovalKruskal = (boolean) obj.get("use_cluster_removal_kruskal");
-        useNeighborGraphRemovalDeterministic = (boolean) obj.get("use_neighbor_graph_removal_deterministic");
-        useNeighborGraphRemovalRandom = (boolean) obj.get("use_neighbor_graph_removal_random");
+        useHistoricNodePairRemovalDeterministic = (boolean) obj.get("use_historic_node_pair_removal_deterministic");
+        useHistoricNodePairRemovalRandom = (boolean) obj.get("use_historic_node_pair_removal_random");
+        useHistoricRequestPairRemoval = (boolean) obj.get("use_historic_request_pair_removal");
         useRandomRemoval = (boolean) obj.get("use_random_removal");
         useRandomRouteRemoval = (boolean) obj.get("use_random_route_removal");
-        useRequestGraphRemoval = (boolean) obj.get("use_request_graph_removal");
         useShawSimplifiedRemovalDeterministic = (boolean) obj.get("use_shaw_simplified_deterministic");
         useShawSimplifiedRemovalRandom = (boolean) obj.get("use_shaw_simplified_random");
         useTimeOrientedRemovalJungwirthDeterministic = (boolean) obj.get("use_time_oriented_removal_jungwirth_deterministic");
@@ -122,14 +122,14 @@ public class Config {
         regretSumOverAllNRegret = (boolean) obj.get("regret_sum_over_all_n_regret");
 
         // - ALNS destroy operators
-        neighborGraphRemovalExponent = (int) obj.get("neighbor_graph_removal_exponent");
+        historicNodePairRemovalExponent = (int) obj.get("neighbor_graph_removal_exponent");
         shawRemovalExponent = (int) obj.get("shaw_removal_exponent");
         timeOrientedRemovalExponent = (int) obj.get("time_oriented_removal_exponent");
         timeOrientedNrOfClosest = (int) obj.get("time_oriented_nr_of_closest");
         timeOrientedJungwirthWeightStartTimeIinSolution = (double) obj.get("time_oriented_jungwirth_weight_start_time_in_solution");
         worstRemovalExponent = (int) obj.get("worst_removal_exponent");
 
-        // see Røpke C&OR §6.1.1 p. 2417
+        // see Ropke C&OR §6.1.1 p. 2417
         // upper bound will be determined instance specific when number of customers is known
         lowerBoundRemovalsFactor = (double) obj.get("lower_bound_factor_nr_of_removals");
         lowerBoundRemovalsMax = (int) obj.get("lower_bound_nr_of_removals");

@@ -1,5 +1,5 @@
 ##### General configurations #####
-random_seed: 42  # if null, no random seed will be used
+random_seed: null  # if null, no random seed will be used
 
 ##### ALNS configurations #####
 alns_iterations: 25_000  # 50_000
@@ -13,11 +13,11 @@ cost_factor_unserved_customer: 5.0  # cost for unserviced customers is equal to 
 
 ### Define active operators (destroy and repair)
 use_cluster_removal_kruskal: true
-use_neighbor_graph_removal_deterministic: false
-use_neighbor_graph_removal_random: true
+use_historic_node_pair_removal_deterministic: false
+use_historic_node_pair_removal_random: true
+use_historic_request_pair_removal: false
 use_random_removal: true
 use_random_route_removal: true
-use_request_graph_removal: false
 use_shaw_simplified_deterministic: false
 use_shaw_simplified_random: true
 use_time_oriented_removal_jungwirth_deterministic: false

@@ -40,13 +40,13 @@ public class ALNSCore {
 
         if (Config.useClusterRemovalKruskal) destroyList.add(new ClusterKruskalRemoval(data));
 
-        if (Config.useNeighborGraphRemovalDeterministic) destroyList.add(new NeighborGraphRemoval(data, this,false));
-        if (Config.useNeighborGraphRemovalRandom) destroyList.add(new NeighborGraphRemoval(data, this, true));
-        if (Config.useNeighborGraphRemovalDeterministic || Config.useNeighborGraphRemovalRandom) this.initNeighborGraph();
+        if (Config.useHistoricNodePairRemovalDeterministic) destroyList.add(new HistoricNodePairRemoval(data, this,false));
+        if (Config.useHistoricNodePairRemovalRandom) destroyList.add(new HistoricNodePairRemoval(data, this, true));
+        if (Config.useHistoricNodePairRemovalDeterministic || Config.useHistoricNodePairRemovalRandom) this.initNeighborGraph();
 
         if (Config.useRandomRemoval) destroyList.add(new RandomRemoval(data));
         if (Config.useRandomRouteRemoval) destroyList.add(new RandomRouteRemoval(data));
-        if (Config.useRequestGraphRemoval) destroyList.add(new RequestGraphRemoval(data));
+        if (Config.useHistoricRequestPairRemoval) destroyList.add(new HistoricRequestNodeRemoval(data));
         if (Config.useShawSimplifiedRemovalDeterministic) destroyList.add(new ShawSimplifiedRemoval(data, false));
         if (Config.useShawSimplifiedRemovalRandom) destroyList.add(new ShawSimplifiedRemoval(data, true));
         if (Config.useTimeOrientedRemovalJungwirthDeterministic) destroyList.add(new TimeOrientedRemoval(data, false, Config.timeOrientedJungwirthWeightStartTimeIinSolution));
@@ -90,7 +90,7 @@ public class ALNSCore {
         Solution solutionBestGlobal = solutionConstr.copyDeep();
 
         // add information from construction to neighbor graph
-        if (Config.useNeighborGraphRemovalRandom || Config.useNeighborGraphRemovalDeterministic) this.updateNeighborGraph(solutionConstr);
+        if (Config.useHistoricNodePairRemovalRandom || Config.useHistoricNodePairRemovalDeterministic) this.updateNeighborGraph(solutionConstr);
 
 
         for (int iteration = 1; iteration <= Config.alnsIterations; iteration++) {
@@ -108,7 +108,7 @@ public class ALNSCore {
             this.getRepairOperatorAtRandom().solve(solutionTemp);
 
             // update neighbor graph if new solution was found (TODO check if the solution is really a new one (hashtable?)
-            if (Config.useNeighborGraphRemovalRandom || Config.useNeighborGraphRemovalDeterministic) this.updateNeighborGraph(solutionTemp);
+            if (Config.useHistoricNodePairRemovalRandom || Config.useHistoricNodePairRemovalDeterministic) this.updateNeighborGraph(solutionTemp);
 
             if (iteration % 1000 == 0) {
                 System.out.println("\n\nIteration " + iteration);

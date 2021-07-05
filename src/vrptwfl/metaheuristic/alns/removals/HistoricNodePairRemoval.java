@@ -8,12 +8,12 @@ import vrptwfl.metaheuristic.data.Data;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NeighborGraphRemoval extends AbstractRemoval {
+public class HistoricNodePairRemoval extends AbstractRemoval {
 
     private boolean randomize;
     private ALNSCore alns;
 
-    public NeighborGraphRemoval(Data data, ALNSCore alns, boolean randomize) {
+    public HistoricNodePairRemoval(Data data, ALNSCore alns, boolean randomize) {
         super(data);
         this.randomize = randomize;
         this.alns = alns;
@@ -31,7 +31,7 @@ public class NeighborGraphRemoval extends AbstractRemoval {
             int idx = 0;
             if (this.randomize) {
                 double rand = Config.randomGenerator.nextDouble();
-                idx = (int) Math.floor(Math.pow(rand, Config.neighborGraphRemovalExponent) * possibleRemovals.size());
+                idx = (int) Math.floor(Math.pow(rand, Config.historicNodePairRemovalExponent) * possibleRemovals.size());
             }
 
             double[] removal = possibleRemovals.get(idx);
