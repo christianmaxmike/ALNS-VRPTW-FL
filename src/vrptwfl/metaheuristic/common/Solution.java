@@ -1,5 +1,6 @@
 package vrptwfl.metaheuristic.common;
 
+import com.google.common.base.Objects;
 import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.data.Data;
 
@@ -16,6 +17,23 @@ public class Solution {
     private ArrayList<Vehicle> vehicles;
     private boolean isFeasible = false;
     private Data data;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Solution)) return false;
+        Solution solution = (Solution) o;
+        return Double.compare(solution.totalCosts, totalCosts) == 0 &&
+                isFeasible == solution.isFeasible &&
+                Objects.equal(notAssignedCustomers, solution.notAssignedCustomers) &&
+                Objects.equal(tempInfeasibleCustomers, solution.tempInfeasibleCustomers) &&
+                Objects.equal(vehicles, solution.vehicles);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(notAssignedCustomers, tempInfeasibleCustomers, totalCosts, vehicles, isFeasible);
+    }
 
     public int getNrOfAssignedCustomers() {
         return this.data.getnCustomers() - this.notAssignedCustomers.size();

@@ -1,6 +1,6 @@
 package vrptwfl.metaheuristic.common;
 
-import org.w3c.dom.ls.LSOutput;
+import com.google.common.base.Objects;
 import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.data.Data;
 
@@ -17,6 +17,24 @@ public class Vehicle {
     private ArrayList<Double> endOfServices;
     private boolean isUsed;
     private int nCustomersInTour;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Vehicle)) return false;
+        Vehicle vehicle = (Vehicle) o;
+        return capacityLimit == vehicle.capacityLimit &&
+                capacityUsed == vehicle.capacityUsed &&
+                Double.compare(vehicle.tourLength, tourLength) == 0 &&
+                Objects.equal(customers, vehicle.customers) &&
+                Objects.equal(startOfServices, vehicle.startOfServices) &&
+                Objects.equal(endOfServices, vehicle.endOfServices);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(capacityLimit, capacityUsed, tourLength, customers, startOfServices, endOfServices);
+    }
 
     public void setId(int id) {
         this.id = id;
