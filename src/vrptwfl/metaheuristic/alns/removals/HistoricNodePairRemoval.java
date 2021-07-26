@@ -25,7 +25,6 @@ public class HistoricNodePairRemoval extends AbstractRemoval {
         List<Integer> removedCustomers = new ArrayList<>();
 
         while (nRemovals > 0) {
-            // TODO HOW TO PASS THE NEIGHBOR GRAPH TO THE DESTROY OPERATOR
             ArrayList<double[]> possibleRemovals = solution.getPossibleRemovalsSortedByNeighborGraph(alns.getNeighborGraph());
 
             int idx = 0;
