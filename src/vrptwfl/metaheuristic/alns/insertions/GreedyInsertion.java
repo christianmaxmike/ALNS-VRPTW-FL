@@ -43,6 +43,7 @@ public class GreedyInsertion extends AbstractInsertion {
 
                 // compare cost increase to currently best (lowest) cost increase
                 if (possibleInsertion[4] + Config.epsilon < minCostIncrease) {
+                	minCostIncrease = possibleInsertion[4];  // update new min cost
                     nextInsertion = possibleInsertion;
                 }
             }

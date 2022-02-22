@@ -23,7 +23,8 @@ public class RandomRouteRemoval extends AbstractRemoval {
         List<Integer> removedCustomers = new ArrayList<>();
 
         int nVehicles = solution.getVehicles().size();
-        List<Integer> shuffledVehicleIndices = CalcUtils.getSortedUniqueRandomNumbersInRange(nVehicles, 0, nVehicles-1);
+        // List<Integer> shuffledVehicleIndices = CalcUtils.getSortedUniqueRandomNumbersInRange(nVehicles, 0, nVehicles-1);
+        List<Integer> shuffledVehicleIndices = CalcUtils.getShuffledUniqueRandomNumbersInRange(nVehicles, 0, nVehicles-1);
 
         vehicleIndexLoop:
         for (Integer idx: shuffledVehicleIndices) {

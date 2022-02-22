@@ -12,7 +12,9 @@ import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ALNSCore {
 
@@ -101,12 +103,14 @@ public class ALNSCore {
             // TODO random auswaehlen aus Operatoren (geht das irgendwie mit Lambdas besser ?)
 
             // destroy solution
-            getDestroyOperatorAtRandom().destroy(solutionTemp);
+            AbstractRemoval destroyOp = getDestroyOperatorAtRandom();
+            destroyOp.destroy(solutionTemp);
 
             // repair solution
             // returns one repair operator specified in repairOperators
-            this.getRepairOperatorAtRandom().solve(solutionTemp);
-
+            AbstractInsertion repairOp = getRepairOperatorAtRandom();
+            repairOp.solve(solutionTemp);
+            
             // update neighbor graph if new solution was found (TODO check if the solution is really a new one (hashtable?)
             if (Config.useHistoricNodePairRemovalRandom || Config.useHistoricNodePairRemovalDeterministic) this.updateNeighborGraph(solutionTemp);
 

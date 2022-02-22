@@ -29,5 +29,14 @@ public class CalcUtils {
         return numbersInRange;
     }
 
+    public static List<Integer> getShuffledUniqueRandomNumbersInRange(int nNumbers, int rangeLowerBound, int rangeUpperBound) {
+        // add all numbers in range to list (numbers will be sorted in ascending order)
+        List<Integer> numbersInRange = new ArrayList<>() {{ for (int i = rangeLowerBound; i <= rangeUpperBound; i++) add(i); }};
+
+        Collections.shuffle(numbersInRange, Config.randomGenerator); // shuffle order of numbers in list
+        numbersInRange = numbersInRange.subList(0, nNumbers);  // get first n numbers of shuffled list
+
+        return numbersInRange;
+    }
 
 }

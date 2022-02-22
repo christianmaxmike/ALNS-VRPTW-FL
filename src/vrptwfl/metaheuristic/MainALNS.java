@@ -8,9 +8,20 @@ import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
 import vrptwfl.metaheuristic.instanceGeneration.SolomonInstanceGenerator;
 import vrptwfl.metaheuristic.utils.CalcUtils;
 
+import java.io.FileWriter;
 import java.io.IOException;
 
 public class MainALNS {
+	
+	private FileWriter writer;
+	
+	public MainALNS() {
+		try {
+			this.writer = new FileWriter("./results.txt", true);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
     // returns the objective function value of the ALNS solution
     public double runALNS(String instanceName, int nCustomers) throws ArgumentOutOfBoundsException {
@@ -60,6 +71,13 @@ public class MainALNS {
         double optimalObjFuncVal = OptimalSolutions.optimalObjFuncValue.get(instanceName)[i];
         double gap = CalcUtils.calculateGap(optimalObjFuncVal, solutionALNS.getTotalCosts());
         System.out.println("Gap: " + gap);
+        
+        try {
+			writer.append(instanceName+","+solutionALNS.getTotalCosts()+","+gap+","+timeElapsed+"\n");
+	        writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 
 
@@ -99,9 +117,8 @@ public class MainALNS {
     }
 
     public static void main(String[] args) throws ArgumentOutOfBoundsException {
-
         final MainALNS algo = new MainALNS();
-        algo.runALNS("R104", 100);
+        algo.runALNS(args[0], 100);
 
 
         // Add TimeLimit (?)

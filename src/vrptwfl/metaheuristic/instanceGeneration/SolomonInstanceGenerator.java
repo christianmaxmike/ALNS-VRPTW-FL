@@ -15,10 +15,11 @@ import java.util.stream.IntStream;
 public class SolomonInstanceGenerator {
 
     private String[] readInstanceTextFile(String fileName) throws IOException {
-        String locationOfSolomonInstances = "instances/Instances-Solomon/";
+        String locationOfSolomonInstances = "./instances/Instances-Solomon/";
 
         String entireTextFile = Files.readString(Path.of(locationOfSolomonInstances + fileName));
-        return entireTextFile.split("\r\n");
+        entireTextFile = entireTextFile.replaceAll("\r\n", "\n"); // windows carriage returns
+        return entireTextFile.split("\n"); // former by Alex (\r\n)
     }
 
     public Data loadInstance(String fileName, int nCustomers) throws ArgumentOutOfBoundsException, IOException {

@@ -14,6 +14,19 @@
           <release>17</release>
         </configuration>
       </plugin>
+		<plugin>
+		  <artifactId>maven-assembly-plugin</artifactId>
+		  <configuration>
+		    <archive>
+		      <manifest>
+		        <mainClass>vrptwfl.metaheuristic.MainALNS</mainClass>
+		      </manifest>
+		    </archive>
+		    <descriptorRefs>
+		      <descriptorRef>jar-with-dependencies</descriptorRef>
+		    </descriptorRefs>
+		  </configuration>
+		</plugin>
     </plugins>
   </build>
 
