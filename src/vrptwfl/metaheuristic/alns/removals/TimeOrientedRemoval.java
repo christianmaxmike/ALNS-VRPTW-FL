@@ -25,7 +25,7 @@ public class TimeOrientedRemoval extends AbstractRemoval {
         super(data);
         this.randomize = randomize;
         if (weightStartTimeInSolution < - Config.epsilon || weightStartTimeInSolution > 1 + Config.epsilon) throw new ArgumentOutOfBoundsException("Weight parameter (alpha_1) for time-oriented destroy must be in interval [0,1]. Given was: " + weightStartTimeInSolution + ".");
-        this.weightStartTimeInSolution = weightStartTimeInSolution;
+        this.weightStartTimeInSolution = weightStartTimeInSolution; // alpha_2 - Wert im draft
     }
 
     @Override

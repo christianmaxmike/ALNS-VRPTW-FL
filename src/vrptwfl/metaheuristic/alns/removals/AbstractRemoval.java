@@ -13,7 +13,19 @@ import java.util.List;
 public abstract class AbstractRemoval {
 
     protected Data data;
+    protected double pi;
+    protected double probability;
+    protected double weight;
+    protected int draws;
 
+	/**
+	 * This abstract class implements the basics for an
+	 * removal operation 
+	 * @param data - contains data of loaded instance
+	 * {@value #pi} pi - 
+	 * {@value #probability} probability - probability of drawing operation
+	 * {@value #weight} weight - weights of operation
+	 */
     public AbstractRemoval(Data data) {
         this.data = data;
     }
@@ -118,5 +130,54 @@ public abstract class AbstractRemoval {
 
     abstract List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) throws ArgumentOutOfBoundsException;
 
+    
+    /*
+     * UPDATE METHODS
+     */
+    public void incrementDraws() {
+    	this.draws ++;
+    }
+    
+    public void addToPI (double add) {
+    	this.pi += add;
+    }
+    
+    /*
+     * SETTERS
+     */
+    public void setProbability(double probability) {
+    	this.probability = probability;
+    }
+    
+    public void setPi(double pi) {
+    	this.pi = pi;
+    }
+    
+    public void setWeight(double weight) {
+    	this.weight = weight;
+    }
+    
+    public void setDraws(int draws) {
+    	this.draws = draws;
+    }
+        
+    /*
+     * GETTERS
+     */
+    public double getProbability() {
+    	return this.probability;
+    }
+    
+    public double getPi() {
+    	return this.pi;
+    }
+    
+    public double getWeight() {
+    	return this.weight;
+    }
+    
+    public double getDraws() {
+    	return this.draws;
+    }
 
 }

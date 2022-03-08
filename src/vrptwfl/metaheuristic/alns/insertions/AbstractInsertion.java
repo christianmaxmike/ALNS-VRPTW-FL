@@ -6,7 +6,19 @@ import vrptwfl.metaheuristic.data.Data;
 public abstract class AbstractInsertion {
 
     private Data data;
+    protected double pi;
+    protected double probability;
+    protected double weight;
+    protected int draws;
 
+	/**
+	 * This abstract class implements the basics for an
+	 * removal operation 
+	 * @param data - contains data of loaded instance
+	 * {@value #pi} pi - 
+	 * {@value #probability} probability - probability of drawing operation
+	 * {@value #weight} weight - weights of operation
+	 */
     public AbstractInsertion(Data data) {
         this.data = data;
     }
@@ -34,6 +46,57 @@ public abstract class AbstractInsertion {
         return solution;
     }
 
+    
     abstract double[] getNextInsertion(Solution solution);
+    
+    /*
+     * UPDATE METHODS
+     */
+    public void incrementDraws() {
+    	this.draws ++;
+    }
+
+    public void addToPi(double add) {
+    	this.pi += add;
+    }
+    
+    /*
+     * SETTERS
+     */
+    public void setProbability(double probability) {
+    	this.probability = probability;
+    }
+    
+    public void setPi(double pi) {
+    	this.pi = pi;
+    }
+    
+    public void setWeight(double weight) {
+    	this.weight = weight;
+    }
+    
+    public void setDraws(int draws) {
+    	this.draws = draws;
+    }
+        
+    /*
+     * GETTERS
+     */
+    public double getProbability() {
+    	return this.probability;
+    }
+    
+    public double getPi() {
+    	return this.pi;
+    }
+    
+    public double getWeight() {
+    	return this.weight;
+    }
+    
+    public int getDraws() {
+    	return this.draws;
+    }
+
 
 }

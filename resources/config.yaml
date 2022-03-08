@@ -44,6 +44,20 @@ time_oriented_nr_of_closest: 100  # maximum number of closest customers to consi
 time_oriented_jungwirth_weight_start_time_in_solution: .75  # alpha_1 in Jungwirth et al. 2021
 worst_removal_exponent: 3
 
+### Update values for Destroy/Repair Operators - SIGMAS
+sigma1: 1
+sigma2: 0
+sigma3: 5
+sigma4: 5
+reactionFactor: 0.1
+
+### Simulated Annealing
+coolingRate: 0.99937    	# Ropke und Pisinger 2016 - 0.9998 EJOR, p.761
+minTempPercent: 0.01      	# percentage the temperature is cooled down, 
+startTempControlParam: 0.05 # start temperature control parameter  (delta in old code), Ropke und Pisinger 2016 - 0.9998 EJOR, p.761
+bigOmega: 0.5				# percentage a solution being 1+w higher than current solution is accepted
+
+
 ##### calculations #####
 rounding_precision: 1     # number of decimal places
 epsilon: 0.0001           # precision for double comparision

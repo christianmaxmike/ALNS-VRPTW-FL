@@ -29,6 +29,37 @@ public class Solution {
                 Objects.equal(tempInfeasibleCustomers, solution.tempInfeasibleCustomers) &&
                 Objects.equal(vehicles, solution.vehicles);
     }
+    
+    public int hashCode_tmp() {
+    	ArrayList<ArrayList<Integer>> vehiclesInfo = new ArrayList<ArrayList<Integer>>();
+    	for (Vehicle v: this.vehicles) {
+    		vehiclesInfo.add(v.getCustomers());
+    	}
+    	vehiclesInfo.sort(new Comparator<ArrayList<Integer>>() {
+
+			@Override
+			public int compare(ArrayList<Integer> o1, ArrayList<Integer> o2) {
+				if  (o1.size() < o2.size()) return -1;
+				else if (o1.size() > o2.size()) return 1;
+				else {
+					for (int customerFirst = 0 ; customerFirst<o1.size(); customerFirst++) {
+						if (o1.get(customerFirst) < o2.get(customerFirst)) {
+							return -1;
+						}
+						else {
+							return 1;
+						}
+						// TODO: check for first customer should be sufficient
+						// equality not possible; customer only assigned once
+					}
+				}
+				return 0;
+			}
+    	}
+    	);
+    	
+    	return vehiclesInfo.hashCode();
+    }
 
     @Override
     public int hashCode() {
