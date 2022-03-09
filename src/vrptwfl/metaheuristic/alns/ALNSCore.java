@@ -125,8 +125,6 @@ public class ALNSCore {
 
 
         for (int iteration = 1; iteration <= Config.alnsIterations; iteration++) {
-//        for (int iteration = 1; iteration <= 10_000; iteration++) {
-
             Solution solutionTemp = solutionCurrent.copyDeep();
 
             // TODO random auswaehlen aus Operatoren (geht das irgendwie mit Lambdas besser ?)
@@ -165,11 +163,9 @@ public class ALNSCore {
             //  }
             
             
-            // double deltaCosts = solutionBestGlobal.getTotalCosts() - solutionTemp.getTotalCosts();
-            
             // END OF ITERATION
             // Call update operations after each iter.
-            this.updateWeightofOperators();
+            this.updateWeightofOperators(iteration);
             this.updateTemperature();
         }
 
@@ -199,18 +195,27 @@ public class ALNSCore {
 
     }
     
-    
-
-    // TODO hier brauchen wir auch noch Test cases
+    /**
+     * This method is used to check for improvements of the temporary solution.
+     * There are four cases:
+     * 1) temp solution is the new best global solution
+     * 2) temp solution has not been checked before and is better than the current solution
+     * 3) temp solution has not been checked before and is not better than the current solution but
+     *    is picked due to simulated annealing allowing for worse solutions
+     * 4) temp solution has been checked before; no changes
+     * @param solutionTemp: Temporary solution
+     * @param solutionCurrent: Current solution
+     * @param solutionBestGlobal: Global best solution
+     * @return Solution object according to the four cases
+     */
     private Solution checkImprovement(Solution solutionTemp, Solution solutionCurrent, Solution solutionBestGlobal) {
-
-    	// TODO Chris: Sigmas nochmal mit Alex checken
     	
         // CASE 1 : check if improvement of global best
         if (solutionTemp.isFeasible()) {
             if (solutionBestGlobal.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon) {
             	this.currentSigma = Config.sigma1;
                 solutionBestGlobal.setSolution(solutionTemp);
+                return solutionTemp;
             }
         }
 
@@ -218,7 +223,7 @@ public class ALNSCore {
         if (!visitedSolutions.containsKey(solutionTemp.hashCode_tmp()) ) {
             // check if temporary solution become new current solution
         	// CASE 2: temp objective fnc better than current solution 
-            if (this.tempSolutionIsAccepted(solutionTemp, solutionCurrent)) {
+            if (this.tempSolutionIsAcceptedByCosts(solutionTemp, solutionCurrent)) {
             	this.currentSigma = Config.sigma2;
                 return solutionTemp;
             }
@@ -245,6 +250,184 @@ public class ALNSCore {
 
     }
     
+
+    private boolean tempSolutionIsAcceptedByCosts(Solution solutionTemp, Solution solutionCurrent) {    	
+    	// improvement ?
+        return solutionCurrent.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon;
+    }
+
+    private AbstractInsertion getRepairOperatorAtRandom() {
+        int idx = Config.randomGenerator.nextInt(this.repairOperators.length);
+        this.currentRepairOpIdx = idx;
+        return this.repairOperators[idx];
+    }
+
+    private AbstractRemoval getDestroyOperatorAtRandom() {
+        int idx = Config.randomGenerator.nextInt(this.destroyOperators.length);
+        this.currentDestroyOpIdx = idx;
+        return this.destroyOperators[this.currentDestroyOpIdx];
+    }
+    
+    
+    /**
+     * This method is used to draw a destroy operator according to the attached probabilities
+     * @return drawn destroy operator
+     */
+    private AbstractRemoval drawDestroyOperator() {
+    	double randomValue = Config.randomGenerator.nextDouble();
+    	double cumulatedSum = 0.0;
+    	for (int idx = 0; idx<this.destroyOperators.length; idx++) {
+    		cumulatedSum += this.destroyOperators[idx].getProbability();
+    		if (randomValue <= cumulatedSum) {
+    			this.currentDestroyOpIdx = idx;
+    			return this.destroyOperators[idx];
+    		}
+    	}
+    	return null;
+    }
+    
+    
+    /**
+     * This method is used to draw an insertion operator according to the attached probabilities
+     * @return drawn repair operator
+     */
+    private AbstractInsertion drawInsertionOperator() {
+    	double randomValue = Config.randomGenerator.nextDouble();
+    	double cumulatedSum = 0.0;
+    	for (int idx = 0; idx < this.repairOperators.length; idx++) {
+    		cumulatedSum += this.repairOperators[idx].getProbability();
+    		if (randomValue <= cumulatedSum) {
+    			this.currentRepairOpIdx = idx;
+    			return this.repairOperators[idx];
+    		}
+    	}
+    	return null;
+    }
+    
+    
+    /**
+     * This method updates the weights of the operators. Weights are updated only after a certain
+     * number of iterations 
+     * @param currentIteration: the current iteration number
+     */
+    private void updateWeightofOperators(int currentIteration) {
+    	if (this.currentSigma < 0) {
+    		return;
+    	}
+    	// Chris' Fragen an Alex: 
+    	// - Im Paper wird nur von sigma Werte gesprochen; was war/ist der Sinn 
+    	//   hinter getAdjustedSigma bzw. WertungsFaktor (Sigma faktor) im alten Code
+    	// -> Antwort: wurde z.T zum skalieren verwendet; nicht ganz sauber
+    	    	
+
+    	// TODO: Wahrscheinlichkeiten mittracken und mal plotten
+    	// TODO: [opt] eps wahrscheinlichkeit damit nicht auf 0 (restwahrscheinlichkeit dass op gezogen werden kann)
+    	{
+        	this.destroyOperators[this.currentDestroyOpIdx].incrementDraws();
+        	this.destroyOperators[this.currentDestroyOpIdx].addToPI(this.currentSigma);
+        	if (currentIteration % 100 == 0) {
+        		double portionOldWeight = this.destroyOperators[this.currentDestroyOpIdx].getWeight() * (1 - Config.reactionFactor);
+        		double updatedWeight = this.destroyOperators[this.currentDestroyOpIdx].getPi() / 
+        				(double) this.destroyOperators[this.currentDestroyOpIdx].getDraws();
+        		updatedWeight *= Config.reactionFactor;
+        		this.destroyOperators[this.currentDestroyOpIdx].setWeight(portionOldWeight + updatedWeight);        		
+            	this.updateProbabilitiesDestroyOps(this.getSumWeightsDestroyOps());    	
+        	}
+    	}
+    			
+    	// update insertion Operator
+    	{
+        	this.repairOperators[this.currentRepairOpIdx].incrementDraws();
+        	this.destroyOperators[this.currentDestroyOpIdx].addToPI(this.currentSigma);
+        	if (currentIteration % 100 == 0) {
+        		double portionOldWeight = this.repairOperators[this.currentRepairOpIdx].getWeight() * (1 - Config.reactionFactor);
+        		double updatedWeight = this.repairOperators[this.currentRepairOpIdx].getPi() / 
+        				(double) this.repairOperators[this.currentRepairOpIdx].getDraws();
+        		updatedWeight *= Config.reactionFactor;
+        		this.repairOperators[this.currentRepairOpIdx].setWeight(portionOldWeight + updatedWeight);        		
+            	this.updateProbabilitiesRepairOps(this.getSumWeightsRepairOps());
+        	}
+    	}    	
+    }
+    
+    
+    /**
+     * This method returns the total sum of weights of the insertion/repair operators
+     * @return sum of weights
+     */
+    private double getSumWeightsRepairOps() {
+    	double sum = 0.0;
+    	for (AbstractInsertion entry : this.repairOperators) {
+    		sum += entry.getWeight();
+    	}
+    	return sum;
+    }
+    
+    
+    /**
+     * This method returns the total sum of weights of the destroy operators
+     * @return sum of weights
+     */
+    private double getSumWeightsDestroyOps() {
+    	
+    	double sum = 0.0;
+    	for (AbstractRemoval entry : this.destroyOperators) {
+    		sum += entry.getWeight();
+    	}
+    	return sum;
+    }
+    
+    
+    /**
+     * This method updates the probabilities of the repair operators
+     * @param sumWeights: sum of weights
+     */
+    private void updateProbabilitiesRepairOps(double sumWeights) {
+    	for (AbstractInsertion entry : this.repairOperators) {
+    		double newProb = entry.getWeight() / sumWeights;
+    		entry.setProbability(newProb > Config.minOpProb ? newProb : Config.minOpProb);
+    	}
+    }
+    
+    
+    /**
+     * This method updated the probabilities of the destroy operators
+     * @param sumWeights: sum of weights
+     */
+    private void updateProbabilitiesDestroyOps(double sumWeights) {
+    	for (AbstractRemoval entry : this.destroyOperators) {
+    		double newProb = entry.getWeight() / sumWeights;
+    		entry.setProbability(newProb > Config.minOpProb ? newProb : Config.minOpProb);
+    	}
+    }
+    
+    
+    /**
+     * In this method the temperature parameter used in simulated annealing is calculated
+     * according to the cost of the initial solution
+     * @param costInitialSolution: costs of the initial solution
+     */
+    private void initTemperature(double costInitialSolution) {
+    	this.temperature = -(Config.startTempControlParam / Math.log(Config.bigOmega)) * costInitialSolution;
+    	this.temperatureEnd = Config.minTempPercent * this.temperature;
+    }
+    
+    
+    /**
+     * This method updates the temperature parameter according to the cooling rate
+     * @see vrptwfl.metaheuristic.Config
+     */
+    private void updateTemperature() {
+    	if (this.temperature > this.temperatureEnd) {
+    		this.temperature *= Config.coolingRate;
+    	}
+    }
+    
+    //
+    // DEPRECTAED FUNCTIONS - START
+    //
+
+    
     // TODO hier brauchen wir auch noch Test cases
     private Solution checkImprovement_orig(Solution solutionTemp, Solution solutionCurrent, Solution solutionBestGlobal) {
 
@@ -257,7 +440,7 @@ public class ALNSCore {
         }
 
         // check if temporary solution become new current solution
-        if (this.tempSolutionIsAccepted(solutionTemp, solutionCurrent)) {
+        if (this.tempSolutionIsAcceptedByCosts(solutionTemp, solutionCurrent)) {
             return solutionTemp;
         }
         return solutionCurrent;        	
@@ -291,126 +474,5 @@ public class ALNSCore {
 //        return solutionCurrent;
     }
 
-
-    private boolean tempSolutionIsAccepted(Solution solutionTemp, Solution solutionCurrent) {    	
-    	// improvement ?
-        return solutionCurrent.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon;
-    }
-
-    private AbstractInsertion getRepairOperatorAtRandom() {
-        int idx = Config.randomGenerator.nextInt(this.repairOperators.length);
-        this.currentRepairOpIdx = idx;
-        return this.repairOperators[idx];
-    }
-
-    private AbstractRemoval getDestroyOperatorAtRandom() {
-        int idx = Config.randomGenerator.nextInt(this.destroyOperators.length);
-        this.currentDestroyOpIdx = idx;
-        return this.destroyOperators[this.currentDestroyOpIdx];
-    }
-    
-    
-    private AbstractRemoval drawDestroyOperator() {
-    	double randomValue = Config.randomGenerator.nextDouble();
-    	double cumulatedSum = 0.0;
-    	for (int idx = 0; idx<this.destroyOperators.length; idx++) {
-    		cumulatedSum += this.destroyOperators[idx].getProbability();
-    		if (randomValue <= cumulatedSum) {
-    			this.currentDestroyOpIdx = idx;
-    			return this.destroyOperators[idx];
-    		}
-    	}
-    	return null;
-    }
-    
-    private AbstractInsertion drawInsertionOperator() {
-    	double randomValue = Config.randomGenerator.nextDouble();
-    	double cumulatedSum = 0.0;
-    	for (int idx = 0; idx < this.repairOperators.length; idx++) {
-    		cumulatedSum += this.repairOperators[idx].getProbability();
-    		if (randomValue <= cumulatedSum) {
-    			this.currentRepairOpIdx = idx;
-    			return this.repairOperators[idx];
-    		}
-    	}
-    	return null;
-    }
-    
-    private void updateWeightofOperators() {
-    	if (this.currentSigma < 0) {
-    		return;
-    	}
-    	//TODO Chris:
-    	// Fragen an Alex: 
-    	// - Im Paper wird nur von sigma Werte gesprochen; was war/ist der Sinn 
-    	//   hinter getAdjustedSigma bzw. WertungsFaktor (Sigma faktor) im alten Code
-    	// - Warum wird im alten code für repaird ops kein Anteil des alten Gewichts berechnet
-    	
-    	// update destroy Op
-    	{
-        	this.destroyOperators[this.currentDestroyOpIdx].incrementDraws();
-        	this.destroyOperators[this.currentDestroyOpIdx].addToPI(this.currentSigma);
-        	double portionOldWeight = this.destroyOperators[this.currentDestroyOpIdx].getWeight() * (1 - Config.reactionFactor);
-        	double updatedWeight = this.destroyOperators[this.currentDestroyOpIdx].getPi() / 
-        			(double) this.destroyOperators[this.currentDestroyOpIdx].getDraws();
-        	updatedWeight *= Config.reactionFactor;
-        	this.destroyOperators[this.currentDestroyOpIdx].setWeight(portionOldWeight + updatedWeight);    		
-    	}
-    			
-    	// update insertion Op
-    	{
-        	this.repairOperators[this.currentRepairOpIdx].incrementDraws();
-        	this.destroyOperators[this.currentDestroyOpIdx].addToPI(this.currentSigma);
-        	// TODO Chris: Warum wird im alten code für repaird ops kein Anteil des alten Gewichts berechnet
-        	double portionOldWeight = this.repairOperators[this.currentRepairOpIdx].getWeight() * (1 - Config.reactionFactor);
-        	double updatedWeight = this.repairOperators[this.currentRepairOpIdx].getPi() / 
-        			(double) this.repairOperators[this.currentRepairOpIdx].getDraws();
-        	updatedWeight *= Config.reactionFactor;
-        	this.repairOperators[this.currentRepairOpIdx].setWeight(portionOldWeight + updatedWeight);     		
-    	}
-    	
-    	this.updateProbabilitiesRepairOps(this.getSumWeightsRepairOps());
-    	this.updateProbabilitiesDestroyOps(this.getSumWeightsDestroyOps());    	
-    }
-    
-    private double getSumWeightsRepairOps() {
-    	double sum = 0.0;
-    	for (AbstractInsertion entry : this.repairOperators) {
-    		sum += entry.getWeight();
-    	}
-    	return sum;
-    }
-    
-    private double getSumWeightsDestroyOps() {
-    	double sum = 0.0;
-    	for (AbstractRemoval entry : this.destroyOperators) {
-    		sum += entry.getWeight();
-    	}
-    	return sum;
-    }
-    
-    private void updateProbabilitiesRepairOps(double sumWeights) {
-    	for (AbstractInsertion entry : this.repairOperators) {
-    		entry.setProbability(entry.getWeight() / sumWeights);
-    	}
-    }
-    
-    private void updateProbabilitiesDestroyOps(double sumWeights) {
-    	for (AbstractRemoval entry : this.destroyOperators) {
-    		entry.setProbability(entry.getWeight() / sumWeights);
-    	}
-    }
-    
-    
-    private void initTemperature(double costInitialSolution) {
-    	this.temperature = -(Config.startTempControlParam / Math.log(Config.bigOmega)) * costInitialSolution;
-    	this.temperatureEnd = Config.minTempPercent * this.temperature;
-    }
-    
-    private void updateTemperature() {
-    	if (this.temperature > this.temperatureEnd) {
-    		this.temperature *= Config.coolingRate;
-    	}
-    }
 
 }

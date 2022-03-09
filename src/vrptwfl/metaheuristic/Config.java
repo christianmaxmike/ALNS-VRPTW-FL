@@ -68,14 +68,16 @@ public class Config {
     public static int sigma1;
     public static int sigma2;
     public static int sigma3;
-    public static int sigma4;
+    // public static int sigma4;
     public static double reactionFactor;
+    public static double minOpProb;
     
     // Variables for simulated annealing
     public static double coolingRate;
     public static double minTempPercent;
     public static double startTempControlParam;
     public static double bigOmega;
+    
     
 
     private static Config conf = new Config();
@@ -154,9 +156,10 @@ public class Config {
         sigma1 = (int) obj.get("sigma1");
         sigma2 = (int) obj.get("sigma2");
         sigma3 = (int) obj.get("sigma3");
-        sigma4 = (int) obj.get("sigma4");
+        // sigma4 = (int) obj.get("sigma4");
         reactionFactor = (double) obj.get("reactionFactor");
-
+        minOpProb = (double) obj.get("minOpProb");
+        
         // Variables for simulated annealing
         coolingRate = (double) obj.get("coolingRate");
         minTempPercent = (double) obj.get("minTempPercent"); 

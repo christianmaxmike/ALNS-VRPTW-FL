@@ -99,8 +99,11 @@ public class SolomonInstanceGenerator {
 
         SolomonInstanceGenerator generator = new SolomonInstanceGenerator();
 //        generator.loadInstance("R101.txt", 25);
+        
+        Data d;
         try {
-            generator.loadInstance("C106.txt", 125);
+            d = generator.loadInstance("R101.txt", 100);
+            // generator.loadInstance("C106.txt", 125);
 //            generator.loadInstance("GibtEsNicht.txt", 125);
         } catch (ArgumentOutOfBoundsException e) {
             e.printStackTrace();
