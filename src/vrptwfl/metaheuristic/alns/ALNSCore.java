@@ -319,13 +319,11 @@ public class ALNSCore {
     	//   hinter getAdjustedSigma bzw. WertungsFaktor (Sigma faktor) im alten Code
     	// -> Antwort: wurde z.T zum skalieren verwendet; nicht ganz sauber
     	    	
-
     	// TODO: Wahrscheinlichkeiten mittracken und mal plotten
-    	// TODO: [opt] eps wahrscheinlichkeit damit nicht auf 0 (restwahrscheinlichkeit dass op gezogen werden kann)
     	{
         	this.destroyOperators[this.currentDestroyOpIdx].incrementDraws();
         	this.destroyOperators[this.currentDestroyOpIdx].addToPI(this.currentSigma);
-        	if (currentIteration % 100 == 0) {
+        	if (currentIteration % Config.updateInterval == 0) {
         		double portionOldWeight = this.destroyOperators[this.currentDestroyOpIdx].getWeight() * (1 - Config.reactionFactor);
         		double updatedWeight = this.destroyOperators[this.currentDestroyOpIdx].getPi() / 
         				(double) this.destroyOperators[this.currentDestroyOpIdx].getDraws();
@@ -339,7 +337,7 @@ public class ALNSCore {
     	{
         	this.repairOperators[this.currentRepairOpIdx].incrementDraws();
         	this.destroyOperators[this.currentDestroyOpIdx].addToPI(this.currentSigma);
-        	if (currentIteration % 100 == 0) {
+        	if (currentIteration % Config.updateInterval == 0) {
         		double portionOldWeight = this.repairOperators[this.currentRepairOpIdx].getWeight() * (1 - Config.reactionFactor);
         		double updatedWeight = this.repairOperators[this.currentRepairOpIdx].getPi() / 
         				(double) this.repairOperators[this.currentRepairOpIdx].getDraws();

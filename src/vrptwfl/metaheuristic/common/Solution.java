@@ -31,6 +31,12 @@ public class Solution {
     }
     
     public int hashCode_tmp() {
+    	// TODO: when Flexible locations come into play; check whether the vehiclesInfo 
+    	// still contains the relevant information or do we have to encode the locations, too.
+    	// E.G. customer A(1)-B(1) with their preferential locations (1). 
+    	// -> delete B(1) from series
+    	// -> add B(2) 
+    	// -> resulting series: A(1) - B(2) 
     	ArrayList<ArrayList<Integer>> vehiclesInfo = new ArrayList<ArrayList<Integer>>();
     	for (Vehicle v: this.vehicles) {
     		vehiclesInfo.add(v.getCustomers());

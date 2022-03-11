@@ -162,6 +162,8 @@ public class Vehicle {
         for (int i = 0; i < this.customers.size() - 1; i++ ) {
             int pred = this.customers.get(i);
             int succ = this.customers.get(i+1);
+            
+            //TODO: CHRIS: Obacht! customer der gescheduled werden soll, kann verschiedene location ids annehmen
 
             double distToCustomer = data.getDistanceBetweenCustomers(pred, customer);
             double earliestStartAtInsertion = Math.max(this.endOfServices.get(i) + distToCustomer, earliestStartCustomer);

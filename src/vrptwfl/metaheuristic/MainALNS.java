@@ -24,7 +24,7 @@ public class MainALNS {
 	}
 
     // returns the objective function value of the ALNS solution
-    public double runALNS(String instanceName, int nCustomers) throws ArgumentOutOfBoundsException {
+    public void runALNS(String instanceName, int nCustomers) throws ArgumentOutOfBoundsException {
 
         SolomonInstanceGenerator generator = new SolomonInstanceGenerator();
         Data data = null;
@@ -81,16 +81,16 @@ public class MainALNS {
 
         // TODO 23.02.2022 ; Chris
         // ###
-        // - simulated annealing  [Ropke&Pisinger, p.2416 COR]  // alter code könnte helfen
-        // - adaptive Komponente: Wahrscheinlichkeit von destroy und insertion 
+        // - [v] simulated annealing  [Ropke&Pisinger, p.2416 COR]  // alter code könnte helfen
+        // - [v] adaptive Komponente: Wahrscheinlichkeit von destroy und insertion 
         //     nicht mehr uniformly distributed, sondern Wahrscheinlichkeit nach historischem 
         //     Erfolg p- und p+ (sigma-Werte)
-        // - hashcode für einzelne solutions
+        // - [v] hashcode für einzelne solutions
         // 
         // !!Tracking für die profs; Was sind meine contributions!!
-        // - Prüfen ob alle Operatoren Von Pisinger&Ropke mit aufgenommen worden sind für VRPTW
+        // - [v] Prüfen ob alle Operatoren Von Pisinger&Ropke mit aufgenommen worden sind für VRPTW
         //   - wenn ja: top
-        //   - wenn nein, Implementieren!
+        //   - wenn nein, flop -> Implementieren!
         // ###
 
         // TODO morgen früh 28.05.2021 ; Alex
@@ -107,7 +107,6 @@ public class MainALNS {
         // TODO moegliches hashing
         //  - bereits generierte Loesungen
         //  - ggf. earliest, latest possible starts in partial routes (pred_id, pred_time,)
-        return 0.0;
     }
 
     private void setInstanceSpecificParameters(int nCustomers, double maxDistance) {
@@ -131,8 +130,6 @@ public class MainALNS {
     public static void main(String[] args) throws ArgumentOutOfBoundsException {
         final MainALNS algo = new MainALNS();
         algo.runALNS(args[0], 100);
-
-
         // Add TimeLimit (?)
     }
 

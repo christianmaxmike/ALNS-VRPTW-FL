@@ -71,6 +71,7 @@ public class Config {
     // public static int sigma4;
     public static double reactionFactor;
     public static double minOpProb;
+    public static int updateInterval;
     
     // Variables for simulated annealing
     public static double coolingRate;
@@ -78,6 +79,9 @@ public class Config {
     public static double startTempControlParam;
     public static double bigOmega;
     
+    // Location dependent variables
+    public static int locationCapacity;
+    public static int numberOfLocationsPerCustomer;
     
 
     private static Config conf = new Config();
@@ -159,12 +163,17 @@ public class Config {
         // sigma4 = (int) obj.get("sigma4");
         reactionFactor = (double) obj.get("reactionFactor");
         minOpProb = (double) obj.get("minOpProb");
+        updateInterval = (int) obj.get("updateInterval");
         
         // Variables for simulated annealing
         coolingRate = (double) obj.get("coolingRate");
         minTempPercent = (double) obj.get("minTempPercent"); 
         startTempControlParam = (double) obj.get("startTempControlParam");
         bigOmega = (double) obj.get("bigOmega");
+        
+        // Location dependent variables
+        locationCapacity = (int) obj.get("locationCapacity");
+        numberOfLocationsPerCustomer = (int) obj.get("numberOfLocationsPerCustomer");
     }
 
     // TODO wieder raus

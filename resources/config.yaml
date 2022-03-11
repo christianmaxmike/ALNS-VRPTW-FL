@@ -50,6 +50,7 @@ sigma2: 13
 sigma3: 9
 reactionFactor: 0.1
 minOpProb: 0.01
+updateInterval: 100
 
 ### Simulated Annealing
 coolingRate: 0.99937    	# Ropke und Pisinger 2016 - 0.9998 EJOR, p.761
@@ -57,6 +58,9 @@ minTempPercent: 0.01      	# percentage the temperature is cooled down,
 startTempControlParam: 0.05 # start temperature control parameter  (delta in old code), Ropke und Pisinger 2016 - 0.9998 EJOR, p.761
 bigOmega: 0.5				# percentage a solution being 1+w higher than current solution is accepted
 
+### Location dependent settings
+locationCapacity: 1			# capacity of locations
+numberOfLocationsPerCustomer: 2 	# set number of locations per customer
 
 ##### calculations #####
 rounding_precision: 1     # number of decimal places
