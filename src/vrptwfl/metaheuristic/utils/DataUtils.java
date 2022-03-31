@@ -1,6 +1,10 @@
 package vrptwfl.metaheuristic.utils;
 
+import java.util.Comparator;
 import java.util.List;
+
+import vrptwfl.metaheuristic.common.Solution;
+import vrptwfl.metaheuristic.data.Data;
 
 public class DataUtils {
 
@@ -17,4 +21,24 @@ public class DataUtils {
         }
         return result;
     }
+    
+    
+    public static int getLocationIndex (int customerId, Solution solution) {
+    	return solution.getData().getCustomersToLocations().get(solution.getData().getOriginalCustomerIds()[customerId]).get(solution.getCustomerAffiliationToLocations()[customerId]);
+    }
+    
+//  
+//  public static int getMatchingIndexInBooleanArray (boolean[] arr, boolean value) {
+//  	for (int idx = 0 ; idx<arr.length; idx++)
+//  		if (arr[idx] == value) return idx;
+//  	return -1;
+//  }
+    
+    public static int[] convertDoubleArrToIntArr (double[] inputArray) {
+    	int[] intArray = new int[inputArray.length];
+    	for (int i=0; i<intArray.length; ++i)
+    		intArray[i] = (int) inputArray[i];
+    	return intArray;
+    }
+    
 }

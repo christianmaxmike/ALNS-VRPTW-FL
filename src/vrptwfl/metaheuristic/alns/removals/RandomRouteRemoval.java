@@ -32,7 +32,7 @@ public class RandomRouteRemoval extends AbstractRemoval {
             if (!vehicle.isUsed()) continue;
 
             for (int c = 1; c < vehicle.getnCustomersInTour()+1; c++) {  // c starts at 1 as first customer is at position 1 (0 is dummy out)
-                int removedCustomer = vehicle.applyRemoval(c, this.data);
+                int removedCustomer = vehicle.applyRemoval(c, this.data, solution);
                 removedCustomers.add(removedCustomer); // vehicle.getCustomers().get(c));
                 nRemovals--;
                 if (nRemovals == 0) break vehicleIndexLoop;

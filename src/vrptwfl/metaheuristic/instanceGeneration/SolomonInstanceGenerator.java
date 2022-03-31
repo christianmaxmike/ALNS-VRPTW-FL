@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -18,15 +19,12 @@ public class SolomonInstanceGenerator {
 
     private String[] readInstanceTextFile(String fileName) throws IOException {
         String locationOfSolomonInstances = "./instances/Instances-Solomon/";
-
         String entireTextFile = Files.readString(Path.of(locationOfSolomonInstances + fileName));
         entireTextFile = entireTextFile.replaceAll("\r\n", "\n"); // windows carriage returns
         return entireTextFile.split("\n"); // former by Alex (\r\n)
     }
-
     
     public Data loadInstance(String fileName, int nCustomers) throws ArgumentOutOfBoundsException, IOException {
-
         String[] lines = readInstanceTextFile(fileName);
 
         // get general information
@@ -39,71 +37,74 @@ public class SolomonInstanceGenerator {
         // get vehicle information
         List<Integer> lineVehicleInfo = getIntegerArrayFromLine(lines[4]);
         int nVehicles = lineVehicleInfo.get(0);
+        int[] vehiclesSkillLvl = new int[nVehicles];  // default: 0 entries
         int vehicleCapacity = lineVehicleInfo.get(1);
-        List<Integer> xcoords = new ArrayList<>();
-        List<Integer> ycoords = new ArrayList<>();
         List<Integer> locationCapacity = new ArrayList<>();
         List<Integer> demands = new ArrayList<>();
         List<Integer> earliestStartTimes = new ArrayList<>();
         List<Integer> latestStartTimes = new ArrayList<>();
         List<Integer> serviceDurations = new ArrayList<>();
+        List<Integer> requiredSkillLvl = new ArrayList<>();
+        
+        HashMap<Integer, ArrayList<Integer>> customerToLocations = new HashMap<Integer, ArrayList<Integer>>();
 
-        // get customer information
+        HashMap<java.awt.geom.Point2D, Integer> coordsToId = new HashMap<java.awt.geom.Point2D, Integer>();
+
+        int locationId = 0;
+        // Read customer information
         for (int i=9; i < 10 + nCustomers; i++ ) { // nCustomers + one additional for depot
             List<Integer> lineCustomer = getIntegerArrayFromLine(lines[i]);
-            xcoords.add(lineCustomer.get(1));
-            ycoords.add(lineCustomer.get(2));
+            
+            java.awt.geom.Point2D c = new java.awt.geom.Point2D.Double(lineCustomer.get(1), lineCustomer.get(2));
+            if (coordsToId.get(c) == null)
+            	coordsToId.put(c, locationId++);
+            
+            if (customerToLocations.get(lineCustomer.get(0)) == null)
+            	customerToLocations.put(lineCustomer.get(0), new ArrayList<Integer>());
+            customerToLocations.get(lineCustomer.get(0)).add(coordsToId.get(c));
+            
             demands.add(lineCustomer.get(3));
             earliestStartTimes.add(lineCustomer.get(4));
             latestStartTimes.add(lineCustomer.get(5));
             serviceDurations.add(lineCustomer.get(6));
             
-            // TODO Check TW überlappung
-            locationCapacity.add(Config.locationCapacity); 
+            // TODO CHRIS: check capacity slots only for critical locations - check count of overlappings of all jobs
+            // TODO CHRIS: pre-processing - identify critical locations
+            
+            locationCapacity.add(1); 
+            requiredSkillLvl.add(0);
+        }
+        
+        for (int nLocations = 1; nLocations < Config.numberOfLocationsPerCustomer; nLocations++) {
+        	for (int customerId = 1; customerId < customerToLocations.size()-1; customerId++) {
+        		customerToLocations.get(customerId).add(customerToLocations.get(customerId+1).get(customerToLocations.get(customerId+1).size()-1));
+        	}
+        	customerToLocations.get(customerToLocations.size()-1).add(
+        			customerToLocations.get(1).get(nLocations-1));
         }
 
-        List<Integer> customerIds = IntStream.rangeClosed(1, nCustomers)
-                .boxed()
-                .collect(Collectors.toList());
+        List<Integer> customerIds = IntStream.rangeClosed(1, nCustomers).boxed().collect(Collectors.toList());
         
-        // TODO: xcoords mit java.awt.geom.Point2D? 
+		// TODO CHRIS - bei hospital instanzen nicht jeder patient hat gleich viel mögliche locations
+		// TODO CHRIS - in hospital instanzen, location mit id 0 nicht zwingend präferierte location
+        // TODO Chris - für customers nur locations ids abspeichern, hashmaps/arraylist
         int numberOfLocations = Config.numberOfLocationsPerCustomer;
-        int[][] multipleXCoords = new int[numberOfLocations][xcoords.size()];
-        int[][] multipleYCoords = new int[numberOfLocations][ycoords.size()];
-        for (int locID = 0; locID < numberOfLocations; locID ++) {
-        	int[] xTmp = DataUtils.convertListToArray(xcoords);
-        	int[] xNewArr = xTmp.clone();
-            System.arraycopy(xTmp, locID, xNewArr, 0, xTmp.length-locID); 
-            System.arraycopy(xTmp, 0, xNewArr, xTmp.length-locID, locID); 
-            multipleXCoords[locID] = xNewArr;
-            
-            int[] yTmp = DataUtils.convertListToArray(ycoords);
-            int[] yNewArr = yTmp.clone();
-            System.arraycopy(yTmp, locID, yNewArr, 0, yTmp.length-locID);
-            System.arraycopy(yTmp, 0, yNewArr, yTmp.length-locID, locID);
-            multipleYCoords[locID] = yNewArr;            
-        }
-        
-        // Create array indicating to which coords a customer is assigned to (-1: no assignment)
-        int[] customerAssignmentToLocations = new int[customerIds.size()];
-        Arrays.fill(customerAssignmentToLocations, -1);
-        
+                
         return new Data(
                 instanceName,
                 nCustomers,
                 nVehicles,
                 vehicleCapacity,
                 DataUtils.convertListToArray(customerIds),
-                DataUtils.convertListToArray(xcoords),
-                DataUtils.convertListToArray(ycoords),
-                multipleXCoords,
-                multipleYCoords,
-                customerAssignmentToLocations,
                 DataUtils.convertListToArray(locationCapacity),
+                customerToLocations,
+                coordsToId,
                 DataUtils.convertListToArray(demands),
                 DataUtils.convertListToArray(earliestStartTimes),
                 DataUtils.convertListToArray(latestStartTimes),
-                DataUtils.convertListToArray(serviceDurations)
+                DataUtils.convertListToArray(serviceDurations),
+                DataUtils.convertListToArray(requiredSkillLvl),
+                vehiclesSkillLvl
         );
     }
 
@@ -124,16 +125,12 @@ public class SolomonInstanceGenerator {
         return intArrayList;
     }
     
-    
-    // TODO main wieder entfernen
+    // TODO Alex: main wieder entfernen
     public static void main(String[] args) throws IOException {
         SolomonInstanceGenerator generator = new SolomonInstanceGenerator();
-//      generator.loadInstance("R101.txt", 25);
         Data d;
         try {
             d = generator.loadInstance("R101.txt", 100);
-            // generator.loadInstance("C106.txt", 125);
-            // generator.loadInstance("GibtEsNicht.txt", 125);
         } catch (ArgumentOutOfBoundsException e) {
             e.printStackTrace();
         }

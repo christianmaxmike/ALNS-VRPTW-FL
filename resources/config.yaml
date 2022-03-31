@@ -1,8 +1,8 @@
 ##### General configurations #####
-random_seed: null  # if null, no random seed will be used
+random_seed: 42  # if null, no random seed will be used
 
 ##### ALNS configurations #####
-alns_iterations: 25_000  # 50_000
+alns_iterations: 10_000 # 25_000  # 50_000
 # Upper bound and lower bound values taken from Ropke C&OR §6.1.1 p. 2417
 lower_bound_nr_of_removals: 30
 lower_bound_factor_nr_of_removals: 0.1
@@ -11,28 +11,28 @@ upper_bound_factor_nr_of_removals: 0.4
 
 cost_factor_unserved_customer: 5.0  # cost for unserviced customers is equal to this number times the maximum distance in the graph
 
-### Define active operators (destroy and repair)
-use_cluster_removal_kruskal: true
-use_historic_node_pair_removal_deterministic: false
-use_historic_node_pair_removal_random: true
-use_historic_request_pair_removal: false
-use_random_removal: true
-use_random_route_removal: true
-use_shaw_simplified_deterministic: false
-use_shaw_simplified_random: true
-use_time_oriented_removal_jungwirth_deterministic: false
-use_time_oriented_removal_jungwirth_random: true
-use_time_oriented_removal_pisinger_deterministic: false
-use_time_oriented_removal_pisinger_random: true
-use_worst_removal_deterministic: false
-use_worst_removal_random: true
+### Define active operators (destroy and repair)							# SOLOMON			HOSPITAL
+use_cluster_removal_kruskal: false						# default: true		# x					# 
+use_historic_node_pair_removal_deterministic: false 	# default: false	# v					# 
+use_historic_node_pair_removal_random: false			# default: true		# v 					# 
+use_historic_request_pair_removal: false  				# default: false	# not implemented	# not implemented
+use_random_removal: false  								# default: true		# v					# 
+use_random_route_removal: false  						# default: true		# v					# 
+use_shaw_simplified_deterministic: false 				# default:false		# x					# 
+use_shaw_simplified_random: false 					 	# default:true		# x					# 
+use_time_oriented_removal_jungwirth_deterministic: false # default:false	# x					# 
+use_time_oriented_removal_jungwirth_random: false  		# default: true		# x					# 
+use_time_oriented_removal_pisinger_deterministic: false # default:false		# x 					# 
+use_time_oriented_removal_pisinger_random: true 		# default: true		# x					# 
+use_worst_removal_deterministic: false	 				# default: false	# v					# v
+use_worst_removal_random: false  						# default: true		# v					# v
 
-use_greedy_insert: true
-use_nregret_2: true
-use_nregret_3: true
-use_nregret_4: false
-use_nregret_5: false
-use_nregret_6: false
+use_greedy_insert: true									# default: true		# v
+use_nregret_2: true										# default: true		# v
+use_nregret_3: false									# default: true		# v
+use_nregret_4: false									# default: false	# v
+use_nregret_5: false									# default: false	# v
+use_nregret_6: false									# default: false	# v
 regret_consider_all_possible_insertion_per_route: false  # default in Pisinger & Ropke C&OR §5.2.2 p. 2415: false
 regret_sum_over_all_n_regret: true  # default in Ropke C&OR §5.2.2 p. 2415: true (e.g. only consider 4th - best or (4th - best) + (3rd - best) + (2nd - best))
 
@@ -58,14 +58,23 @@ minTempPercent: 0.01      	# percentage the temperature is cooled down,
 startTempControlParam: 0.05 # start temperature control parameter  (delta in old code), Ropke und Pisinger 2016 - 0.9998 EJOR, p.761
 bigOmega: 0.5				# percentage a solution being 1+w higher than current solution is accepted
 
+
 ### Location dependent settings
-locationCapacity: 1			# capacity of locations
 numberOfLocationsPerCustomer: 2 	# set number of locations per customer
+
 
 ##### calculations #####
 rounding_precision: 1     # number of decimal places
-epsilon: 0.0001           # precision for double comparision
+epsilon: 0.0001           # precision for double comparison
 bigM_regret: 100_000      # must be greater than the largest possible regret
+
+
+#### HOSPITAL LOADER
+planningIntervals: 5      # 5 min planning interval
+maxCapacityVehicles: 10   # big enough to never be critical
+solveAsTwoProblems: true  # morning and evening problems separated from each other
+splitRegularShift: true   # split regular shift
+printHospitalLoaderInfo: false	# logging 
 
 
 ##### not defined in papers (open) #####

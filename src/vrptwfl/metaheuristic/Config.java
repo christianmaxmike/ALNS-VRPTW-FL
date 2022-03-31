@@ -80,8 +80,16 @@ public class Config {
     public static double bigOmega;
     
     // Location dependent variables
-    public static int locationCapacity;
+    // public static int locationCapacity;
     public static int numberOfLocationsPerCustomer;
+    
+    
+    // Hospital Instances
+    public static int planningIntervals;
+    public static int maxCapacityVehicles;
+    public static boolean solveAsTwoProblems;
+    public static boolean splitRegularShift;
+    public static boolean printHospitalLoaderInfo;
     
 
     private static Config conf = new Config();
@@ -172,8 +180,15 @@ public class Config {
         bigOmega = (double) obj.get("bigOmega");
         
         // Location dependent variables
-        locationCapacity = (int) obj.get("locationCapacity");
+        // locationCapacity = (int) obj.get("locationCapacity");
         numberOfLocationsPerCustomer = (int) obj.get("numberOfLocationsPerCustomer");
+        
+        // for Hospital Instances
+        planningIntervals = (int) obj.get("planningIntervals");
+        maxCapacityVehicles = (int) obj.get("maxCapacityVehicles");
+        solveAsTwoProblems = (boolean) obj.get("solveAsTwoProblems");
+        splitRegularShift = (boolean) obj.get("splitRegularShift");
+        printHospitalLoaderInfo = (boolean) obj.get("printHospitalLoaderInfo");
     }
 
     // TODO wieder raus

@@ -9,8 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-// remove customers which yield highest cost reduction if they are removed
-// Ropke and Pisinger 2006, page 460 (Transportation Science)
+/**
+ * This class implements the Worst Removal heuristic.
+ * Remove customers which yield highest cost reduction if they are removed.
+ * Ropke and Pisinger 2006, page 460 (Transportation Science)
+ */
 public class WorstRemoval extends AbstractRemoval {
 
     private final boolean randomize;
@@ -28,7 +31,7 @@ public class WorstRemoval extends AbstractRemoval {
 
 //        Map<int[], Double> myCache; // TODO hier gehts mitm Guava Cache weiter
 
-        // TODO kann man ausnuzten, dass bei jedem removal immer nur ein vehicle betroffen ist?
+        // TODO kann man ausnuzen, dass bei jedem removal immer nur ein vehicle betroffen ist?
         //  eigentlich duerfte deswegen nur eine
 
         while (nRemovals > 0) {
@@ -51,13 +54,11 @@ public class WorstRemoval extends AbstractRemoval {
 
             // apply removal {customer, vehicle.id, i, travelTimeReduction}
             // TODO ggf. eigene applyRemovalMethode, wo kosten nicht nochmal ausgerechnet werden muessen
-            solution.getVehicles().get((int) removal[1]).applyRemoval((int) removal[2], this.data);
+            solution.getVehicles().get((int) removal[1]).applyRemoval((int) removal[2], this.data, solution);
             removedCustomers.add((int) removal[0]);
 
             nRemovals--;
         }
-
         return removedCustomers;
     }
-
 }

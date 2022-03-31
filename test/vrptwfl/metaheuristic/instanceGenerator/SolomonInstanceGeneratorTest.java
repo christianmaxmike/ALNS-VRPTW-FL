@@ -47,8 +47,8 @@ public class SolomonInstanceGeneratorTest {
 
         assertEquals("Number of customer", 50, data.getCustomers().length);
 
-        assertEquals("Distance [0][1]", 15.2, data.getDistanceBetweenCustomers(0,1), 0.0001);
-        assertEquals("Distance [38][12]", 54.1, data.getDistanceBetweenCustomers(38,12), 0.0001);
+        assertEquals("Distance [0][1]", 15.2, data.getDistanceBetweenLocations(0,1), 0.0001);
+        assertEquals("Distance [38][12]", 54.1, data.getDistanceBetweenLocations(38,12), 0.0001);
 
         assertEquals("Demand customer 11", 12, data.getDemands()[11]);
         assertEquals("Earliest start customer 23", 68, data.getEarliestStartTimes()[23]);

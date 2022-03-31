@@ -4,10 +4,14 @@ import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
+import vrptwfl.metaheuristic.utils.DataUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.ListIterator;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class RegretInsertion extends AbstractInsertion {
 
@@ -29,16 +33,30 @@ public class RegretInsertion extends AbstractInsertion {
     public double[] getNextInsertion(Solution solution) {
         // initialize values
         double maxRegret = -1;
-        double[] nextInsertion = new double[5]; // [customerId, vehicleId, positionInRoute, startTime, additionalCosts]
+        
+        // nextInsertion : [customerId, vehicleId, positionInRoute, startTime, additionalCosts]
+        // Chris; new nextInsertion : [customerID, vehicleID, idxPositionInRoute, serviceStartTime, additionalCosts, preferencedLocation, capacitySlot]
+        double[] nextInsertion = new double[8]; 
         // positionInRoute is defined as the position at which the customer will be inserted
         nextInsertion[4] = Config.bigMRegret;
 
         ListIterator<Integer> iter = solution.getNotAssignedCustomers().listIterator();
-
-        while(iter.hasNext()){
+        /*
+        int[] unscheduledCostumers = DataUtils.convertListToArray(solution.getNotAssignedCustomers());
+        Integer[] indexes = IntStream.range(0, unscheduledCostumers.length).boxed().toArray(Integer[]::new);
+        Arrays.sort(indexes, Comparator.<Integer>comparingDouble(i -> solution.getData().getRequiredSkillLvl()[unscheduledCostumers[i]]).reversed());
+        int[] it = new int[unscheduledCostumers.length];
+        for (int i = 0 ; i< unscheduledCostumers.length; i++)
+        	it[i] = unscheduledCostumers[indexes[i]];
+        ArrayList<Integer> list = (ArrayList<Integer>) Arrays.stream(it).boxed().collect(Collectors.toList());
+        ListIterator<Integer> iter = list.listIterator();
+        */
+        
+        while(iter.hasNext()) {
 
             // init info for customer
             int customer = iter.next();
+            
             double regret = -1;
 
             // get all possible insertions for the customer
@@ -46,7 +64,6 @@ public class RegretInsertion extends AbstractInsertion {
 
             // if list is empty, no feasible assignment to any route exists for that customer
             if (possibleInsertionsForCustomer.isEmpty()) {
-
                 solution.getTempInfeasibleCustomers().add(customer);
                 iter.remove();
             } else {
@@ -62,7 +79,7 @@ public class RegretInsertion extends AbstractInsertion {
                     }
                 }
             }
-        } // end while(iter.hasNext())
+        } // END WHILE
         return nextInsertion;
     }
 

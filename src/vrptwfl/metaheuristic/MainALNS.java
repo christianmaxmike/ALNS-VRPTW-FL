@@ -5,115 +5,105 @@ import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.data.OptimalSolutions;
 import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
+import vrptwfl.metaheuristic.instanceGeneration.HospitalInstanceLoader;
 import vrptwfl.metaheuristic.instanceGeneration.SolomonInstanceGenerator;
 import vrptwfl.metaheuristic.utils.CalcUtils;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 
+/**
+ * Main class of adaptive large neighborhood search (ALNS) for solving
+ * Vehicle Routing Problems with Time Windows and flexible locations (VRPTW-FL) 
+ * problems
+ */
 public class MainALNS {
 	
 	private FileWriter writer;
 	
-	public MainALNS() {
+	/**
+	 * Constructor of the MainALNS class. 
+	 * A FileWrite object is initialized for results logging
+	 */
+	public MainALNS(String outputFile) {
 		try {
-			this.writer = new FileWriter("./results.txt", true);
+			this.writer = new FileWriter("./"+outputFile, true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-    // returns the objective function value of the ALNS solution
-    public void runALNS(String instanceName, int nCustomers) throws ArgumentOutOfBoundsException {
+	/**
+	 * Main procedure for solving the ALNS on VRPTW-FL problems. 
+	 * The function first calculates an initial solution which is then used as input 
+	 * for the ALNS. The final routings as well as the optimality gap to the best
+	 * known solution is printed on the standard output. The found solution for the 
+	 * instance is also logged into a file defined in the constructor of the class: 
+	 * Format of logging: instanceName, TotalCosts, OptimalityGap, ElapsedTime
+	 * @param instanceName: instance name to be solved
+	 * @param nCustomers: number of customers
+	 * @throws ArgumentOutOfBoundsException
+	 */
+    public void runALNS(Data data, String instanceName) throws ArgumentOutOfBoundsException {
 
-        SolomonInstanceGenerator generator = new SolomonInstanceGenerator();
-        Data data = null;
-        try {
-            data = generator.loadInstance(instanceName + ".txt", nCustomers);
-        } catch (ArgumentOutOfBoundsException | IOException e) {
-            e.printStackTrace();
-        }
+        this.setInstanceSpecificParameters(data.getnCustomers(), data.getMaxDistanceInGraph());
 
-        this.setInstanceSpecificParameters(nCustomers, data.getMaxDistanceInGraph());
-
+        // Initial Solution
         ConstructionHeuristicRegret construction = new ConstructionHeuristicRegret(data);
         long startTimeConstruction = System.currentTimeMillis();
         Solution solutionConstr = construction.constructSolution(2);
-
-        // TODO wieder raus
-        System.out.println(solutionConstr.getNotAssignedCustomers());
-        System.out.println(solutionConstr.getTempInfeasibleCustomers());
+        
+        System.out.println("Init solution - not assigned customers   :" + solutionConstr.getNotAssignedCustomers());
+        System.out.println("Init solution - temp infeasible customers:" + solutionConstr.getTempInfeasibleCustomers());
+        System.out.println("Customers for scheduling (original ids):" + Arrays.toString(data.getOriginalCustomerIds()));
         solutionConstr.printSolution();
+        //System.exit(0);
 
         // ALNS
         ALNSCore alns = new ALNSCore(data);
         Solution solutionALNS = alns.runALNS(solutionConstr);
 
+        System.out.println("Init solution - not assigned customers   :" + solutionALNS.getNotAssignedCustomers());
+        System.out.println("Init solution - temp infeasible customers:" + solutionALNS.getTempInfeasibleCustomers());
+        System.out.println("Customers for scheduling (original job ids):" + Arrays.toString(data.getOriginalCustomerIds()));
         long finishTimeConstruction = System.currentTimeMillis();
         long timeElapsed = (finishTimeConstruction - startTimeConstruction);
         System.out.println("Time for construction " + timeElapsed + " ms.");
 
-        // TODO WICHTIG FEHLER SUCHEN BEI REMOVAL !!!
+        // TODO Alex: brauchen irgendwas, um Lösung zu speichern (ZF und Touren startzeiten etc.)
 
-        // TODO brauchen irgendwas, um Lösung zu speichern (ZF und Touren startzeiten etc.)
-
-        // TODO wieder raus
         System.out.println(solutionALNS.getNotAssignedCustomers());
         System.out.println(solutionALNS.getTempInfeasibleCustomers());
         solutionALNS.printSolution();
 
-        // TODO check, ob es key ueberhaupt gibt, auch checken, ob es 25, 50 oder 100 Kunden sind
-
         int i = -1;
-        if (nCustomers == 100) i = 2;
-        else if (nCustomers == 50) i = 1;
-        else if (nCustomers == 25) i = 0;
+        if (data.getnCustomers() == 25)		    i = 0;
+        else if (data.getnCustomers() == 50)	i = 1;
+        else if (data.getnCustomers() == 100)	i = 2;
+        else return; //System.exit(0); // no optimal value stored --> Quit
+        
+        // Calculate optimality gap
         double optimalObjFuncVal = OptimalSolutions.optimalObjFuncValue.get(instanceName)[i];
         double gap = CalcUtils.calculateGap(optimalObjFuncVal, solutionALNS.getTotalCosts());
         System.out.println("Gap: " + gap);
         
+        // Write result
         try {
-			writer.append(instanceName+","+solutionALNS.getTotalCosts()+","+gap+","+timeElapsed+"\n");
+			writer.append(instanceName + "," + solutionALNS.getTotalCosts() + "," + gap + "," + timeElapsed + "\n");
 	        writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-        // TODO 23.02.2022 ; Chris
-        // ###
-        // - [v] simulated annealing  [Ropke&Pisinger, p.2416 COR]  // alter code könnte helfen
-        // - [v] adaptive Komponente: Wahrscheinlichkeit von destroy und insertion 
-        //     nicht mehr uniformly distributed, sondern Wahrscheinlichkeit nach historischem 
-        //     Erfolg p- und p+ (sigma-Werte)
-        // - [v] hashcode für einzelne solutions
-        // 
-        // !!Tracking für die profs; Was sind meine contributions!!
-        // - [v] Prüfen ob alle Operatoren Von Pisinger&Ropke mit aufgenommen worden sind für VRPTW
-        //   - wenn ja: top
-        //   - wenn nein, flop -> Implementieren!
-        // ###
-
-        // TODO morgen früh 28.05.2021 ; Alex
-        //  1) Min- und Max-Anzahl removals pro iteration (siehe ALNS Paper)
-        //  2) Test Vehicles
-        //  3) Test Construction
-        //  4) ggf. weiter Tests, wenn Solution object anders aussieht nach ALNS
-
-        // TODO 2: tests für geladene instanzen
-        // TODO 3: Logik ALNS anfangen (50_000 iteration random destroy, und regret repairs)
-
-        // TODO 4: greedy repair
-
-        // TODO moegliches hashing
-        //  - bereits generierte Loesungen
-        //  - ggf. earliest, latest possible starts in partial routes (pred_id, pred_time,)
     }
 
+    /**
+     * Sets the upper bound for number of removals in each ALNS iteration
+     * (see Pisinger & Ropke 2007, C&OR §6.1.1 p. 2417)
+     * @param nCustomers: number of customers
+     * @param maxDistance: maximal distance in the input locations
+     */
     private void setInstanceSpecificParameters(int nCustomers, double maxDistance) {
-
-        // set upper bound for number of removals in each ALNS iteration
-        // (see Pisinger & Ropke 2007, C&OR §6.1.1 p. 2417)
-
         int lb1 = Config.lowerBoundRemovalsMax;
         int lb2 = (int) Math.round(nCustomers * Config.lowerBoundRemovalsFactor);
         Config.lowerBoundRemovals = Math.min(lb1,  lb2);
@@ -124,15 +114,89 @@ public class MainALNS {
 
         // set penalty (costs) for unserved customers
         Config.penaltyUnservedCustomer = maxDistance * Config.costFactorUnservedCustomer;
-
     }
 
+    /**
+     * Entry point of the program. Calls the runALNS function with the attached
+     * instance being defined as first args parameter.
+     * @param args: args parameter (instance name to be solved)
+     * @throws ArgumentOutOfBoundsException
+     */
     public static void main(String[] args) throws ArgumentOutOfBoundsException {
-        final MainALNS algo = new MainALNS();
-        algo.runALNS(args[0], 100);
-        // Add TimeLimit (?)
+        String instanceName = args[0];
+        boolean isSolomonInstance = Boolean.parseBoolean(args[1]);
+        int nCustomers = 25;
+        String outFile = args.length > 1 ? args[1] : "results.txt";
+        
+        Data[] data;
+        if (isSolomonInstance)
+        	data = loadSolomonInstance(instanceName, nCustomers);
+        else
+        	data = loadHospitalInstance(instanceName);
+        
+    	final MainALNS algo = new MainALNS(outFile);
+    	algo.runALNS(data[0], instanceName);        	
+//        for (Data d: data) {
+//        	final MainALNS algo = new MainALNS(outFile);
+//        	algo.runALNS(d, instanceName);        	
+//        }
+        // Alex: Add TimeLimit (?)
+    }
+    
+    public static Data[] loadSolomonInstance(String instanceName, int nCustomers) {
+    	SolomonInstanceGenerator generator = new SolomonInstanceGenerator();
+        Data[] data = new Data[1];
+        try {
+            data[0] = generator.loadInstance(instanceName + ".txt", nCustomers);
+        } catch (ArgumentOutOfBoundsException | IOException e) {
+            e.printStackTrace();
+        }
+        return data;
+    }
+    
+    public static Data[] loadHospitalInstance(String instanceNam) {
+    	HospitalInstanceLoader loader = new HospitalInstanceLoader();
+        Data[] dataArr;
+        dataArr = loader.loadHospitalInstanceFromJSON("hospital_instance_i020_b1_f6_v01");
+        return dataArr;
     }
 
+    
+    //
+    // ### TODOs ###
+    //
+    
     // TODO performance
     // - LRU cache (last recent usage)
+    
+    // TODO 23.02.2022 ; Chris
+    // ###
+    // - [v] simulated annealing  [Ropke&Pisinger, p.2416 COR]  // alter code könnte helfen
+    // - [v] adaptive Komponente: Wahrscheinlichkeit von destroy und insertion 
+    //     nicht mehr uniformly distributed, sondern Wahrscheinlichkeit nach historischem 
+    //     Erfolg p- und p+ (sigma-Werte)
+    // - [v] hashcode für einzelne solutions
+    // 
+    // !!Tracking für die profs; Was sind meine contributions!!
+    // - [v] Prüfen ob alle Operatoren Von Pisinger&Ropke mit aufgenommen worden sind für VRPTW
+    //   - wenn ja: top
+    //   - wenn nein, -> Implementieren!
+    // ###
+
+    // TODO morgen früh 28.05.2021 ; Alex
+    //  1) Min- und Max-Anzahl removals pro iteration (siehe ALNS Paper)
+    //  2) Test Vehicles
+    //  3) Test Construction
+    //  4) ggf. weiter Tests, wenn Solution object anders aussieht nach ALNS
+
+    // TODO 2: tests für geladene instanzen
+    
+    // TODO 3: Logik ALNS anfangen (50_000 iteration random destroy, und regret repairs)
+
+    // TODO 4: greedy repair
+
+    // TODO moegliches hashing
+    //  - bereits generierte Loesungen
+    //  - ggf. earliest, latest possible starts in partial routes (pred_id, pred_time,)
+
 }

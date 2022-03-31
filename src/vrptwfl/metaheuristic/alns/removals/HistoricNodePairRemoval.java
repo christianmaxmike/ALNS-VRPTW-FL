@@ -34,7 +34,7 @@ public class HistoricNodePairRemoval extends AbstractRemoval {
             }
 
             double[] removal = possibleRemovals.get(idx);
-            solution.getVehicles().get((int) removal[1]).applyRemoval((int) removal[2], this.data);
+            solution.getVehicles().get((int) removal[1]).applyRemoval((int) removal[2], this.data, solution);
             removedCustomers.add((int) removal[0]);
 
             nRemovals--;

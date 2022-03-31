@@ -4,6 +4,7 @@ import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
+import vrptwfl.metaheuristic.utils.DataUtils;
 
 import java.util.*;
 
@@ -19,13 +20,15 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
     }
 
     @Override
-    List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) {
-
-        List<Integer> removedCustomers = new ArrayList<>();
+    List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) {        
+        int[] customerLocationReferences = solution.getCustomerAffiliationToLocations().clone();
+        
+    	List<Integer> removedCustomers = new ArrayList<>();
 
         // choose route at random
         ArrayList<Vehicle> vehicles = new ArrayList<>(solution.getUsedVehicles()); // only vehicle which contain customers
-        if (vehicles.isEmpty()) return removedCustomers; // if no vehicle contains customers
+        if (vehicles.isEmpty()) 
+        	return removedCustomers; // if no vehicle contains customers
 
         boolean[] triedVehicle = new boolean[solution.getVehicles().size()];
 
@@ -34,38 +37,44 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
         triedVehicle[firstVehicle.getId()] = true;
 
         // create first cluster
-        ArrayList<Integer> customersToRemove = getCustomersToRemove(firstVehicle);
-        // TODO wieder raus
-//        System.out.println(customersToRemove);
-
+        ArrayList<Integer> customersToRemove = getCustomersToRemove(firstVehicle, solution);
+        
         // apply removals
         for (Integer customer: customersToRemove) {
-            // TODO wieder raus
-//            System.out.println("Remove customer (first): " + customer);
             removedCustomers.add(customer);
-            firstVehicle.applyRemovalForCustomer(customer, this.data);
+            firstVehicle.applyRemovalForCustomer(customer, this.data, solution);
             nRemovals--;
         }
 
         // still more removals needed (nRemovals not yet reached) and there is vehicles left from which customers can be removed
         while (nRemovals > 0 && !solution.getUsedVehicles().isEmpty()) {
-
             // randomly select customer already removed
             int idxC = Config.randomGenerator.nextInt(removedCustomers.size());
             Integer referenceCustomer = removedCustomers.get(idxC);
+            int firstCustomerPreferencedLocation = customerLocationReferences[referenceCustomer];
+            int referenceCustomerLocationIdx = DataUtils.getLocationIndex(referenceCustomer, solution);
 
+            // int referenceCustomerLocationIdx = DataUtils.getLocationIndex(referenceCustomer.intValue(), customerLocationReferences[referenceCustomer.intValue()], solution.getData());
+            
             // find customer close to reference customer (however, preferably one from a tour that has not yet been processed)
-            double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[referenceCustomer];
+            // TODO: Chris - adapt to multiple locations
+            // double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[referenceCustomer];
+            double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[referenceCustomerLocationIdx];
             ArrayList<double[]> closest = new ArrayList<>();
 
             // add all customers already assigned to the vehicles
-            // TODO check if vehicle schon angefasst wurde (this new request should come from an untouched route)
+            // TODO Alex: check if vehicle schon angefasst wurde (this new request should come from an untouched route)
             for (Vehicle vehicle: solution.getVehicles()) {
                 if (!vehicle.isUsed()) continue; // if vehicle is not used
                 if (triedVehicle[vehicle.getId()]) continue; // if cluster has been build from this vehicle already
                 for (int customer: vehicle.getCustomers()) {
-                    if (customer == 0) continue;
-                    closest.add(new double[] {customer, vehicle.getId(), distanceToFirstCustomer[customer]});
+                    if (customer == 0) 
+                    	continue;
+                    int customerPreferencedLocation = customerLocationReferences[customer];
+                    // int customersLocation = DataUtils.getLocationIndex(customer, solution);
+                    int customersLocation = DataUtils.getLocationIndex(customer, solution);
+                    closest.add(new double[] {customer, vehicle.getId(), distanceToFirstCustomer[customersLocation]});
+                    // closest.add(new double[] {customer, vehicle.getId(), distanceToFirstCustomer[customer]});
                 }
             }
 
@@ -82,13 +91,11 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
             triedVehicle[vehicle.getId()] = true;
 
             // create  cluster
-            customersToRemove = getCustomersToRemove(vehicle);
+            customersToRemove = getCustomersToRemove(vehicle, solution);
             // apply removals
             for (Integer customer: customersToRemove) {
                 removedCustomers.add(customer);
-                // TODO wieder raus
-//                System.out.println("Remove customer (iter): " + customer);
-                vehicle.applyRemovalForCustomer(customer, this.data);
+                vehicle.applyRemovalForCustomer(customer, this.data, solution);
                 nRemovals--;
                 if (nRemovals <= 0) break;
             }
@@ -97,18 +104,17 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
         return removedCustomers;
     }
 
-    private ArrayList<Integer> getCustomersToRemove(Vehicle vehicle) {
+    private ArrayList<Integer> getCustomersToRemove(Vehicle vehicle, Solution solution) {
         ArrayList<Integer> customersToRemove = new ArrayList<>();
         if (vehicle.getnCustomersInTour() < 3) {
             // remove all customers in tour
-//            System.out.println("alle raus"); // TODO wieder raus
             customersToRemove.addAll(vehicle.getRealCustomers());
         } else {
             // partition customers in route into two clusters
             // apply Kruskal's algorithm but stop when two disconnected parts are left
             // choose one cluster at random, and remove customers
 //            System.out.println("kruskal raus"); // TODO wieder raus
-            customersToRemove = this.applyKruskalToGetCustomersToBeRemoved(vehicle);
+            customersToRemove = this.applyKruskalToGetCustomersToBeRemoved(vehicle, solution);
         }
         return customersToRemove;
     }
@@ -116,10 +122,10 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
     // KIT 08: Minimum Spanning Trees
     // slides 257-
     // https://www.youtube.com/watch?v=99FvOZTogzA
-    private ArrayList<Integer> applyKruskalToGetCustomersToBeRemoved(Vehicle vehicle) {
+    private ArrayList<Integer> applyKruskalToGetCustomersToBeRemoved(Vehicle vehicle, Solution solution) {
 
         int nNodes = vehicle.getnCustomersInTour();
-        // TODO wieder raus
+        // TODO Alex: wieder raus
 //        System.out.println("Vehicle " + vehicle.getId());
 //        System.out.println("nNodes " + nNodes);
 
@@ -127,7 +133,7 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
         UnionFind T = new UnionFind(nNodes);
 
         // sort E in ascending order of weight
-        List<Edge> edges = this.createEdges(vehicle);
+        List<Edge> edges = this.createEdges(vehicle, solution);
         Collections.sort(edges);
 
         // kruskal(E)
@@ -161,15 +167,21 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
     }
 
     // edges consider positions of customers in tour (not the customer id)
-    private ArrayList<Edge> createEdges(Vehicle vehicle) {
+    private ArrayList<Edge> createEdges(Vehicle vehicle, Solution solution) {
         ArrayList<Edge> edges = new ArrayList<>();
         for (int i = 0; i < vehicle.getRealCustomers().size() - 1; i++) { // customer 0 and n are dummies
             for (int j = i + 1; j < vehicle.getRealCustomers().size(); j++) {
 //                edges.add(new Edge(i, j, this.data.getDistanceBetweenCustomers(i,j)));
                 int customerI = vehicle.getRealCustomers().get(i);
                 int customerJ = vehicle.getRealCustomers().get(j);
+
+                int locCustomerI = solution.getData().getCustomersToLocations().get(solution.getData().getOriginalCustomerIds()[customerI]).get(solution.getCustomerAffiliationToLocations()[customerI]);
+                int locCustomerJ = solution.getData().getCustomersToLocations().get(solution.getData().getOriginalCustomerIds()[customerJ]).get(solution.getCustomerAffiliationToLocations()[customerJ]);
+
                 // graph assumes that nodes start at 0
-                Edge edge = new Edge(i, j, this.data.getDistanceBetweenCustomers(customerI,customerJ));
+                // Edge edge = new Edge(i, j, this.data.getDistanceBetweenCustomers(customerI,customerJ));
+                // Edge edge = new Edge(i, j, solution.getDistanceBetweenCustomersByAffiliations(customerI,customerJ));
+                Edge edge = new Edge(i, j, solution.getDistanceBetweenLocations(locCustomerI,locCustomerJ));
 //                edge.print();
                 edges.add(edge);
             }
@@ -268,7 +280,7 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
                 if (clusterIds[i] == targetId) positions.add(i);
             }
 
-            // TODO wieder raus
+            // TODO Alex: wieder raus
 //            // set values for the two clusters to either 0 or 1
 //            int origValueFirstCluster = clusterIds[0];
 //            for (int i = 0; i < clusterIds.length; i++) {

@@ -9,7 +9,8 @@ import java.util.List;
 public class CalcUtils {
 
     public static double calculateGap(double valueOptimal, double compValue) {
-        return Math.abs(compValue - valueOptimal) / compValue;
+        // return Math.abs(compValue - valueOptimal) / compValue;
+        return (compValue - valueOptimal) / compValue;
     }
 
     // returns random number in given range [lowerBound, upperBound]

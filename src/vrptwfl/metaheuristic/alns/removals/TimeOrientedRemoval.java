@@ -6,6 +6,7 @@ import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
 import vrptwfl.metaheuristic.utils.CalcUtils;
+import vrptwfl.metaheuristic.utils.DataUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -16,9 +17,7 @@ import java.util.List;
 // Pisinger & Ropke 2007, page 2414 (C&OR)
 public class TimeOrientedRemoval extends AbstractRemoval {
 
-
     private final boolean randomize;
-
     private double weightStartTimeInSolution; // [%] in Pisinger & Ropke = 1; in Jungwirth can be between 0 and 1
 
     public TimeOrientedRemoval(Data data, boolean randomize, double weightStartTimeInSolution) throws ArgumentOutOfBoundsException {
@@ -39,17 +38,25 @@ public class TimeOrientedRemoval extends AbstractRemoval {
         int firstCustomer = -1; // set dummy value to see later if customer could be removed
         int posFirstRemoval = CalcUtils.getRandomNumberInClosedRange(0, this.data.getnCustomers() - solution.getNotAssignedCustomers().size() - 1);
         double startTimeFirstCustomer = -1.;
+        int firstCustomerLocationIdx = -1;
+        int firstCustomerPreferencedLocation = -1;
 
-        // TODO koennen wir das auslagern in eigene Methode? Ist identisch mit ShawSimplified
+        // TODO Alex: koennen wir das auslagern in eigene Methode? Ist identisch mit ShawSimplified
         // go through all vehicles and count the customers until the count corresponds to the position to remove
         for (Vehicle vehicle: solution.getVehicles()) {
-            if (!vehicle.isUsed()) continue;
+            if (!vehicle.isUsed()) 
+            	continue;
 
             if (posFirstRemoval >= vehicle.getnCustomersInTour()) {
                 posFirstRemoval -= vehicle.getnCustomersInTour();
             } else {
                 startTimeFirstCustomer = vehicle.getStartOfServices().get(posFirstRemoval + 1);  // +1 as dummy out is at index 0
-                firstCustomer = vehicle.applyRemoval(posFirstRemoval + 1, this.data);  // +1 as dummy out is at index 0
+                // firstCustomerPreferencedLocation = solution.getCustomerAffiliationToLocations()[posFirstRemoval + 1];
+                firstCustomer = vehicle.getCustomers().get(posFirstRemoval + 1);
+                firstCustomerPreferencedLocation = solution.getCustomerAffiliationToLocations()[firstCustomer];
+                firstCustomerLocationIdx = DataUtils.getLocationIndex(firstCustomer, solution);
+
+                vehicle.applyRemoval(posFirstRemoval + 1, this.data, solution);  // +1 as dummy out is at index 0
                 removedCustomers.add(firstCustomer); //vehicle.getCustomers().get(posFirstRemoval));
                 nRemovals--;
                 break;
@@ -60,7 +67,9 @@ public class TimeOrientedRemoval extends AbstractRemoval {
         if (firstCustomer == -1) return removedCustomers;
 
         // 2) --- get customers closest to the reference customer ---
-        double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[firstCustomer];
+        // TODO: Chris: auf mehrere locations anpassen
+        // double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[firstCustomer];
+        double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[firstCustomerLocationIdx];
         List<double[]> closest = new ArrayList<>();
 
         // add all customers already assigned to the vehicle
@@ -73,7 +82,9 @@ public class TimeOrientedRemoval extends AbstractRemoval {
                 double timeDiff = Math.abs(startTimeFirstCustomer - vehicle.getStartOfServices().get(positionCounter));
                 double avgStartTime = data.getAverageStartTimes(firstCustomer, customer);
                 double timeRelatedness = this.weightStartTimeInSolution * timeDiff + (1 - this.weightStartTimeInSolution) * avgStartTime;
-                closest.add(new double[] {customer, vehicle.getId(), distanceToFirstCustomer[customer], timeRelatedness});
+                int customersLocation = DataUtils.getLocationIndex(customer, solution);
+                closest.add(new double[] {customer, vehicle.getId(), distanceToFirstCustomer[customersLocation], timeRelatedness});
+                // closest.add(new double[] {customer, vehicle.getId(), distanceToFirstCustomer[customer], timeRelatedness});
             }
         }
         // sort according to distance (smallest distance first)
@@ -95,7 +106,7 @@ public class TimeOrientedRemoval extends AbstractRemoval {
             double[] removal = closest.get(idx);
 
             removedCustomers.add((int) removal[0]);
-            solution.getVehicles().get((int) removal[1]).applyRemovalForCustomer((int) removal[0], this.data);
+            solution.getVehicles().get((int) removal[1]).applyRemovalForCustomer((int) removal[0], this.data, solution);
 
             // remove customer from list of closest customers
             closest.remove(idx);
