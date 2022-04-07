@@ -2,12 +2,10 @@ package vrptwfl.metaheuristic.alns.removals;
 
 import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.common.Solution;
-import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
 import vrptwfl.metaheuristic.utils.CalcUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

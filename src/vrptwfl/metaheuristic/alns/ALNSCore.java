@@ -4,6 +4,8 @@ import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.alns.insertions.AbstractInsertion;
 import vrptwfl.metaheuristic.alns.insertions.GreedyInsertion;
 import vrptwfl.metaheuristic.alns.insertions.RegretInsertion;
+import vrptwfl.metaheuristic.alns.insertions.RegretInsertionBacktracking;
+import vrptwfl.metaheuristic.alns.insertions.SkillMatchingInsertion;
 import vrptwfl.metaheuristic.alns.removals.*;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.common.Vehicle;
@@ -88,6 +90,8 @@ public class ALNSCore {
         if (Config.useTimeOrientedRemovalPisingerRandom) destroyList.add(new TimeOrientedRemoval(data, true, 1.0));
         if (Config.useWorstRemovalDeterministic) destroyList.add(new WorstRemoval(data, false));
         if (Config.useWorstRemovalRandom) destroyList.add(new WorstRemoval(data, true));
+        if (Config.useSkillMismatchRemovalDeterministic) destroyList.add(new SkillMismatchRemoval(data, false));
+        if (Config.useSkillMismatchRemovalRandom) destroyList.add(new SkillMismatchRemoval(data, true));
 
         this.destroyOperators = new AbstractRemoval[destroyList.size()];
         this.destroyOperators = destroyList.toArray(this.destroyOperators);
@@ -109,11 +113,14 @@ public class ALNSCore {
         List<AbstractInsertion> repairList = new ArrayList<>();
 
         if (Config.useGreedyInsert) repairList.add(new GreedyInsertion(data));
+        if (Config.useSkillMatchingInsert) repairList.add(new SkillMatchingInsertion(data));
         if (Config.useNRegret2) repairList.add(new RegretInsertion(2, data));
         if (Config.useNRegret3) repairList.add(new RegretInsertion(3, data));
         if (Config.useNRegret4) repairList.add(new RegretInsertion(4, data));
         if (Config.useNRegret5) repairList.add(new RegretInsertion(5, data));
         if (Config.useNRegret6) repairList.add(new RegretInsertion(6, data));
+        
+        if (Config.enableBacktracking) repairList.add(new RegretInsertionBacktracking(2, data));
 
         this.repairOperators = new AbstractInsertion[repairList.size()];
         this.repairOperators = repairList.toArray(this.repairOperators);
@@ -186,6 +193,7 @@ public class ALNSCore {
             //AbstractInsertion repairOp = getRepairOperatorAtRandom();
             AbstractInsertion repairOp = drawInsertionOperator();
             repairOp.solve(solutionTemp);
+
             
             // update neighbor graph if new solution was found (TODO check if the solution is really a new one (hashtable?)
             if (Config.useHistoricNodePairRemovalRandom || Config.useHistoricNodePairRemovalDeterministic) this.updateNeighborGraph(solutionTemp);
@@ -477,7 +485,7 @@ public class ALNSCore {
 
     
     //
-    // DEPRECTAED FUNCTIONS - START
+    // DEPRECATED FUNCTIONS - START
     //
     // TODO hier brauchen wir auch noch Test cases
     private Solution checkImprovement_orig(Solution solutionTemp, Solution solutionCurrent, Solution solutionBestGlobal) {

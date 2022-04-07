@@ -4,14 +4,10 @@ import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
-import vrptwfl.metaheuristic.utils.DataUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.ListIterator;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class RegretInsertion extends AbstractInsertion {
 
@@ -60,12 +56,16 @@ public class RegretInsertion extends AbstractInsertion {
             double regret = -1;
 
             // get all possible insertions for the customer
+            // entries have the form: 
+    		// customer, vehicleId, posInRoute, starTime, costs, location, capacity, entryIdxInLoc
             ArrayList<double[]> possibleInsertionsForCustomer = solution.getPossibleInsertionsForCustomer(customer);
 
             // if list is empty, no feasible assignment to any route exists for that customer
             if (possibleInsertionsForCustomer.isEmpty()) {
-                solution.getTempInfeasibleCustomers().add(customer);
-                iter.remove();
+            	if (solution.checkSchedulingOfPredecessors(customer)) {
+            		solution.getTempInfeasibleCustomers().add(customer);
+            		iter.remove();            		
+            	}
             } else {
                 // get regret by sorting list and calculating difference between best and k-th best insertion
                 regret = this.calculateRegret(this.k, possibleInsertionsForCustomer);
@@ -116,7 +116,9 @@ public class RegretInsertion extends AbstractInsertion {
         return regret;
     }
 
-
-
+	@Override
+	public Solution runBacktracking(Solution initSolution) {
+		return initSolution;
+	}
 
 }

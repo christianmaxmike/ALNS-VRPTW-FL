@@ -21,7 +21,7 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
 
     @Override
     List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) {        
-        int[] customerLocationReferences = solution.getCustomerAffiliationToLocations().clone();
+        // int[] customerLocationReferences = solution.getCustomerAffiliationToLocations().clone();
         
     	List<Integer> removedCustomers = new ArrayList<>();
 
@@ -51,7 +51,7 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
             // randomly select customer already removed
             int idxC = Config.randomGenerator.nextInt(removedCustomers.size());
             Integer referenceCustomer = removedCustomers.get(idxC);
-            int firstCustomerPreferencedLocation = customerLocationReferences[referenceCustomer];
+            // int firstCustomerPreferencedLocation = customerLocationReferences[referenceCustomer];
             int referenceCustomerLocationIdx = DataUtils.getLocationIndex(referenceCustomer, solution);
 
             // int referenceCustomerLocationIdx = DataUtils.getLocationIndex(referenceCustomer.intValue(), customerLocationReferences[referenceCustomer.intValue()], solution.getData());
@@ -70,7 +70,7 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
                 for (int customer: vehicle.getCustomers()) {
                     if (customer == 0) 
                     	continue;
-                    int customerPreferencedLocation = customerLocationReferences[customer];
+                    // int customerPreferencedLocation = customerLocationReferences[customer];
                     // int customersLocation = DataUtils.getLocationIndex(customer, solution);
                     int customersLocation = DataUtils.getLocationIndex(customer, solution);
                     closest.add(new double[] {customer, vehicle.getId(), distanceToFirstCustomer[customersLocation]});
@@ -181,7 +181,7 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
                 // graph assumes that nodes start at 0
                 // Edge edge = new Edge(i, j, this.data.getDistanceBetweenCustomers(customerI,customerJ));
                 // Edge edge = new Edge(i, j, solution.getDistanceBetweenCustomersByAffiliations(customerI,customerJ));
-                Edge edge = new Edge(i, j, solution.getDistanceBetweenLocations(locCustomerI,locCustomerJ));
+                Edge edge = new Edge(i, j, solution.getData().getDistanceBetweenLocations(locCustomerI,locCustomerJ));
 //                edge.print();
                 edges.add(edge);
             }

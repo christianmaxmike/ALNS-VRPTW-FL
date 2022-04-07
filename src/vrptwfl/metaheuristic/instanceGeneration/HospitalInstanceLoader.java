@@ -1,18 +1,14 @@
 package vrptwfl.metaheuristic.instanceGeneration;
 
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
-import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
 import vrptwfl.metaheuristic.utils.DataUtils;
 import vrptwfl.metaheuristic.Config;
 
@@ -88,6 +84,7 @@ public class HospitalInstanceLoader {
 			ImportedRoom[] rooms = instance.getRooms(); //dataLoader.loadRoomsFromJSON(instanceName);
 			ImportedJob[] importedRealJobs = instance.getJobs();
 			double[][] realJobs = this.generateRealJobs(importedRealJobs);
+			HashMap<Integer, ArrayList<Integer>> predJobs = this.generatePredJobs(importedRealJobs);
 //			Job[] realJobs = this.generateRealJobs(importedRealJobs, locations);			
 			HashMap<Integer, ArrayList<Integer>> job2Location = getJobToLocation(importedRealJobs);
 
@@ -120,10 +117,13 @@ public class HospitalInstanceLoader {
 				// data[0].setRealJobs(realJobsMorning);
 				// data[1].setRealJobs(realJobsEvening);
 				ArrayList<double[][]> morningEveningJobs = this.getJobsForMorningAndEveningShift(realJobs);
-				this.handleDataTransfer(morningEveningJobs.get(0), data[0]);
-				this.handleDataTransfer(morningEveningJobs.get(1), data[1]);
+				HashMap<Integer, ArrayList<Integer>> morningPredJobs = this.getPredJobsShift(predJobs, morningEveningJobs.get(0));
+				HashMap<Integer, ArrayList<Integer>> eveningPredJobs = this.getPredJobsShift(predJobs, morningEveningJobs.get(1));
+				this.handleDataTransfer(morningEveningJobs.get(0), data[0], morningPredJobs);
+				this.handleDataTransfer(morningEveningJobs.get(1), data[1], eveningPredJobs);
 			} else {
-				this.handleDataTransfer(realJobs, data[0]);
+				//TODO: Chris - add depot dummy job
+				this.handleDataTransfer(realJobs, data[0], predJobs);
 				// data[0].setRealJobs(realJobs);
 			}
 
@@ -168,7 +168,7 @@ public class HospitalInstanceLoader {
 	 * @param jobInformation
 	 * @param data
 	 */
-	private void handleDataTransfer(double[][] jobInformation, Data data) {
+	private void handleDataTransfer(double[][] jobInformation, Data data, HashMap<Integer, ArrayList<Integer>> predJobs) {
         List<Integer> customerIds = IntStream.rangeClosed(1, jobInformation[0].length-1).boxed().collect(Collectors.toList());
 		int[] originalCustomerIds = DataUtils.convertDoubleArrToIntArr(jobInformation[6]);
         data.setEndOfPlanningHorizon((int) jobInformation[1][0]); // <-- Depot Info
@@ -180,7 +180,19 @@ public class HospitalInstanceLoader {
 		data.setDemands(DataUtils.convertDoubleArrToIntArr(jobInformation[3]));
 		data.setNCustomers(jobInformation[0].length-1);
 		data.setRequiredSkillLvl(DataUtils.convertDoubleArrToIntArr(jobInformation[4]));
+		data.setCustomersPreferredLocation(DataUtils.convertDoubleArrToIntArr(jobInformation[5]));
+		data.setPredCustomers(predJobs);
 		data.calculateAverageStartTimes();
+		data.createSwappingCosts();
+	}
+	
+	private HashMap<Integer, ArrayList<Integer>> getPredJobsShift (HashMap<Integer, ArrayList<Integer>> predJobs, double[][] jobInfo) {
+		HashMap<Integer, ArrayList<Integer>> shiftPredJobs = new HashMap<Integer, ArrayList<Integer>>();
+		for (int i=1; i<jobInfo[0].length; i++) {
+			int customerId = (int) jobInfo[6][i];
+			shiftPredJobs.put(customerId, predJobs.get(customerId));
+		}
+		return shiftPredJobs;
 	}
 	
 	private ArrayList<double[][]> getJobsForMorningAndEveningShift(double[][] realJobs) {
@@ -387,7 +399,6 @@ public class HospitalInstanceLoader {
 	 * @return imported therapists (just split if long shift)
 	 */
 	private ImportedTherapist[] splitRegularShifts(ImportedTherapist[] therapists) {
-		
 		ArrayList<ImportedTherapist> listSplitShifts = new ArrayList<>();
 		int idx = -1;
 		int connectionId = -1;
@@ -437,6 +448,18 @@ public class HospitalInstanceLoader {
 		return customerToLocations;
 	}
 	
+	private HashMap<Integer, ArrayList<Integer>> generatePredJobs(ImportedJob[] importedRealJobs) {
+		HashMap<Integer, ArrayList<Integer>> predJobs = new HashMap<Integer, ArrayList<Integer>>();
+		for(int i = 0; i < importedRealJobs.length; i++) {
+			ImportedJob im = importedRealJobs[i];
+			ArrayList<Integer> listPredJobs = new ArrayList<Integer>();
+			for (int predJobId : im.getPredJobsIds())
+				listPredJobs.add(predJobId + 1);
+			predJobs.put(im.getId() + 1, listPredJobs);
+		}
+		return predJobs;
+	}
+	
 	private double[][] generateRealJobs(ImportedJob[] importedRealJobs) {
 		
 		// init jobs only with job id
@@ -445,6 +468,7 @@ public class HospitalInstanceLoader {
 //		for(int i = 0; i < importedRealJobs.length; i++) {
 //			jobs[i] = new Job(i);
 //		}
+		
 		for(int i = 0; i < jobInformation[0].length; i++) {
 			ImportedJob im = importedRealJobs[i];
 			jobInformation[0][i] = im.getEarliestStart();
@@ -453,7 +477,8 @@ public class HospitalInstanceLoader {
 			jobInformation[3][i] = 1;
 			jobInformation[4][i] = im.getSkill();
 			jobInformation[5][i] = im.getPreferredLocationId();
-			jobInformation[6][i] = im.getId();
+			jobInformation[6][i] = im.getId() + 1;
+			
 		}
 
 		//TODO Chris - mandatory jobs
@@ -497,6 +522,7 @@ public class HospitalInstanceLoader {
 	//
 	// CODE FROM BAD CODE / EXACT PROCEDURE
 	//
+	/*
 	private void generateMandatorySuccJobs(Job[] jobs) {
 		for(Job job: jobs) {
 			if(job.getMandatoryPredJobs().size() > 0) {
@@ -506,41 +532,30 @@ public class HospitalInstanceLoader {
 			}
 		}		
 	}
+	*/
 
-	private ArrayList<Job> generatePredJobs(ImportedJob im, Job[] jobs) {
-		ArrayList<Job> predJobs = new ArrayList<>();
+	/*
+	private ArrayList<Integer> generatePredJobs(ImportedJob im) {
+		ArrayList<Integer> predJobs = new ArrayList<>();
+		if(im.getPredJobsIds().length > 0)
+			for(Integer idx: im.getPredJobsIds())
+				predJobs.add(idx);
 
-		if(im.getPredJobsIds().length == 0) {
-			return predJobs;
-		} else {
-			for(Integer idx: im.getPredJobsIds()) {
-				predJobs.add(jobs[idx]);
-			}
-			return predJobs;
-		}
+		return predJobs;
 	}
-
-	private ArrayList<Location> generateLocationsForJob(ImportedJob im, Location[] locations) {
-		ArrayList<Location> locForJob = new ArrayList<>();
+	 */
+	
+	/*
+	private ArrayList<Integer> generateLocationsForJob(ImportedJob im, Location[] locations) {
+		ArrayList<Integer> locForJob = new ArrayList<>();
 		for(Integer idx: im.getLocationIds()) {
 			locForJob.add(this.getLocationFromId(locations, idx));
 		}
 		return locForJob;
 	}
+	*/
 
-	
-	private void setNVehiclesPerWorkingPattern(WorkingPattern[] wp, Vehicle[] vehicles) {
-		for(WorkingPattern w: wp) {
-			int count = 0;
-			for(Vehicle v: vehicles) {
-				if(v.getWorkingPattern().getId() == w.getId()) {
-					count++;
-				}
-			}
-			w.setNVehiclesInPattern(count);
-		}
-	}
-
+	/*
 	private Vehicle[] generateVehicles(ImportedTherapist[] therapists, WorkingPattern[] wp, int vehicleCapacity) {
 		Vehicle[] vehicles = new Vehicle[therapists.length];
 		for(ImportedTherapist t: therapists) {
@@ -548,7 +563,21 @@ public class HospitalInstanceLoader {
 		}
 		return vehicles;
 	}
+	*/
 
+
+//	private void setNVehiclesPerWorkingPattern(WorkingPattern[] wp, Vehicle[] vehicles) {
+//		for(WorkingPattern w: wp) {
+//			int count = 0;
+//			for(Vehicle v: vehicles) {
+//				if(v.getWorkingPattern().getId() == w.getId()) {
+//					count++;
+//				}
+//			}
+//			w.setNVehiclesInPattern(count);
+//		}
+//	}
+	
 	
 	/**
 	 * Planning with 540 min after 8am (working start); 48-60 mittag!
@@ -556,81 +585,82 @@ public class HospitalInstanceLoader {
 	 * @param wp
 	 * @return
 	 */
-	private WorkingPattern getWorkingPatternFromTherapist(ImportedTherapist t, WorkingPattern[] wp) {
-		int shiftStart = 0;
-		int shiftEnd;
-		if(!t.isShortShift()) {
-			shiftEnd = (int)Math.floor((double)540/this.planningInterval);
-		} else {
-			if(t.isShiftStartMorning()) {
-				shiftEnd = (int)Math.floor((double)240/this.planningInterval);
-			} else {
-				shiftStart = (int)Math.floor((double)300/this.planningInterval);
-				shiftEnd = (int)Math.floor((double)540/this.planningInterval);
-			}
-		}
-				
-		for(WorkingPattern w: wp) {
-			if(w.getShiftStart() == shiftStart && w.getShiftEnd() == shiftEnd) {
-				return w;
-			}
-		}
-		
-		return null;
-	}
+//	private WorkingPattern getWorkingPatternFromTherapist(ImportedTherapist t, WorkingPattern[] wp) {
+//		int shiftStart = 0;
+//		int shiftEnd;
+//		if(!t.isShortShift()) {
+//			shiftEnd = (int)Math.floor((double)540/this.planningInterval);
+//		} else {
+//			if(t.isShiftStartMorning()) {
+//				shiftEnd = (int)Math.floor((double)240/this.planningInterval);
+//			} else {
+//				shiftStart = (int)Math.floor((double)300/this.planningInterval);
+//				shiftEnd = (int)Math.floor((double)540/this.planningInterval);
+//			}
+//		}
+//				
+//		for(WorkingPattern w: wp) {
+//			if(w.getShiftStart() == shiftStart && w.getShiftEnd() == shiftEnd) {
+//				return w;
+//			}
+//		}
+//		
+//		return null;
+//	}
 
-	private WorkingPattern[] generateWorkingPattern(ImportedTherapist[] therapists) {
-		
-		ArrayList<WorkingPattern> wpList = new ArrayList<>();
-		int wp_id = -1;
-		
-		boolean longShift = false;
-		boolean shortShiftEarly = false;
-		boolean shortShiftLate = false;
-
-		// TO DO: hard coded start times...
-		for(ImportedTherapist t: therapists) {
-			if(!t.isShortShift() && !longShift) {
-				longShift = true;
-				wp_id++;
-				int shiftEnd = (int)Math.floor((double)540/this.planningInterval);
-				wpList.add(new WorkingPattern(wp_id, 0, shiftEnd, true, false, 0.0));
-			} else {
-				if(t.isShiftStartMorning() && t.isShortShift() && !shortShiftEarly) {
-					shortShiftEarly = true;
-					wp_id++;
-					int shiftEnd = (int)Math.floor((double)240/this.planningInterval);
-					wpList.add(new WorkingPattern(wp_id, 0, shiftEnd, false, true,0.0));
-				} else if (t.isShortShift() && !shortShiftLate){
-					shortShiftLate = true;
-					wp_id++;
-					int shiftStart = (int)Math.floor((double)300/this.planningInterval);
-					int shiftEnd = (int)Math.floor((double)540/this.planningInterval);
-					wpList.add(new WorkingPattern(wp_id, shiftStart, shiftEnd, false, false,0.0));
-				}
-			}
-		}
-		
-		WorkingPattern[] wp = new WorkingPattern[wpList.size()];
-		wp = wpList.toArray(wp);
-		
-		return wp;
-	}
+//	private WorkingPattern[] generateWorkingPattern(ImportedTherapist[] therapists) {
+//		
+//		ArrayList<WorkingPattern> wpList = new ArrayList<>();
+//		int wp_id = -1;
+//		
+//		boolean longShift = false;
+//		boolean shortShiftEarly = false;
+//		boolean shortShiftLate = false;
+//
+//		// TO DO: hard coded start times...
+//		for(ImportedTherapist t: therapists) {
+//			if(!t.isShortShift() && !longShift) {
+//				longShift = true;
+//				wp_id++;
+//				int shiftEnd = (int)Math.floor((double)540/this.planningInterval);
+//				wpList.add(new WorkingPattern(wp_id, 0, shiftEnd, true, false, 0.0));
+//			} else {
+//				if(t.isShiftStartMorning() && t.isShortShift() && !shortShiftEarly) {
+//					shortShiftEarly = true;
+//					wp_id++;
+//					int shiftEnd = (int)Math.floor((double)240/this.planningInterval);
+//					wpList.add(new WorkingPattern(wp_id, 0, shiftEnd, false, true,0.0));
+//				} else if (t.isShortShift() && !shortShiftLate){
+//					shortShiftLate = true;
+//					wp_id++;
+//					int shiftStart = (int)Math.floor((double)300/this.planningInterval);
+//					int shiftEnd = (int)Math.floor((double)540/this.planningInterval);
+//					wpList.add(new WorkingPattern(wp_id, shiftStart, shiftEnd, false, false,0.0));
+//				}
+//			}
+//		}
+//		
+//		WorkingPattern[] wp = new WorkingPattern[wpList.size()];
+//		wp = wpList.toArray(wp);
+//		
+//		return wp;
+//	}
 	
-	private void generateWorkingPatternAndVehicles(Data _data, ImportedTherapist[] therapists, int vehicleCapacity, Logger logger, int dataArrayId) {
-		WorkingPattern[] wp = this.generateWorkingPattern(therapists);
-		_data.setWorkingPattern(wp);
-
-		// generate vehicles
-		Vehicle[] vehicles = this.generateVehicles(therapists, wp, vehicleCapacity);
-		_data.setVehicles(vehicles);
-
-		this.setNVehiclesPerWorkingPattern(wp, vehicles);
-
-		if(Config.printHospitalLoaderInfo) {
-			this.printVehicleInformation(vehicles, wp, logger, dataArrayId);
-		}
-	}
+	
+//	private void generateWorkingPatternAndVehicles(Data _data, ImportedTherapist[] therapists, int vehicleCapacity, Logger logger, int dataArrayId) {
+//		WorkingPattern[] wp = this.generateWorkingPattern(therapists);
+//		_data.setWorkingPattern(wp);
+//
+//		// generate vehicles
+//		Vehicle[] vehicles = this.generateVehicles(therapists, wp, vehicleCapacity);
+//		_data.setVehicles(vehicles);
+//
+//		this.setNVehiclesPerWorkingPattern(wp, vehicles);
+//
+//		if(Config.printHospitalLoaderInfo) {
+//			this.printVehicleInformation(vehicles, wp, logger, dataArrayId);
+//		}
+//	}
 
 
 	//
@@ -747,7 +777,6 @@ public class HospitalInstanceLoader {
 
     public static void main(String[] args) throws IOException {
     	HospitalInstanceLoader loader = new HospitalInstanceLoader();
-        Data[] d;
-        d = loader.loadHospitalInstanceFromJSON("hospital_instance_i020_b1_f6_v02");
+    	loader.loadHospitalInstanceFromJSON("hospital_instance_i020_b1_f6_v01");
     }
 }

@@ -56,9 +56,9 @@ public class MainALNS {
         
         System.out.println("Init solution - not assigned customers   :" + solutionConstr.getNotAssignedCustomers());
         System.out.println("Init solution - temp infeasible customers:" + solutionConstr.getTempInfeasibleCustomers());
-        System.out.println("Customers for scheduling (original ids):" + Arrays.toString(data.getOriginalCustomerIds()));
+        System.out.println("Customers for scheduling:" + Arrays.toString(data.getOriginalCustomerIds()));
         solutionConstr.printSolution();
-        //System.exit(0);
+        System.exit(0);
 
         // ALNS
         ALNSCore alns = new ALNSCore(data);
@@ -66,7 +66,7 @@ public class MainALNS {
 
         System.out.println("Init solution - not assigned customers   :" + solutionALNS.getNotAssignedCustomers());
         System.out.println("Init solution - temp infeasible customers:" + solutionALNS.getTempInfeasibleCustomers());
-        System.out.println("Customers for scheduling (original job ids):" + Arrays.toString(data.getOriginalCustomerIds()));
+        System.out.println("Customers for scheduling:" + Arrays.toString(data.getOriginalCustomerIds()));
         long finishTimeConstruction = System.currentTimeMillis();
         long timeElapsed = (finishTimeConstruction - startTimeConstruction);
         System.out.println("Time for construction " + timeElapsed + " ms.");
@@ -81,7 +81,7 @@ public class MainALNS {
         if (data.getnCustomers() == 25)		    i = 0;
         else if (data.getnCustomers() == 50)	i = 1;
         else if (data.getnCustomers() == 100)	i = 2;
-        else return; //System.exit(0); // no optimal value stored --> Quit
+        else return; // no optimal value stored --> Quit
         
         // Calculate optimality gap
         double optimalObjFuncVal = OptimalSolutions.optimalObjFuncValue.get(instanceName)[i];
@@ -115,6 +115,36 @@ public class MainALNS {
         // set penalty (costs) for unserved customers
         Config.penaltyUnservedCustomer = maxDistance * Config.costFactorUnservedCustomer;
     }
+    
+    /**
+     * Loads the attached solomon instance.
+     * @param instanceName filename of solomon instance
+     * @param nCustomers number of customers being scheduled for the solomon instance
+     * @return array containing the data object in the 0-th position
+     */
+    public static Data[] loadSolomonInstance(String instanceName, int nCustomers) {
+    	SolomonInstanceGenerator generator = new SolomonInstanceGenerator();
+        Data[] data = new Data[1];
+        try {
+            data[0] = generator.loadInstance(instanceName + ".txt", nCustomers);
+        }
+        catch (ArgumentOutOfBoundsException | IOException e) { 
+            e.printStackTrace();
+        }		
+        return data;
+    }
+    
+    /**
+     * Loads the attached hospital instance.
+     * @param instanceName filename of hospital instance
+     * @return array containing data objects (if solveAsTwoProblems is activate in config file -> array contains morning/evening data objects)
+     */
+    public static Data[] loadHospitalInstance(String instanceNam) {
+    	HospitalInstanceLoader loader = new HospitalInstanceLoader();
+        Data[] dataArr;
+        dataArr = loader.loadHospitalInstanceFromJSON("hospital_instance_i060_b1_f6_v01");
+        return dataArr;
+    }
 
     /**
      * Entry point of the program. Calls the runALNS function with the attached
@@ -143,30 +173,11 @@ public class MainALNS {
         // Alex: Add TimeLimit (?)
     }
     
-    public static Data[] loadSolomonInstance(String instanceName, int nCustomers) {
-    	SolomonInstanceGenerator generator = new SolomonInstanceGenerator();
-        Data[] data = new Data[1];
-        try {
-            data[0] = generator.loadInstance(instanceName + ".txt", nCustomers);
-        } catch (ArgumentOutOfBoundsException | IOException e) {
-            e.printStackTrace();
-        }
-        return data;
-    }
-    
-    public static Data[] loadHospitalInstance(String instanceNam) {
-    	HospitalInstanceLoader loader = new HospitalInstanceLoader();
-        Data[] dataArr;
-        dataArr = loader.loadHospitalInstanceFromJSON("hospital_instance_i020_b1_f6_v01");
-        return dataArr;
-    }
-
-    
     //
     // ### TODOs ###
     //
     
-    // TODO performance
+    // TODO Alex : performance
     // - LRU cache (last recent usage)
     
     // TODO 23.02.2022 ; Chris
@@ -183,7 +194,7 @@ public class MainALNS {
     //   - wenn nein, -> Implementieren!
     // ###
 
-    // TODO morgen früh 28.05.2021 ; Alex
+    // TODO Alex : morgen früh 28.05.2021
     //  1) Min- und Max-Anzahl removals pro iteration (siehe ALNS Paper)
     //  2) Test Vehicles
     //  3) Test Construction

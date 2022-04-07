@@ -39,7 +39,7 @@ public class TimeOrientedRemoval extends AbstractRemoval {
         int posFirstRemoval = CalcUtils.getRandomNumberInClosedRange(0, this.data.getnCustomers() - solution.getNotAssignedCustomers().size() - 1);
         double startTimeFirstCustomer = -1.;
         int firstCustomerLocationIdx = -1;
-        int firstCustomerPreferencedLocation = -1;
+        // int firstCustomerPreferencedLocation = -1;
 
         // TODO Alex: koennen wir das auslagern in eigene Methode? Ist identisch mit ShawSimplified
         // go through all vehicles and count the customers until the count corresponds to the position to remove
@@ -53,7 +53,7 @@ public class TimeOrientedRemoval extends AbstractRemoval {
                 startTimeFirstCustomer = vehicle.getStartOfServices().get(posFirstRemoval + 1);  // +1 as dummy out is at index 0
                 // firstCustomerPreferencedLocation = solution.getCustomerAffiliationToLocations()[posFirstRemoval + 1];
                 firstCustomer = vehicle.getCustomers().get(posFirstRemoval + 1);
-                firstCustomerPreferencedLocation = solution.getCustomerAffiliationToLocations()[firstCustomer];
+                // firstCustomerPreferencedLocation = solution.getCustomerAffiliationToLocations()[firstCustomer];
                 firstCustomerLocationIdx = DataUtils.getLocationIndex(firstCustomer, solution);
 
                 vehicle.applyRemoval(posFirstRemoval + 1, this.data, solution);  // +1 as dummy out is at index 0

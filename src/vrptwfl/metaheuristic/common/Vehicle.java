@@ -1,7 +1,6 @@
 package vrptwfl.metaheuristic.common;
 
 import com.google.common.base.Objects;
-import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.utils.DataUtils;
 
@@ -57,7 +56,6 @@ public class Vehicle {
         this.skillLvl = skillLvl;
     }
     
-
     /**
      * Copies the vehicle object
      * @return Copy of vehicle object
@@ -104,7 +102,7 @@ public class Vehicle {
             double endServicePred = this.endOfServices.get(i);
             double startServiceSucc = this.startOfServices.get(i+1);
             
-            // return arr in format [location, capacitySlot, startTimeService, costs, entryIdxInTour]
+            // return arr in format [location, capacitySlot, startTimeService, costs, entryIdxInLoc]
             // locationIdx, capacity, timeStart, additionalTravelCosts, entryIdx};
             ArrayList<double[]> customersPossibleLTW = solution.getAvailableLTWForCustomer(customer, 
             		                                                     (int) earliestStartCustomer, 
@@ -116,7 +114,7 @@ public class Vehicle {
             	continue;
             else // possible insertion found
             	for (int newEntry = 0 ; newEntry<customersPossibleLTW.size(); newEntry++)
-            		
+            		// customer, vehicleId, posInRoute, starTime, costs, location, capacity, entryIdxInLoc
             		possibleInsertions.add(new double[] {customer, 
             											 this.id, 
             											 i+1, 
@@ -152,24 +150,23 @@ public class Vehicle {
             customer = succ;
             succ = this.customers.get(i+1);
 
+            // Get locations
             int locSucc = solution.getData().getCustomersToLocations().get(solution.getData().getOriginalCustomerIds()[succ]).get(solution.getCustomerAffiliationToLocations()[succ]);
             int locPred = solution.getData().getCustomersToLocations().get(solution.getData().getOriginalCustomerIds()[pred]).get(solution.getCustomerAffiliationToLocations()[pred]);
             int locCustomer = solution.getData().getCustomersToLocations().get(solution.getData().getOriginalCustomerIds()[customer]).get(solution.getCustomerAffiliationToLocations()[customer]);
             
-            // double distToCustomer = solution.getDistanceBetweenCustomersByAffiliations(pred, customer);
-            // double distFromCustomer = solution.getDistanceBetweenCustomersByAffiliations(customer, succ);
-            // double distWithoutCustomer = solution.getDistanceBetweenCustomersByAffiliations(pred, succ);
-            double distToCustomer = solution.getDistanceBetweenLocations(locPred, locCustomer);
-            double distFromCustomer = solution.getDistanceBetweenLocations(locCustomer, locSucc);
-            double distWithoutCustomer = solution.getDistanceBetweenLocations(locPred, locSucc);
-            
-            
+            // Get distances
+            double distToCustomer = solution.getData().getDistanceBetweenLocations(locPred, locCustomer);
+            double distFromCustomer = solution.getData().getDistanceBetweenLocations(locCustomer, locSucc);
+            double distWithoutCustomer = solution.getData().getDistanceBetweenLocations(locPred, locSucc);
+                 
+            // Calculate costs
             double travelTimeReduction = distToCustomer + distFromCustomer - distWithoutCustomer;
+            
+            // Add to possible removals
             possibleRemovals.add(new double[] {customer, this.id, i, travelTimeReduction});
             i++;
-
         } while (i < this.customers.size() - 1);
-
         return possibleRemovals;
     }
 
@@ -240,7 +237,8 @@ public class Vehicle {
         this.tourLength += additionCosts;
         
         solution.setCustomerAffiliationToLocation(customer, customerPreferredLocation);
-        solution.setCustomerAffiliationToCapacity(customer, locationCapacityOccupied);
+        solution.setCustomerAssignmentToCapacitySlot(customer, locationCapacityOccupied);
+        solution.setCustomerAssignmentToVehicles(customer, this.id);
         solution.setLocationOccupancy(DataUtils.getLocationIndex(customer, solution), 
         						  locationCapacityOccupied, 
         						  start, 
@@ -287,16 +285,17 @@ public class Vehicle {
         int locSucc = solution.getData().getCustomersToLocations().get(solution.getData().getOriginalCustomerIds()[succ]).get(solution.getCustomerAffiliationToLocations()[succ]);
         int locPred = solution.getData().getCustomersToLocations().get(solution.getData().getOriginalCustomerIds()[pred]).get(solution.getCustomerAffiliationToLocations()[pred]);
         int locCustomer = solution.getData().getCustomersToLocations().get(solution.getData().getOriginalCustomerIds()[customer]).get(solution.getCustomerAffiliationToLocations()[customer]);
-        double distToCustomer = solution.getDistanceBetweenLocations(locPred, locCustomer);
-        double distFromCustomer = solution.getDistanceBetweenLocations(locCustomer, locSucc);
+        double distToCustomer = solution.getData().getDistanceBetweenLocations(locPred, locCustomer);
+        double distFromCustomer = solution.getData().getDistanceBetweenLocations(locCustomer, locSucc);
         
         // double distToCustomer = solution.getDistanceBetweenCustomersByAffiliations(pred, customer);        
         // double distFromCustomer = solution.getDistanceBetweenCustomersByAffiliations(customer, succ);
         // double reductionTravelCosts = distToCustomer + distFromCustomer - solution.getDistanceBetweenCustomersByAffiliations(pred, succ);
-        double reductionTravelCosts = distToCustomer + distFromCustomer - solution.getDistanceBetweenLocations(locPred, locSucc);
+        double reductionTravelCosts = distToCustomer + distFromCustomer - solution.getData().getDistanceBetweenLocations(locPred, locSucc);
         
         solution.freeCustomerAffiliationToLocation(customer);
         solution.freeCustomerAffiliationToCapacity(customer);
+        solution.freeCustomerAffiliationToVehicle(customer);
         this.tourLength -= reductionTravelCosts;
 
         // this.printTour(solution);
@@ -311,6 +310,15 @@ public class Vehicle {
         return this.applyRemoval(position, data, solution);
     }
     
+    //
+    // CUSTOM GETTERS
+    // 
+    public double getSwappingCosts(Solution s) {
+    	double swappingCosts = 0.0;
+    	for ( int i = 1 ; i < this.customers.size()-1; i++)
+    		swappingCosts += s.getData().getSwappingCosts()[s.getData().getCustomersPreferredLocation()[this.customers.get(i)]][s.getCustomerAffiliationToLocations()[this.customers.get(i)]];
+    	return swappingCosts;
+    }
     
     //
     // SETTERS
@@ -380,13 +388,17 @@ public class Vehicle {
     }
 
     /**
-     * Set the numer of customers within the tour
-     * @param nCustomersInTour: nubmer of customers in the tour
+     * Set the number of customers within the tour
+     * @param nCustomersInTour: number of customers in the tour
      */
     public void setnCustomersInTour(int nCustomersInTour) {
         this.nCustomersInTour = nCustomersInTour;
     }
     
+    /**
+     * Set the skill level of the vehicle
+     * @param skillLvl: skill level
+     */
     public void setSkillLvl (int skillLvl) {
     	this.skillLvl = skillLvl;
     }
@@ -395,7 +407,7 @@ public class Vehicle {
     // GETTERS
     //
     /**
-     * Get the number of customers wihtin the tour of the vehicle
+     * Get the number of customers within the tour of the vehicle
      * @return number of customers being scheduled for the vehicle
      */
     public int getnCustomersInTour() {
@@ -425,7 +437,7 @@ public class Vehicle {
      * @return list (real) customers
      */
     public ArrayList<Integer> getRealCustomers() {
-        return new ArrayList(customers.subList(1, customers.size()-1));
+        return new ArrayList<Integer>(customers.subList(1, customers.size()-1));
     }
 
     /**
@@ -468,6 +480,10 @@ public class Vehicle {
         return isUsed;
     }
     
+    public int getSkillLvl() {
+    	return skillLvl;
+    }
+    
     
     //
     // EQUALITY & HASHING
@@ -499,19 +515,25 @@ public class Vehicle {
      */
     public void printTour(Solution sol) {
     	DecimalFormat df = new DecimalFormat("0.0");
-        System.out.println("Tour of vehicle " + this.id + " (n=" +  this.nCustomersInTour +  ")(TourCosts:" + df.format(this.tourLength) + "):"); // TODO logger debug
-        for (int i = 0; i < this.customers.size() - 1; i++) {
+        System.out.println("Tour of vehicle " + this.id + " (n=" +  this.nCustomersInTour +  ") (TourCosts:" + df.format(this.tourLength) + "):"); // TODO logger debug
+        System.out.print(this.customers.get(0) + " --(" + sol.getData().getDistanceBetweenLocations(0, sol.getData().getCustomersToLocations().get(sol.getData().getOriginalCustomerIds()[this.customers.get(1)]).get(sol.getCustomerAffiliationToLocations()[this.customers.get(1)])) + ")-> ");
+        for (int i = 1; i < this.customers.size() - 1; i++) {
         	int originalCustomerId = sol.getData().getOriginalCustomerIds()[this.customers.get(i)];
             System.out.print(this.customers.get(i) + 
             		"(" +originalCustomerId + "|" + 
             		DataUtils.getLocationIndex(this.customers.get(i), sol) + "|" + 
             		sol.getCustomerAffiliationToCapacity()[this.customers.get(i)] + "|" + 
-            		sol.getData().getServiceDurations()[this.customers.get(i)] + ")" + " --");
+            		sol.getData().getServiceDurations()[this.customers.get(i)] + "|" + 
+            		this.startOfServices.get(i) + "-" + 
+            		this.endOfServices.get(i) +  ")" + " --");
             
-            int locSucc = sol.getData().getCustomersToLocations().get(sol.getData().getOriginalCustomerIds()[this.customers.get(i)]).get(sol.getCustomerAffiliationToLocations()[this.customers.get(i)]);
-            int locPred = sol.getData().getCustomersToLocations().get(sol.getData().getOriginalCustomerIds()[this.customers.get(i+1)]).get(sol.getCustomerAffiliationToLocations()[this.customers.get(i+1)]);
+            int locPred = sol.getData().getCustomersToLocations().get(sol.getData().getOriginalCustomerIds()[this.customers.get(i)]).get(sol.getCustomerAffiliationToLocations()[this.customers.get(i)]);
+            int locSucc = sol.getData().getCustomersToLocations().get(sol.getData().getOriginalCustomerIds()[this.customers.get(i+1)]).get(sol.getCustomerAffiliationToLocations()[this.customers.get(i+1)]);
 
-            System.out.print("(" + sol.getDistanceBetweenLocations(locSucc, locPred) + ")-> ");
+            if (i==this.customers.size()-2)
+                System.out.print("(" + sol.getData().getDistanceBetweenLocations(locPred, 0) + ")-> ");
+            else
+            	System.out.print("(" + sol.getData().getDistanceBetweenLocations(locPred, locSucc) + ")-> ");
         }
         System.out.println(this.customers.get(this.customers.size() - 1) + "");
     }

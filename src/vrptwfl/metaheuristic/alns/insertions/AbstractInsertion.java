@@ -36,6 +36,8 @@ public abstract class AbstractInsertion {
      * @return double array containg the next possible insertion
      */
     abstract double[] getNextInsertion(Solution solution);
+    
+    public abstract Solution runBacktracking(Solution initSolution);
 
 
     //
@@ -50,8 +52,9 @@ public abstract class AbstractInsertion {
      * @return updated solution
      */
     public final Solution solve(Solution solution) {
-        // final such that method cannot be accidentally overridden in subclass
-        while (!solution.getNotAssignedCustomers().isEmpty()) {
+        // function is final such that method cannot be accidentally overridden in subclass
+        
+    	while (!solution.getNotAssignedCustomers().isEmpty()) {
         	
             double[] nextInsertion = this.getNextInsertion(solution);
             // check if at least one insertion has been found (-1 was initial dummy value and should be replaced by something >= 0)
@@ -72,6 +75,11 @@ public abstract class AbstractInsertion {
         return solution;
     }
 
+    
+    public final Solution solveBacktrack (Solution solution) {
+    	Solution sol = this.runBacktracking(solution);
+    	return sol;
+    }
     
     //
     // UPDATE METHODS

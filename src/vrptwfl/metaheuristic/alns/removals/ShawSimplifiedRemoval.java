@@ -1,6 +1,5 @@
 package vrptwfl.metaheuristic.alns.removals;
 
-import com.google.common.collect.Ordering;
 import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.common.Vehicle;
@@ -31,7 +30,7 @@ public class ShawSimplifiedRemoval extends AbstractRemoval {
         int firstCustomer = -1; // set dummy value to see later if customer could be removed
         int posFirstRemoval = CalcUtils.getRandomNumberInClosedRange(0, this.data.getnCustomers() - solution.getNotAssignedCustomers().size() - 1);
         int firstCustomerLocationIdx = -1;
-        int firstCustomerPreferencedLocation = -1;
+        // int firstCustomerPreferencedLocation = -1;
 
         // go through all vehicles and count the customers until the count corresponds to the position to remove
         for (Vehicle vehicle: solution.getVehicles()) {
@@ -42,7 +41,7 @@ public class ShawSimplifiedRemoval extends AbstractRemoval {
             } else {
             	// TODO: Chris - adapt to multiple locations
             	firstCustomer = vehicle.getCustomers().get(posFirstRemoval + 1);
-                firstCustomerPreferencedLocation = solution.getCustomerAffiliationToLocations()[firstCustomer];
+                // firstCustomerPreferencedLocation = solution.getCustomerAffiliationToLocations()[firstCustomer];
                 firstCustomerLocationIdx = DataUtils.getLocationIndex(firstCustomer, solution);
 
                 vehicle.applyRemoval(posFirstRemoval + 1, this.data, solution);  // +1 as dummy out is at index 0
@@ -60,8 +59,8 @@ public class ShawSimplifiedRemoval extends AbstractRemoval {
         while (nRemovals > 0) {
 
             // 1) choose already selected customer i (reference customer)
-            int idxI = CalcUtils.getRandomNumberInClosedRange(0, removedCustomers.size() - 1);
-            int customerI = removedCustomers.get(idxI);
+            // int idxI = CalcUtils.getRandomNumberInClosedRange(0, removedCustomers.size() - 1);
+            // int customerI = removedCustomers.get(idxI);
 
             // 2) get customers closest to the reference customer
             // get row form travel time matrix

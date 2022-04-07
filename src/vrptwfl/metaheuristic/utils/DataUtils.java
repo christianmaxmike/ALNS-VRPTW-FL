@@ -1,10 +1,9 @@
 package vrptwfl.metaheuristic.utils;
 
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
 
 import vrptwfl.metaheuristic.common.Solution;
-import vrptwfl.metaheuristic.data.Data;
 
 public class DataUtils {
 
@@ -22,23 +21,33 @@ public class DataUtils {
         return result;
     }
     
-    
-    public static int getLocationIndex (int customerId, Solution solution) {
-    	return solution.getData().getCustomersToLocations().get(solution.getData().getOriginalCustomerIds()[customerId]).get(solution.getCustomerAffiliationToLocations()[customerId]);
+    /**
+     * Converts a list of double values into an array
+     * @param list: list of double values
+     * @return array of doubles
+     */
+    public static double[] convertDoubleListToArr(ArrayList<Double> list) {
+    	double[] result = new double[list.size()];
+    	for (int i = 0; i<list.size(); i++)
+    		result[i] = list.get(i);
+    	return result;
     }
     
-//  
-//  public static int getMatchingIndexInBooleanArray (boolean[] arr, boolean value) {
-//  	for (int idx = 0 ; idx<arr.length; idx++)
-//  		if (arr[idx] == value) return idx;
-//  	return -1;
-//  }
-    
+    /**
+     * Converts a double array into an integer array
+     * @param inputArray: double array
+     * @return integer array
+     */
     public static int[] convertDoubleArrToIntArr (double[] inputArray) {
     	int[] intArray = new int[inputArray.length];
     	for (int i=0; i<intArray.length; ++i)
     		intArray[i] = (int) inputArray[i];
     	return intArray;
+    }
+
+    
+    public static int getLocationIndex (int customerId, Solution solution) {
+    	return solution.getData().getCustomersToLocations().get(solution.getData().getOriginalCustomerIds()[customerId]).get(solution.getCustomerAffiliationToLocations()[customerId]);
     }
     
 }

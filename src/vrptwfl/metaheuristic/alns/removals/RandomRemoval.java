@@ -1,6 +1,5 @@
 package vrptwfl.metaheuristic.alns.removals;
 
-import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;

@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Class implementing the solution object.
@@ -29,11 +30,18 @@ public class Solution {
     private ArrayList<Vehicle> vehicles;
     private Data data;
     private double totalCosts;
+    private double vehicleTourCosts;
+    private double swappingCosts;
+    private double penaltyCosts;
     private boolean isFeasible = false;
     private HashMap<Integer, HashMap<Integer, ArrayList<Double[]>>> map; // location -> capacitySlot -> list of service time tuples [start, end]
     private int[] customersAssignedLocations;     // length: customer size + 1 (depot)
     private int[] customersAssignedCapacitySlot;  // length: customer size + 1 (depot)
+    private int[] customersAssignedToVehicles;	  // length: customer size + 1 (depot)
 
+    private HashMap<Integer, ArrayList<double[]>> triedInsertions;
+    
+    
     /**
      * Constructor for a solution object.
      * @param data: Data object
@@ -52,11 +60,14 @@ public class Solution {
 		this.isFeasible = solutionTemp.isFeasible();
 		this.customersAssignedCapacitySlot = Arrays.copyOf(solutionTemp.getCustomerAffiliationToCapacity(), solutionTemp.getCustomerAffiliationToCapacity().length);
 		this.customersAssignedLocations = Arrays.copyOf(solutionTemp.getCustomerAffiliationToLocations(), solutionTemp.getCustomerAffiliationToLocations().length);
+		this.customersAssignedToVehicles = Arrays.copyOf(solutionTemp.getCustomersAssignedToVehicles(), solutionTemp.getCustomersAssignedToVehicles().length);
 		
+        this.triedInsertions = new HashMap<Integer, ArrayList<double[]>>();
+
+		// Copy vehicles
 		ArrayList<Vehicle> newVehicles = new ArrayList<>();
-		for (Vehicle veh: solutionTemp.getVehicles()) {
+		for (Vehicle veh: solutionTemp.getVehicles())
 			newVehicles.add(veh.copyDeep());
-		}
 		this.setVehicles(newVehicles);
 	}
 	
@@ -66,13 +77,16 @@ public class Solution {
 	 * @param data: Data object
 	 * @return: Empty solution object
 	 */
-    public static Solution getEmptySolution(Data data) {
+    @SuppressWarnings("serial")
+	public static Solution getEmptySolution(Data data) {
         Solution start = new Solution(data);
         start.setVehicles(data.initializeVehicles());
         // initially add all customers to list of not assigned customers
-        start.setNotAssignedCustomers(new ArrayList<>() {{ for (int i : data.getCustomers()) add(i); }});
+        start.setNotAssignedCustomers(new ArrayList<Integer>() {{ for (int i : data.getCustomers()) add(i); }});
         start.setTempInfeasibleCustomers(new ArrayList<>());
         start.setFeasible(false);
+        
+        start.triedInsertions = new HashMap<Integer, ArrayList<double[]>>();
         
         // Create array indicating to which coords a customer is assigned to (-1: no assignment)
         start.customersAssignedLocations = new int[data.getCustomers().length+1];
@@ -83,8 +97,12 @@ public class Solution {
         Arrays.fill(start.customersAssignedCapacitySlot, -1);
         start.customersAssignedCapacitySlot[0] = 0; // -> Depot
         
+        start.customersAssignedToVehicles = new int[data.getCustomers().length + 1];
+        Arrays.fill(start.customersAssignedToVehicles, -1);
+        start.customersAssignedToVehicles[0] = 0; // -> Depot
+        
         start.map = new HashMap<Integer, HashMap<Integer, ArrayList<Double[]>>>();
-        //for (int loc = 0; loc<data.getCustomersToLocations().size(); loc++) {
+
         for (int loc = 0; loc<data.getDistanceMatrix().length; loc++) {
         	for (int capacity = 0; capacity < data.getLocationCapacity()[loc]; capacity ++) {
         		ArrayList<Double[]> tmp = new ArrayList<Double[]>();
@@ -119,12 +137,22 @@ public class Solution {
     		int location = this.data.getCustomersToLocations().get(this.data.getOriginalCustomerIds()[customer]).get(locationIdx);
     		
     		// Get travel distances from and to the customer
-    		double distToCustomer = getDistanceBetweenLocations(DataUtils.getLocationIndex(pred, this), location);
-    		double distFromCustomer = getDistanceBetweenLocations(location, DataUtils.getLocationIndex(succ, this));
+    		double distToCustomer = data.getDistanceBetweenLocations(DataUtils.getLocationIndex(pred, this), location);
+    		double distFromCustomer = data.getDistanceBetweenLocations(location, DataUtils.getLocationIndex(succ, this));
     		//double distFromCustomer = getDistance(succ, location);
         	// Check earliest and latest insertions to fit predecessor's and successor's service time
             double earliestStartAtInsertion = Math.max(endServicePred + distToCustomer, earliestStartCustomer);
             double latestStartAtInsertion = Math.min(startServiceSucc - distFromCustomer - this.data.getServiceDurations()[customer], latestStartCustomer);
+            
+            // Check end service time of dependencies to predecessor jobs [customerId, endServiceTime, LocationIdx];
+            double[] infoOfLatestPredJob = this.getEndServiceTimeOfLatestPredJob(customer);
+            // if a predecessor job couldn't be scheduled, the current job can also not be scheduled; break
+            if (infoOfLatestPredJob[1] == -1)
+            	return possibleInsertions;
+            else if  (infoOfLatestPredJob[1] > 0){
+            	double distToPredecessorJob = data.getDistanceBetweenLocations(DataUtils.getLocationIndex((int) infoOfLatestPredJob[0], this), location);
+            	earliestStartAtInsertion = Math.max(earliestStartAtInsertion, infoOfLatestPredJob[1] + distToPredecessorJob);            	
+            }
             
             // check if location is feasible at all w.r.t to service times
             // E.g. : 10 < 10.00004 - 1e-6  ; just prevent numerical instability
@@ -132,7 +160,7 @@ public class Solution {
             if (latestStartAtInsertion < earliestStartAtInsertion - Config.epsilon) break;
  
 //			double additionalTravelCosts = distToCustomer + distFromCustomer - getDistanceBetweenCustomersByAffiliations(pred, succ);
-			double additionalTravelCosts = distToCustomer + distFromCustomer - getDistanceBetweenLocations(DataUtils.getLocationIndex(pred, this), DataUtils.getLocationIndex(succ, this));
+			double additionalTravelCosts = distToCustomer + distFromCustomer - data.getDistanceBetweenLocations(DataUtils.getLocationIndex(pred, this), DataUtils.getLocationIndex(succ, this));
             // check available capacity
 			// int loc = DataUtils.getPreferredLocationIndex(customer, location, this.data);
     		for (int capacity = 0; capacity < this.data.getLocationCapacity()[location]; capacity ++) {
@@ -149,6 +177,7 @@ public class Solution {
     				if (timeSucc[0] < endServicePred) 
     					continue; 
     				
+    				//TODO CHRIS - die Überprüfung passt noch nicht
     				if (timePred[1] < earliestStartAtInsertion & 
     					timeSucc[0] > latestStartAtInsertion + serviceTime & 
     					earliestStartAtInsertion + serviceTime < startServiceSucc & 
@@ -251,17 +280,40 @@ public class Solution {
 	  }
 	  return count;
 	}
+	
+	/**
+	 * Calculates the total costs. Calls subprocedures for calculating 
+	 * i) the routing costs of vehicles; ii) swapping costs; and iii) penalty costs  
+	 */
+	private void calculateTotalCosts() {
+        this.calculateCostsFromVehicles();
+        this.calculateSwappingCostsForLocations();
+        this.calculatePenaltyCosts();
+        this.totalCosts = this.vehicleTourCosts + this.swappingCosts + this.penaltyCosts;
+	}
 
 	/**
 	 * Computes the current total costs of all vehicles.
 	 * Result is stored in the class variable totalCosts.
 	 */
     private void calculateCostsFromVehicles() {
-        this.totalCosts = 0.;
+//        this.totalCosts = 0.;
+//        for (Vehicle veh: vehicles)
+//        	this.totalCosts += veh.getTourLength();
+        this.vehicleTourCosts = 0.;
         for (Vehicle veh: vehicles)
-            this.totalCosts += veh.getTourLength();
+        	this.vehicleTourCosts += veh.getTourLength();
     }
 
+    /**
+     * Aggregates the swapping costs of all vehicles
+     */
+    private void calculateSwappingCostsForLocations( ) {
+    	this.swappingCosts = 0.0;
+    	for (Vehicle v: vehicles)
+    		swappingCosts += v.getSwappingCosts(this);
+    }
+    
     
     //
     // UPDATE METHODS
@@ -273,7 +325,9 @@ public class Solution {
      * @param removedCustomers: list of removed customers
      */
     public void updateSolutionAfterRemoval(List<Integer> removedCustomers) {
-        this.calculateCostsFromVehicles();
+        //this.calculateCostsFromVehicles();
+        //this.calculateSwappingCostsForLocations();
+    	this.calculateTotalCosts();
         if (!removedCustomers.isEmpty()) {
             this.notAssignedCustomers.addAll(removedCustomers);
             isFeasible = false;
@@ -285,9 +339,12 @@ public class Solution {
      * Update the solution's state after an insertion operation. 
      */
     public void updateSolutionAfterInsertion() {
-        this.calculateCostsFromVehicles();
-        this.addInfeasiblesToNotAssigned();
-        this.calculatePenaltyCosts();
+        //this.calculateCostsFromVehicles();
+        //this.calculateSwappingCostsForLocations();
+    	//this.calculatePenaltyCosts();
+
+    	this.addInfeasiblesToNotAssigned();
+        this.calculateTotalCosts();
     }
 
     /**
@@ -302,12 +359,13 @@ public class Solution {
      * The function aggregates the penalty costs for unassigned customers.
      */
     private void addCostsForUnservedCustomers() {
-        this.totalCosts += this.notAssignedCustomers.size() * Config.penaltyUnservedCustomer;
+        //this.totalCosts += this.notAssignedCustomers.size() * Config.penaltyUnservedCustomer;
+        this.penaltyCosts = this.notAssignedCustomers.size() * Config.penaltyUnservedCustomer;
     }
 
     /**
      * Add a customer to the list of unassigned customers.
-     * @param customer
+     * @param customer: id of customer
      */
     public void addCustomerToNotAssignedCustomers(int customer) {
         this.notAssignedCustomers.add(customer);
@@ -326,15 +384,68 @@ public class Solution {
     // CUSTOM GET FNCS
     //   
     /**
-     * Retrieve the distance between two locations.
-     * @param location1: id of first location
-     * @param location2: id of second location
-     * @return distance between two locations
+     * Get the end service time of the latest predecessor jobs. 
+     * If there is not predecessor job, the end service time of predecessor jobs is 
+     * set to 0, hence, it is possible to schedule the customer from the very beginning.
+     * If a predecessor job couldn't be scheduled, then the current job can also not 
+     * be scheduled and a '-1' is returned. 
+     * @param customerId: id of customer which has to be scheduled next
+     * @return Get the end service time of latest predecessor job 
      */
-    public double getDistanceBetweenLocations (int location1, int location2) {
-    	return this.data.getDistanceMatrix()[location1][location2];
+    public double[] getEndServiceTimeOfLatestPredJob (int customerId) {
+    	double endServiceTimeOfLatestPredJob = 0;
+    	int locationIdOfLatestPredJob = 0; 
+    	int customerIdOfLatestPredJob = 0;
+    	ArrayList<Integer> predIds = this.data.getPredCustomers().get(this.data.getOriginalCustomerIds()[customerId]);
+    	for (int originalPredCustomerId : predIds) {
+    		int predCustomerId = Arrays.stream(this.data.getOriginalCustomerIds()).boxed().collect(Collectors.toList()).indexOf(originalPredCustomerId);
+    		
+    		// if there is a predecessor job which couldn't be scheduled, the current customer
+    		// can also not be scheduled and a -1 is returned
+    		if (this.customersAssignedToVehicles[predCustomerId] == -1) {
+    			endServiceTimeOfLatestPredJob = -1;    			
+    			return new double[] {-1, -1,-1};    			
+    		}
+    		// check the end service time
+    		Vehicle v = this.vehicles.get(this.customersAssignedToVehicles[predCustomerId]);
+			int idx = v.getCustomers().indexOf(predCustomerId);
+			if (endServiceTimeOfLatestPredJob < v.getEndOfServices().get(idx)) {
+				endServiceTimeOfLatestPredJob = v.getEndOfServices().get(idx);
+				customerIdOfLatestPredJob = predCustomerId;
+				locationIdOfLatestPredJob = this.customersAssignedLocations[predCustomerId];
+			}
+    	}
+    	return new double[] {customerIdOfLatestPredJob, endServiceTimeOfLatestPredJob, locationIdOfLatestPredJob};
+    }
+    
+    public boolean checkSchedulingOfPredecessors (int customerId) {
+    	boolean flag = true;
+    	ArrayList<Integer> predIds = this.data.getPredCustomers().get(this.data.getOriginalCustomerIds()[customerId]);
+    	for (int originalPredCustomerId: predIds) {
+    		int predCustomerId = Arrays.stream(this.data.getOriginalCustomerIds()).boxed().collect(Collectors.toList()).indexOf(originalPredCustomerId);
+    		int existenceOfPredecessor = this.tempInfeasibleCustomers.indexOf(predCustomerId);
+    		if (existenceOfPredecessor == -1 && this.customersAssignedToVehicles[predCustomerId] == -1) {
+    			return false;
+    		}
+    		
+    	}
+    	return flag;
+    }
+    
+    /**
+     * Retrieve customers being assigned to any vehicle
+     * @return list of scheduled customers
+     */
+    public ArrayList<Integer> getAssignedCustomers() {
+    	ArrayList<Integer> list = new ArrayList<Integer>();
+    	for (int i=1; i<this.customersAssignedToVehicles.length; i++) {
+    		if (this.customersAssignedToVehicles[i]!=-1)
+    			list.add(i);
+    	}
+    	return list;
     }
 
+    
     //
     // GETTERS
     //
@@ -404,6 +515,14 @@ public class Solution {
     }
     
     /**
+     * Get array storing assignment of customers to vehicles
+     * @return: array customers to vehicles
+     */
+    public int[] getCustomersAssignedToVehicles() {
+    	return customersAssignedToVehicles;
+    }
+    
+    /**
      * Retrieve customer to locations mapping. The keys are the customer ids,
      * and the values are the list of possible locations per customer.
      * @return HashMap Customer to location list
@@ -418,6 +537,11 @@ public class Solution {
      */
     public Data getData() {
     	return data;
+    }
+    
+    
+    public HashMap<Integer, ArrayList<double[]>> getTriedInsertions() {
+    	return triedInsertions;
     }
     
 
@@ -438,8 +562,17 @@ public class Solution {
      * @param customer: customer's id
      * @param capacity: capacity slot
      */
-    public void setCustomerAffiliationToCapacity (int customer, int capacity) {
+    public void setCustomerAssignmentToCapacitySlot (int customer, int capacity) {
     	this.customersAssignedCapacitySlot[customer] = capacity;
+    }
+    
+    /**
+     * Sets customer's assignment to vehicles
+     * @param customer: customer id
+     * @param vehicleId: vehicle id 
+     */
+    public void setCustomerAssignmentToVehicles (int customer, int vehicleId) {
+    	this.customersAssignedToVehicles[customer] = vehicleId;
     }
     
     /**
@@ -518,6 +651,10 @@ public class Solution {
     	this.customersAssignedCapacitySlot[customer] = -1;
     }
     
+    public void freeCustomerAffiliationToVehicle(int customer) {
+    	this.customersAssignedToVehicles[customer] = -1;
+    }
+    
     /**
      * Deallocates a location's capacity slot within a certain time interval
      * being attached as parameters.
@@ -559,6 +696,7 @@ public class Solution {
 
         sol.customersAssignedCapacitySlot = Arrays.copyOf(this.customersAssignedCapacitySlot, this.customersAssignedCapacitySlot.length);
         sol.customersAssignedLocations = Arrays.copyOf(this.customersAssignedLocations, this.customersAssignedLocations.length);
+        sol.customersAssignedToVehicles = Arrays.copyOf(this.customersAssignedToVehicles,  this.customersAssignedToVehicles.length);
         
         sol.map = new HashMap<Integer, HashMap<Integer, ArrayList<Double[]>>>();
         for (Map.Entry<Integer, HashMap<Integer, ArrayList<Double[]>>> entry: this.map.entrySet()) {
@@ -568,6 +706,13 @@ public class Solution {
         		sol.map.get(entry.getKey()).put(innerEntry.getKey(), new ArrayList<Double[]>(this.map.get(entry.getKey()).get(innerEntry.getKey())));
         	}
         }
+        
+        //TODO: copy anything from triedInsertions ??? -> solution is in a new state 
+        sol.triedInsertions = new HashMap<Integer, ArrayList<double[]>>();
+        for  (Map.Entry<Integer, ArrayList<double[]>> entry: this.triedInsertions.entrySet()) {
+    		sol.triedInsertions.put(entry.getKey(), new ArrayList<double[]>(entry.getValue()));
+        }
+        
         return sol;
     }
 
@@ -609,7 +754,7 @@ public class Solution {
 						if (o1.get(customerFirst) < o2.get(customerFirst)) {
 							return -1;
 						}
-						else {
+						else if (o1.get(customerFirst) > o2.get(customerFirst)) {
 							return 1;
 						}
 						// TODO: check for first customer should be sufficient
@@ -637,6 +782,7 @@ public class Solution {
      */
     public void printSolution() {
         int nActiveVehicles = this.getNActiveVehicles();
+        System.out.println("VehicleCosts:" + this.vehicleTourCosts + " - SwappingCosts:" + this.swappingCosts + " - PenaltyCosts: " + this.penaltyCosts);
         System.out.println("Solution total costs: " + this.totalCosts + "\tn vehicles used: " + nActiveVehicles); // TODO logger debug!
         for (Vehicle veh: this.vehicles) {
             if (veh.isUsed()) {

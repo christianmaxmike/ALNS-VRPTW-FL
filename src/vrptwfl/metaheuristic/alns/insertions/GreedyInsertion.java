@@ -3,14 +3,10 @@ package vrptwfl.metaheuristic.alns.insertions;
 import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.data.Data;
-import vrptwfl.metaheuristic.utils.DataUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.ListIterator;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * This class implements the greedy insertion heuristic.
@@ -59,8 +55,10 @@ public class GreedyInsertion extends AbstractInsertion {
 
             // if list is empty, no feasible assignment to any route exists for that customer
             if (possibleInsertionsForCustomer.isEmpty()) {
-                solution.getTempInfeasibleCustomers().add(customer);
-                iter.remove();
+            	if (solution.checkSchedulingOfPredecessors(customer)) {
+	                solution.getTempInfeasibleCustomers().add(customer);
+	                iter.remove();
+            	}
             } else {
                 possibleInsertionsForCustomer.sort(Comparator.comparing(a -> a[4])); // sort by additional costs
                 double[] possibleInsertion = possibleInsertionsForCustomer.get(0);
@@ -74,4 +72,9 @@ public class GreedyInsertion extends AbstractInsertion {
         } // end while(iter.hasNext())
         return nextInsertion;
     }
+
+	@Override
+	public Solution runBacktracking(Solution initSolution) {
+		return initSolution;
+	}
 }

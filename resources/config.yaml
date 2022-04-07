@@ -1,7 +1,8 @@
-##### General configurations #####
+##### GENERAL CONFIGURATIONS #####
 random_seed: 42  # if null, no random seed will be used
 
-##### ALNS configurations #####
+
+### ALNS CONFIGURATION
 alns_iterations: 10_000 # 25_000  # 50_000
 # Upper bound and lower bound values taken from Ropke C&OR §6.1.1 p. 2417
 lower_bound_nr_of_removals: 30
@@ -9,42 +10,65 @@ lower_bound_factor_nr_of_removals: 0.1
 upper_bound_nr_of_removals: 60
 upper_bound_factor_nr_of_removals: 0.4
 
+
+### PENALTIES SETTINGS
+# unserved customers
 cost_factor_unserved_customer: 5.0  # cost for unserviced customers is equal to this number times the maximum distance in the graph
+# location factor for swapping costs
+factorSwappingCosts: 1
 
-### Define active operators (destroy and repair)							# SOLOMON			HOSPITAL
-use_cluster_removal_kruskal: false						# default: true		# x					# 
-use_historic_node_pair_removal_deterministic: false 	# default: false	# v					# 
-use_historic_node_pair_removal_random: false			# default: true		# v 					# 
-use_historic_request_pair_removal: false  				# default: false	# not implemented	# not implemented
-use_random_removal: false  								# default: true		# v					# 
-use_random_route_removal: false  						# default: true		# v					# 
-use_shaw_simplified_deterministic: false 				# default:false		# x					# 
-use_shaw_simplified_random: false 					 	# default:true		# x					# 
-use_time_oriented_removal_jungwirth_deterministic: false # default:false	# x					# 
-use_time_oriented_removal_jungwirth_random: false  		# default: true		# x					# 
-use_time_oriented_removal_pisinger_deterministic: false # default:false		# x 					# 
-use_time_oriented_removal_pisinger_random: true 		# default: true		# x					# 
-use_worst_removal_deterministic: false	 				# default: false	# v					# v
-use_worst_removal_random: false  						# default: true		# v					# v
 
-use_greedy_insert: true									# default: true		# v
-use_nregret_2: true										# default: true		# v
-use_nregret_3: false									# default: true		# v
-use_nregret_4: false									# default: false	# v
-use_nregret_5: false									# default: false	# v
-use_nregret_6: false									# default: false	# v
-regret_consider_all_possible_insertion_per_route: false  # default in Pisinger & Ropke C&OR §5.2.2 p. 2415: false
-regret_sum_over_all_n_regret: true  # default in Ropke C&OR §5.2.2 p. 2415: true (e.g. only consider 4th - best or (4th - best) + (3rd - best) + (2nd - best))
+### DEFINE ACTIVE OPERATORS (DESTROY + REPAIR)									# SOLOMON			HOSPITAL
+# removals
+use_cluster_removal_kruskal: false							# default: true		# x					# 
+use_historic_node_pair_removal_deterministic: false 		# default: false	# v					# 
+use_historic_node_pair_removal_random: false				# default: true		# v 					# 
+use_historic_request_pair_removal: false  					# default: false	# not implemented	# not implemented
+use_random_removal: false  									# default: true		# v					# 
+use_random_route_removal: false  							# default: true		# v					# 
+use_shaw_simplified_deterministic: false 					# default:false		# x					# 
+use_shaw_simplified_random: false 					 		# default:true		# x					# 
+use_time_oriented_removal_jungwirth_deterministic: false	# default:false		# x					# 
+use_time_oriented_removal_jungwirth_random: false  			# default: true		# x					# 
+use_time_oriented_removal_pisinger_deterministic: false 	# default:false		# x 					# 
+use_time_oriented_removal_pisinger_random: false 			# default: true		# x					# 
+use_worst_removal_deterministic: false	 					# default: false	# v					# v
+use_worst_removal_random: false  							# default: true		# v					# v
+use_skill_mismatch_removal_deterministic: true
+use_skill_mismatch_removal_random: false
 
-### Destroy operators parameters
+# insertions
+use_greedy_insert: false									# default: true		# v
+use_skill_matching_insert: true
+use_nregret_2: true											# default: true		# v
+use_nregret_3: false										# default: true		# v
+use_nregret_4: false										# default: false	# v
+use_nregret_5: false										# default: false	# v
+use_nregret_6: false										# default: false	# v
+regret_consider_all_possible_insertion_per_route: false 	# default in Pisinger & Ropke C&OR §5.2.2 p. 2415: false
+regret_sum_over_all_n_regret: true  						# default in Ropke C&OR §5.2.2 p. 2415: true (e.g. only consider 4th - best or (4th - best) + (3rd - best) + (2nd - best))
+
+
+### PARAMS FOR DESTROY OPERATORS
 neighbor_graph_removal_exponent: 6
 shaw_removal_exponent: 6
-time_oriented_removal_exponent: 6  # in Pisinger & Ropke C&OR §5.1.5 p. 2414: identical to shaw_removal_exponent
-time_oriented_nr_of_closest: 100  # maximum number of closest customers to consider when applying time oriented removal
+time_oriented_removal_exponent: 6  							# in Pisinger & Ropke C&OR §5.1.5 p. 2414: identical to shaw_removal_exponent
+time_oriented_nr_of_closest: 100  							# maximum number of closest customers to consider when applying time oriented removal
 time_oriented_jungwirth_weight_start_time_in_solution: .75  # alpha_1 in Jungwirth et al. 2021
 worst_removal_exponent: 3
+skill_mismatch_removal_exponent: 3
 
-### Update values for Destroy/Repair Operators - SIGMAS
+
+### BACKTRACKING SETTINGS (for initial solution)
+enable_backtracking: true
+backtrackTrials : 4			 								# how many restarts
+backtrackJump: 5
+backtrackJumpToLevel: 5
+backtrackJumpToLevelProbabilities: [1.0, 0.6, 0.3, 0.2, 0.1]
+backtrackBySteps: false  									# backtracking by steps (=false) or by levels (=true) 
+
+
+### UPDATE VALUES FOR DESTROY/REPAIR OPS - SIGMAS
 sigma1: 33
 sigma2: 13
 sigma3: 9
@@ -52,32 +76,33 @@ reactionFactor: 0.1
 minOpProb: 0.01
 updateInterval: 100
 
-### Simulated Annealing
-coolingRate: 0.99937    	# Ropke und Pisinger 2016 - 0.9998 EJOR, p.761
-minTempPercent: 0.01      	# percentage the temperature is cooled down, 
-startTempControlParam: 0.05 # start temperature control parameter  (delta in old code), Ropke und Pisinger 2016 - 0.9998 EJOR, p.761
-bigOmega: 0.5				# percentage a solution being 1+w higher than current solution is accepted
+
+### SIMULATED ANNEALING
+coolingRate: 0.99937    			# Ropke und Pisinger 2016 - 0.9998 EJOR, p.761
+minTempPercent: 0.01      			# percentage the temperature is cooled down, 
+startTempControlParam: 0.05 		# start temperature control parameter  (delta in old code), Ropke und Pisinger 2016 - 0.9998 EJOR, p.761
+bigOmega: 0.5						# percentage a solution being 1+w higher than current solution is accepted
 
 
-### Location dependent settings
-numberOfLocationsPerCustomer: 2 	# set number of locations per customer
+### GENERAL CALCULATIONS SETTINGS 
+rounding_precision: 1     			# number of decimal places
+epsilon: 0.0001           			# precision for double comparison
+bigM_regret: 100_000      			# must be greater than the largest possible regret
 
 
-##### calculations #####
-rounding_precision: 1     # number of decimal places
-epsilon: 0.0001           # precision for double comparison
-bigM_regret: 100_000      # must be greater than the largest possible regret
+### SOLOMON LOADER SETTINGS
+numberOfLocationsPerCustomer: 2 	# set number of locations per customer (for solomon instances)
 
 
-#### HOSPITAL LOADER
-planningIntervals: 5      # 5 min planning interval
-maxCapacityVehicles: 10   # big enough to never be critical
-solveAsTwoProblems: true  # morning and evening problems separated from each other
-splitRegularShift: true   # split regular shift
-printHospitalLoaderInfo: false	# logging 
+### HOSPITAL LOADER SETTINGS
+planningIntervals: 5				# 5 min planning interval
+maxCapacityVehicles: 10				# big enough to never be critical
+solveAsTwoProblems: true			# morning and evening problems separated from each other
+splitRegularShift: true				# split regular shift
+printHospitalLoaderInfo: false		# logging 
 
 
-##### not defined in papers (open) #####
+### not defined in papers (open) 
 # - penalty for unserved customers ($\Gamma$)
 # - time-oriented destroy. number of geographically close nodes ($B$) oder sind das auch die 100 Kunden?
 # - score weights for all time score and score in last M iterations

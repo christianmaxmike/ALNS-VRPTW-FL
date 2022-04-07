@@ -2,10 +2,13 @@ package vrptwfl.metaheuristic;
 
 import org.yaml.snakeyaml.Yaml;
 
+import vrptwfl.metaheuristic.utils.DataUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
 
@@ -28,10 +31,15 @@ public class Config {
     public static double upperBoundRemovalsFactor;
     public static int upperBoundRemovalsMax;
 
+    // PENALTY COSTS
+    // unserviced customer
     public static double costFactorUnservedCustomer;
     public static double penaltyUnservedCustomer;
+    // location swapping
+    public static int factorSwappingCosts;
 
-    // alns operators to use
+    // ALSN OEPRATORS TO USE
+    // removals
     public static boolean useClusterRemovalKruskal;
     public static boolean useHistoricNodePairRemovalDeterministic;
     public static boolean useHistoricNodePairRemovalRandom;
@@ -46,8 +54,11 @@ public class Config {
     public static boolean useTimeOrientedRemovalPisingerRandom;
     public static boolean useWorstRemovalDeterministic;
     public static boolean useWorstRemovalRandom;
-
+    public static boolean useSkillMismatchRemovalRandom;
+    public static boolean useSkillMismatchRemovalDeterministic;
+    // insertions
     public static boolean useGreedyInsert;
+    public static boolean useSkillMatchingInsert;
     public static boolean useNRegret2;
     public static boolean useNRegret3;
     public static boolean useNRegret4;
@@ -56,75 +67,83 @@ public class Config {
     public static boolean regretConsiderAllPossibleInsertionPerRoute;
     public static boolean regretSumOverAllNRegret;
 
-    // alns operator parameters
+    // ALNS OPERATOR PARAMETERS
     public static int historicNodePairRemovalExponent;
     public static int shawRemovalExponent;
     public static int timeOrientedRemovalExponent;
     public static int timeOrientedNrOfClosest;
     public static double timeOrientedJungwirthWeightStartTimeIinSolution;
     public static int worstRemovalExponent;
+    public static int skillMismatchRemovalExponent;
     
-    // Update values for Destroy/Repair Operators
+    // BACKTRACKING SETTINGS
+    public static boolean enableBacktracking;
+    public static int backtrackTrials;
+    public static int backtrackJump;
+    public static int backtrackJumpToLevel;
+    public static double[] backtrackJumpToLevelProbabilities;
+    public static boolean backtrackBySteps;
+
+    // UPDATE VALUES FOR DESTROY/REPAIR OPS
     public static int sigma1;
     public static int sigma2;
     public static int sigma3;
-    // public static int sigma4;
     public static double reactionFactor;
     public static double minOpProb;
     public static int updateInterval;
     
-    // Variables for simulated annealing
+    // SIMULATED ANNEALING
     public static double coolingRate;
     public static double minTempPercent;
     public static double startTempControlParam;
     public static double bigOmega;
     
-    // Location dependent variables
-    // public static int locationCapacity;
+    // LOCATION DEPENDENT VARIABLES (for solomon instances)
     public static int numberOfLocationsPerCustomer;
-    
-    
-    // Hospital Instances
+        
+    // HOSPITAL INSTANCES
     public static int planningIntervals;
     public static int maxCapacityVehicles;
     public static boolean solveAsTwoProblems;
     public static boolean splitRegularShift;
     public static boolean printHospitalLoaderInfo;
     
-
     private static Config conf = new Config();
 
+    //TODO Chris - singleton
     // private to prevent anyone else from instantiating
     private Config() {
         loadConfig();
     }
 
     public void loadConfig() {
-
-        Yaml yaml = new Yaml();
         InputStream inputStream = null;
         try {
             inputStream = new FileInputStream(new File("resources/config.yaml"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
+        Yaml yaml = new Yaml();
         Map<String, Object> obj = yaml.load(inputStream);
 
+        
         // --- GENERAL ---
         Integer randomSeed =  (Integer) obj.get("random_seed");
         randomGenerator = randomSeed != null ? new Random(randomSeed) : new Random();
 
+        
         // --- CALCULATION / math helpers ---
         epsilon = (double) obj.get("epsilon");
         bigMRegret = (int) obj.get("bigM_regret");
         roundingPrecisionFactor = Math.pow(10, ((int) obj.get("rounding_precision")));
 
+        
         // --- ALNS configurations ---
         alnsIterations = (int) obj.get("alns_iterations");
 
-        costFactorUnservedCustomer = (double) obj.get("cost_factor_unserved_customer");
-
+        
+        // --- DESTROY / REPAIR OPERATORS ---
+        // removals
         useClusterRemovalKruskal = (boolean) obj.get("use_cluster_removal_kruskal");
         useHistoricNodePairRemovalDeterministic = (boolean) obj.get("use_historic_node_pair_removal_deterministic");
         useHistoricNodePairRemovalRandom = (boolean) obj.get("use_historic_node_pair_removal_random");
@@ -139,60 +158,77 @@ public class Config {
         useTimeOrientedRemovalPisingerRandom = (boolean) obj.get("use_time_oriented_removal_pisinger_random");
         useWorstRemovalDeterministic = (boolean) obj.get("use_worst_removal_deterministic");
         useWorstRemovalRandom = (boolean) obj.get("use_worst_removal_random");
-
+        useSkillMismatchRemovalRandom = (boolean) obj.get("use_skill_mismatch_removal_random");
+        useSkillMismatchRemovalDeterministic = (boolean) obj.get("use_skill_mismatch_removal_deterministic");
+        // insertions
         useGreedyInsert = (boolean) obj.get("use_greedy_insert");
+        useSkillMatchingInsert = (boolean) obj.get("use_skill_matching_insert");
         useNRegret2 = (boolean) obj.get("use_nregret_2");
         useNRegret3 = (boolean) obj.get("use_nregret_3");
         useNRegret4 = (boolean) obj.get("use_nregret_4");
         useNRegret5 = (boolean) obj.get("use_nregret_5");
         useNRegret6 = (boolean) obj.get("use_nregret_6");
+        
+        
+        // --- SETTINGS FOR ALNS DESTROY OPERATORS ---
         regretConsiderAllPossibleInsertionPerRoute = (boolean) obj.get("regret_consider_all_possible_insertion_per_route");
         regretSumOverAllNRegret = (boolean) obj.get("regret_sum_over_all_n_regret");
-
-        // - ALNS destroy operators
         historicNodePairRemovalExponent = (int) obj.get("neighbor_graph_removal_exponent");
         shawRemovalExponent = (int) obj.get("shaw_removal_exponent");
         timeOrientedRemovalExponent = (int) obj.get("time_oriented_removal_exponent");
         timeOrientedNrOfClosest = (int) obj.get("time_oriented_nr_of_closest");
         timeOrientedJungwirthWeightStartTimeIinSolution = (double) obj.get("time_oriented_jungwirth_weight_start_time_in_solution");
         worstRemovalExponent = (int) obj.get("worst_removal_exponent");
-
+        skillMismatchRemovalExponent = (int) obj.get("skill_mismatch_removal_exponent");
         // see Ropke C&OR §6.1.1 p. 2417
         // upper bound will be determined instance specific when number of customers is known
         lowerBoundRemovalsFactor = (double) obj.get("lower_bound_factor_nr_of_removals");
         lowerBoundRemovalsMax = (int) obj.get("lower_bound_nr_of_removals");
         upperBoundRemovalsFactor = (double) obj.get("upper_bound_factor_nr_of_removals");
         upperBoundRemovalsMax = (int) obj.get("upper_bound_nr_of_removals");
+        
 
-        // Update values for Destroy/Repair Operators
+        // --- BACKTRACKING OPTIONS ---
+        enableBacktracking = (boolean) obj.get("enable_backtracking");
+        backtrackTrials = (int) obj.get("backtrackTrials");
+        backtrackJump = (int) obj.get("backtrackJump");
+        backtrackJumpToLevel = (int) obj.get("backtrackJumpToLevel");
+        backtrackJumpToLevelProbabilities = DataUtils.convertDoubleListToArr((ArrayList<Double>) obj.get("backtrackJumpToLevelProbabilities"));
+        backtrackBySteps = (boolean) obj.get("backtrackBySteps");
+
+        
+        // --- UPDATE VALUES FOR DESTROY/REPAIR OPERATORS ---
         sigma1 = (int) obj.get("sigma1");
         sigma2 = (int) obj.get("sigma2");
         sigma3 = (int) obj.get("sigma3");
-        // sigma4 = (int) obj.get("sigma4");
         reactionFactor = (double) obj.get("reactionFactor");
         minOpProb = (double) obj.get("minOpProb");
         updateInterval = (int) obj.get("updateInterval");
         
-        // Variables for simulated annealing
+        
+        // --- SIMULATED ANNEALING ---
         coolingRate = (double) obj.get("coolingRate");
         minTempPercent = (double) obj.get("minTempPercent"); 
         startTempControlParam = (double) obj.get("startTempControlParam");
         bigOmega = (double) obj.get("bigOmega");
         
-        // Location dependent variables
-        // locationCapacity = (int) obj.get("locationCapacity");
-        numberOfLocationsPerCustomer = (int) obj.get("numberOfLocationsPerCustomer");
         
-        // for Hospital Instances
+        // --- PENALTIES ---
+        // factor for swapping location costs
+        factorSwappingCosts = (int) obj.get("factorSwappingCosts");
+        // costs for unscheduled customers
+        costFactorUnservedCustomer = (double) obj.get("cost_factor_unserved_customer");
+        
+        
+        // --- LOCATION SETTINGS (for solomon instances) ---
+        numberOfLocationsPerCustomer = (int) obj.get("numberOfLocationsPerCustomer");
+
+        
+        // --- SETTINGS FOR HOSPITAL INSTANCES ---
         planningIntervals = (int) obj.get("planningIntervals");
         maxCapacityVehicles = (int) obj.get("maxCapacityVehicles");
         solveAsTwoProblems = (boolean) obj.get("solveAsTwoProblems");
         splitRegularShift = (boolean) obj.get("splitRegularShift");
         printHospitalLoaderInfo = (boolean) obj.get("printHospitalLoaderInfo");
-    }
-
-    // TODO wieder raus
-    public static void main(String[] args) {
-        System.out.println("Hello Config");
     }
 }

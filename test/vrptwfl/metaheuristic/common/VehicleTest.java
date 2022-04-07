@@ -20,7 +20,7 @@ public class VehicleTest {
     public void setup() throws IOException, ArgumentOutOfBoundsException {
         SolomonInstanceGenerator generator = new SolomonInstanceGenerator();
         data = generator.loadInstance("C104.txt", 100);
-        vehicle = new Vehicle(4, 200, 230.);
+        vehicle = new Vehicle(4, 200, 230., 1);
     }
 
     @Test
@@ -35,13 +35,13 @@ public class VehicleTest {
         assertEquals("Returning to depot end", 230.0, vehicle.getEndOfServices().get(1), Config.epsilon);
     }
 
-    @Test
-    public void noInsertionPossibleIfCapacityLimitExceeded() {
-        int customer = 10;
-        data.setDemandOfCustomer(customer, 1_000);
-        // if capacity is exceeded return empty list of possible insertions
-        assertTrue(vehicle.getPossibleInsertions(customer, data).isEmpty());
-    }
+//    @Test
+//    public void noInsertionPossibleIfCapacityLimitExceeded() {
+//        int customer = 10;
+//        data.setDemandOfCustomer(customer, 1_000);
+//        // if capacity is exceeded return empty list of possible insertions
+//        assertTrue(vehicle.getPossibleInsertions(customer, data).isEmpty());
+//    }
 
     // TODO 1-2 Test, dass berechnete Insertions korrekt sind
     //  {customer, vehicle.id, i+1, earliestStartAtInsertion, additionTravelCosts}

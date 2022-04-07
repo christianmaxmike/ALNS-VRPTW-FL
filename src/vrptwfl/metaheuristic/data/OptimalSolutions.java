@@ -6,7 +6,7 @@ import static java.util.Map.entry;
 
 public class OptimalSolutions {
 
-    private static OptimalSolutions opt = new OptimalSolutions();
+    // private static OptimalSolutions opt = new OptimalSolutions();
 
     // 25, 50, 100 customers
     public static Map<String, double[]> optimalObjFuncValue = Map.ofEntries(
@@ -74,10 +74,7 @@ public class OptimalSolutions {
             entry("RC108", new int[] {3, 6, 11})
     );
 
-    // TODO wieder raus
     public static void main(String[] args) {
         System.out.println(optimalObjFuncValue.get("R101")[1]);
     }
-
-
 }

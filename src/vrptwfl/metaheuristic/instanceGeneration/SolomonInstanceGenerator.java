@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,6 +44,9 @@ public class SolomonInstanceGenerator {
         List<Integer> latestStartTimes = new ArrayList<>();
         List<Integer> serviceDurations = new ArrayList<>();
         List<Integer> requiredSkillLvl = new ArrayList<>();
+        List<Integer> preferredLocations = new ArrayList<>();
+        
+        HashMap<Integer, ArrayList<Integer>> predJobs = new HashMap<Integer, ArrayList<Integer>>();
         
         HashMap<Integer, ArrayList<Integer>> customerToLocations = new HashMap<Integer, ArrayList<Integer>>();
 
@@ -73,6 +75,9 @@ public class SolomonInstanceGenerator {
             
             locationCapacity.add(1); 
             requiredSkillLvl.add(0);
+            
+            preferredLocations.add(coordsToId.get(c));
+            predJobs.put(lineCustomer.get(0), new ArrayList<Integer>());
         }
         
         for (int nLocations = 1; nLocations < Config.numberOfLocationsPerCustomer; nLocations++) {
@@ -85,11 +90,6 @@ public class SolomonInstanceGenerator {
 
         List<Integer> customerIds = IntStream.rangeClosed(1, nCustomers).boxed().collect(Collectors.toList());
         
-		// TODO CHRIS - bei hospital instanzen nicht jeder patient hat gleich viel mögliche locations
-		// TODO CHRIS - in hospital instanzen, location mit id 0 nicht zwingend präferierte location
-        // TODO Chris - für customers nur locations ids abspeichern, hashmaps/arraylist
-        int numberOfLocations = Config.numberOfLocationsPerCustomer;
-                
         return new Data(
                 instanceName,
                 nCustomers,
@@ -104,7 +104,9 @@ public class SolomonInstanceGenerator {
                 DataUtils.convertListToArray(latestStartTimes),
                 DataUtils.convertListToArray(serviceDurations),
                 DataUtils.convertListToArray(requiredSkillLvl),
-                vehiclesSkillLvl
+                vehiclesSkillLvl,
+                predJobs,
+                DataUtils.convertListToArray(preferredLocations)
         );
     }
 
@@ -128,9 +130,8 @@ public class SolomonInstanceGenerator {
     // TODO Alex: main wieder entfernen
     public static void main(String[] args) throws IOException {
         SolomonInstanceGenerator generator = new SolomonInstanceGenerator();
-        Data d;
         try {
-            d = generator.loadInstance("R101.txt", 100);
+            generator.loadInstance("R101.txt", 100);
         } catch (ArgumentOutOfBoundsException e) {
             e.printStackTrace();
         }

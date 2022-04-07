@@ -5,7 +5,6 @@ import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.utils.DataUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,16 +33,21 @@ public class Data {
     private double maxDistanceInGraph;
     private double endOfPlanningHorizon;
     private double[][] distanceMatrix;
+    private double[][] swappingCosts;
     private double[][] averageStartTimes;
     private int[] originalCustomerIds;
+    private int[] customersPreferredLocationId;
+    HashMap<Integer, ArrayList<Integer>> predCustomers;
     
     // Key: CustomerID
     // Values: LocationIds
     private HashMap<Integer, ArrayList<Integer>> customerToLocations;
 
-    /**
-     * Empty constructor
-     */
+    
+	/**
+	 * Constructor for data object.
+	 * @param instanceName: filename of instance being processed
+	 */
     public Data(String instanceName){
     	this.instanceName = instanceName;
     }
@@ -69,7 +73,8 @@ public class Data {
                 HashMap<Integer, ArrayList<Integer>> customerToLocations, 
                 HashMap<java.awt.geom.Point2D, Integer> location2Id,
                 int[] demands, int[] earliestStartTimes, int[] latestStartTimes, int[] serviceDurations,
-                int[] requiredSkillLvl, int[] vehiclesSkillLvl) {
+                int[] requiredSkillLvl, int[] vehiclesSkillLvl, HashMap<Integer, ArrayList<Integer>> predJobs,
+                int[] preferredLocations) {
         this.instanceName = instanceName;
         this.nCustomers = nCustomers;
         this.nVehicles = nVehicles;
@@ -85,6 +90,8 @@ public class Data {
         this.serviceDurations = serviceDurations;
         this.requiredSkillLvl = requiredSkillLvl;
         this.vehiclesSkillLvl = vehiclesSkillLvl;
+        this.customersPreferredLocationId = preferredLocations;
+        this.predCustomers = predJobs;
 
         // service Durations always the same within the dataset
         // latest StartTimes of first customer (depot) indicates the max latest start time
@@ -92,6 +99,9 @@ public class Data {
 
         // Creates the distance matrix w.r.t the locations
         this.createDistanceMatrix(location2Id);
+        // Creates mx of swapping costs
+        this.createSwappingCosts();
+        // Calculates average start times
         this.calculateAverageStartTimes();
     }
 
@@ -139,6 +149,23 @@ public class Data {
         	}
         }
     }
+    
+    /**
+     * Creates matrix of swapping costs. If a customer cannot be served at its 
+     * preferential location, the total costs subsumes the swapping costs of all
+     * customers which are served at any of their non-preferential locations.
+     */
+    public void createSwappingCosts() {
+    	this.swappingCosts = new double[this.distanceMatrix.length][this.distanceMatrix[0].length];
+    	for (int n = 0; n < swappingCosts.length; n++) {
+    		for (int m = n+1; m < swappingCosts[n].length; m++) {
+    			double dist = this.distanceMatrix[n][m];
+    			double swapCost = Math.pow(dist, Config.factorSwappingCosts);
+    			this.swappingCosts[n][m] = swapCost;
+    			this.swappingCosts[m][n] = swapCost;
+    		}
+    	}
+    }
 
 	/**
 	 * Calling this method will initialize n vehicles according to 
@@ -154,21 +181,7 @@ public class Data {
         return vehicles;
     }
     
-    /**
-     * Retrieve the distance between two customers according to the 
-     * distance matrix
-     * @param customer1: first customers
-     * @param customer2: second customer
-     * @return distance between two customers
-     */
-    
-    //TODO: CHRIS - muss auf location ids angepasst werden.
-    //      customer 1 und customer2 haben keinen location Bezug
-    //  public double getDistanceBetweenCustomers(int customer1, int customer2) {
-    //      return this.distanceMatrix[customer1][customer2];        
-    //  }
-    
-    
+
     //
     // CUSTOM GET FNCS
     //    
@@ -182,25 +195,6 @@ public class Data {
         return averageStartTimes[customerI][customerJ];
     }
     
-//    /**
-//     * Retrieve the distance between to location referenced by params i and j directing to the
-//     * first row of xcoords and ycoords data.
-//     * @param i: identifier of first location
-//     * @param j: identifier of second location
-//     * @return distance between two locations
-//     */
-//    private double getDistanceValue(int i, int j) {
-//        //double diffX = this.xcoords[i] - this.xcoords[j];
-//        //double diffY = this.ycoords[i] - this.ycoords[j];
-//    	double diffX = this.multipleXCoords[0][i] - this.multipleXCoords[0][j];
-//    	double diffY = this.multipleYCoords[0][i] - this.multipleYCoords[0][j];
-//
-//        double distance = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY,2));
-//        // round to
-//        distance = Math.round(distance * Config.roundingPrecisionFactor)/Config.roundingPrecisionFactor;
-//        return distance;
-//    }
-    
     /**
      * Get the distance between to coordinates/points. 
      * @param p1: first Point2D specifying a point with x-coordinates and y-coordinates
@@ -211,6 +205,16 @@ public class Data {
     	double distance = p1.distance(p2);
         distance = Math.round(distance * Config.roundingPrecisionFactor)/Config.roundingPrecisionFactor;
         return distance;    	
+    }
+    
+    /**
+     * Retrieve the distance between two locations.
+     * @param location1: id of first location
+     * @param location2: id of second location
+     * @return distance between two locations
+     */
+    public double getDistanceBetweenLocations (int location1, int location2) {
+    	return this.getDistanceMatrix()[location1][location2];
     }
 
     
@@ -313,10 +317,10 @@ public class Data {
         return serviceDurations;
     }
     
-//    public int[][] getMultipleXCoords () {
-//    	return this.multipleXCoords;
-//    }
-//    
+    /**
+     * Retrieve array storing the customers required skill level.
+     * @return required skill leve for all customers (i-th position = required skill level of i-th customer)
+     */
     public int[] getRequiredSkillLvl() {
     	return requiredSkillLvl;
     }
@@ -339,11 +343,39 @@ public class Data {
     	return this.locationCapacity;
     }
     
+    /**
+     * Retrieve original customer ids
+     * @return: original customer ids
+     */
     public int[] getOriginalCustomerIds() {
     	return this.originalCustomerIds;
     }
+    
+    /**
+     * Retrieve mapping from customers to their predecessor jobs
+     * @return: Predecessor jobs (key: customer id - value: list of predecessor jobs)
+     */
+    public HashMap<Integer, ArrayList<Integer>> getPredCustomers() {
+    	return this.predCustomers;
+    }
+    
+    /**
+     * Retrieve customers preferential location identifiers.
+     * @return: preferred location id
+     */
+    public int[] getCustomersPreferredLocation() {
+    	return this.customersPreferredLocationId;
+    }
+    
+    /**
+     * Retrieve matrix storing the swapping costs from one location to another
+     * @return: Swapping costs
+     */
+    public double[][] getSwappingCosts() {
+    	return this.swappingCosts;
+    }
 
-
+    
     //
     // SETTERS
     //
@@ -363,10 +395,18 @@ public class Data {
         this.vehicleCapacity = vehicleCapacity;
     }
     
+    /**
+     * Set the number of vehicles
+     * @param nVehicles: number of vehicles
+     */
     public void setNVehicles(int nVehicles) {
     	this.nVehicles = nVehicles;
     }
     
+    /**
+     * Set the number of customers
+     * @param nCustomers: number of customers
+     */
     public void setNCustomers(int nCustomers) {
     	this.nCustomers = nCustomers;
     }
@@ -403,37 +443,87 @@ public class Data {
         this.serviceDurations = serviceDurations;
     }
 
-    
+    /**
+     * Sets the distance matrix (nLocations x nLocations) of the data object.
+     * @param distanceMatrix: distance matrix
+     */
     public void setDistanceMatrix(double[][] distanceMatrix) {
     	this.distanceMatrix = distanceMatrix;
     }
     
+    /**
+     * Sets the capacity slots of the locations
+     * @param locationCapacity: list of capacity slots. i-th index indicates the number of slots for the i-th location (0=depot)
+     */
     public void setLocationCapacity(ArrayList<Integer> locationCapacity) {
     	this.locationCapacity = DataUtils.convertListToArray(locationCapacity);
     }
     
+    /**
+     * Sets the maximal distance between locations = max value in distance matrix
+     * @param maxDistValue: maximal distance
+     */
     public void setMaxDistanceInGraph(double maxDistValue) {
     	this.maxDistanceInGraph = maxDistValue;
     }
     
+    /**
+     * Sets HashMap mapping customers to theirs individual possible locations.
+     * Key: customer id - Value: list of locations
+     * @param customerToLocations: mapping customers to their possible locations
+     */
     public void setCustomerToLocation(HashMap<Integer, ArrayList<Integer>> customerToLocations) {    	
     	this.customerToLocations = customerToLocations; 
     }
     
+    /**
+     * Sets the end of the planing horizon. Indicator for end of any service time.
+     * @param endOfPlanningHorizon: end of planning horizon
+     */
     public void setEndOfPlanningHorizon(int endOfPlanningHorizon) {
     	this.endOfPlanningHorizon = endOfPlanningHorizon;
     }
     
+    /**
+     * Sets the original customer identifiers.
+     * @param originalCustomerIds: original identifiers
+     */
     public void setOriginalCustomerIds(int[] originalCustomerIds) {
     	this.originalCustomerIds = originalCustomerIds;
     }
     
+    /**
+     * Sets the required skill level being necessary for a customer to be served.
+     * @param requiredSkillLvl: required skill level
+     */
     public void setRequiredSkillLvl(int[] requiredSkillLvl) {
     	this.requiredSkillLvl = requiredSkillLvl;
     }
     
+    /**
+     * Sets the vehicles skill level. 
+     * @param vehiclesSkillLvl: vehicle skill level
+     */
     public void setVehiclesSkillLvl(int[] vehiclesSkillLvl) {
     	this.vehiclesSkillLvl = vehiclesSkillLvl;
+    }
+    
+    /**
+     * Sets the predecessor jobs of customers.
+     * Key: customer id - value: identifiers of predecessor jobs
+     * @param predCustomers: mapping of customers to theirs predecessor jobs
+     */
+    public void setPredCustomers(HashMap<Integer, ArrayList<Integer>> predCustomers) {
+    	this.predCustomers = predCustomers;
+    }
+    
+    /**
+     * Sets the preferred location identifiers of customers. If a customer is served at its
+     * preferred location, there are no swapping costs.
+     * @param preferredLocations: preferential location identifiers
+     */
+    public void setCustomersPreferredLocation(int[] preferredLocations) {
+    	this.customersPreferredLocationId = preferredLocations;
     }
     
     
@@ -448,5 +538,29 @@ public class Data {
     public void setDemandOfCustomer(int customer, int demand) {
         this.demands[customer] = demand;
     }
+    
+    
+    //
+    // DEPRECATED
+    //
+//  /**
+//  * Retrieve the distance between to location referenced by parameters i and j directing to the
+//  * first row of xcoords and ycoords data.
+//  * @param i: identifier of first location
+//  * @param j: identifier of second location
+//  * @return distance between two locations
+//  */
+// private double getDistanceValue(int i, int j) {
+//     //double diffX = this.xcoords[i] - this.xcoords[j];
+//     //double diffY = this.ycoords[i] - this.ycoords[j];
+// 	double diffX = this.multipleXCoords[0][i] - this.multipleXCoords[0][j];
+// 	double diffY = this.multipleYCoords[0][i] - this.multipleYCoords[0][j];
+//
+//     double distance = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY,2));
+//     // round to
+//     distance = Math.round(distance * Config.roundingPrecisionFactor)/Config.roundingPrecisionFactor;
+//     return distance;
+// }
+ 
 
 }
