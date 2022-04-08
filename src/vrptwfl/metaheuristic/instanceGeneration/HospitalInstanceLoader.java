@@ -122,12 +122,12 @@ public class HospitalInstanceLoader {
 				this.handleDataTransfer(morningEveningJobs.get(0), data[0], morningPredJobs);
 				this.handleDataTransfer(morningEveningJobs.get(1), data[1], eveningPredJobs);
 			} else {
-				//TODO: Chris - add depot dummy job
+				//TODO Chris - add depot dummy job
 				this.handleDataTransfer(realJobs, data[0], predJobs);
 				// data[0].setRealJobs(realJobs);
 			}
 
-			// print info --> TODO maybe separate method
+			// print info --> TODO Alex - maybe separate method
 //			if(Config.printHospitalLoaderInfo) {
 //				this.printRealJobsInformation(realJobs, logger);
 //			}
@@ -285,7 +285,7 @@ public class HospitalInstanceLoader {
 //			job.setEveningJob(false);
 //		}
 		
-		// TODO: Chris - handle mandatory jobs
+		// TODO Chris - handle mandatory jobs
 		ArrayList<double[][]> morningEveningInfo = new ArrayList<double[][]>();
 		morningEveningInfo.add(morningJobInformation);
 		morningEveningInfo.add(eveningJobInformation);

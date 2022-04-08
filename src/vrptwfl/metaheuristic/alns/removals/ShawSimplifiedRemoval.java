@@ -39,7 +39,7 @@ public class ShawSimplifiedRemoval extends AbstractRemoval {
             if (posFirstRemoval >= vehicle.getnCustomersInTour()) {
                 posFirstRemoval -= vehicle.getnCustomersInTour();
             } else {
-            	// TODO: Chris - adapt to multiple locations
+            	// TODO Chris - adapt to multiple locations
             	firstCustomer = vehicle.getCustomers().get(posFirstRemoval + 1);
                 // firstCustomerPreferencedLocation = solution.getCustomerAffiliationToLocations()[firstCustomer];
                 firstCustomerLocationIdx = DataUtils.getLocationIndex(firstCustomer, solution);
@@ -64,9 +64,9 @@ public class ShawSimplifiedRemoval extends AbstractRemoval {
 
             // 2) get customers closest to the reference customer
             // get row form travel time matrix
-            // TODO wenn mehrere locations, dann die location beruecksichtigen, die am dichtesten ist
+            // TODO Alex - wenn mehrere locations, dann die location beruecksichtigen, die am dichtesten ist
             //  (in distanceToFirstCustomer[customer])
-            // TODO Methode auslagern, wird auch in ClusterKruskal benutzt
+            // TODO Alex - Methode auslagern, wird auch in ClusterKruskal benutzt
             //double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[customerI];
             double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[firstCustomerLocationIdx];
             ArrayList<double[]> closest = new ArrayList<>();
@@ -99,7 +99,7 @@ public class ShawSimplifiedRemoval extends AbstractRemoval {
             if (nRemovals == 0) break;
         } // end while (nRemovals > 0)
 
-        // TODO entferne alten Teil, wenn man es nicht mehr braucht
+        // TODO Alex - entferne alten Teil, wenn man es nicht mehr braucht
 //        // get customers closest to the first one
 //        // get row form travel time matrix
 //        double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[firstCustomer];

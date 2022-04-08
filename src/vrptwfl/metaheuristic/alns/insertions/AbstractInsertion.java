@@ -71,7 +71,7 @@ public abstract class AbstractInsertion {
         // update solution object, then return it
         solution.updateSolutionAfterInsertion();
 
-        // TODO: Chris - call by reference, den return value könnte man sich wohl sparen
+        // TODO Chris - call by reference, den return value könnte man sich wohl sparen
         return solution;
     }
 

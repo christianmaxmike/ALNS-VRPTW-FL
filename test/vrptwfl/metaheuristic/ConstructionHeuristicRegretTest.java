@@ -98,7 +98,7 @@ public class ConstructionHeuristicRegretTest {
 //
 //    @Test
 //    public void secondCustomerToDifferentRoute() {
-//        // TODO: hier Fall konstruieren, wo man wirklich die andere Route nehmen sollte (ggf. über Mocks, dass distance matrix ueberschrieben wird)
+//        // TODO Alex - hier Fall konstruieren, wo man wirklich die andere Route nehmen sollte (ggf. über Mocks, dass distance matrix ueberschrieben wird)
 //        int firstCustomer = 17;
 //        int secondCustomer = 23; // 17 is far away from 1 in instance
 //
@@ -123,9 +123,9 @@ public class ConstructionHeuristicRegretTest {
 //
 //    }
 //
-//    // TODO Test, ob possibleInsertionsForCustomer auch wirklich nach groesstem Regret sortiert ist (ist das was vorne steht wirklich groesser?)?
+//    // TODO Alex - Test, ob possibleInsertionsForCustomer auch wirklich nach groesstem Regret sortiert ist (ist das was vorne steht wirklich groesser?)?
 //
-//    // TODO checken, ob die Touren wirklich feasible sind (zumindest exemplarisch) --> ZU ALNS (dann alns mit 10 iterationen laufen lassen)
+//    // TODO Alex - checken, ob die Touren wirklich feasible sind (zumindest exemplarisch) --> ZU ALNS (dann alns mit 10 iterationen laufen lassen)
 
 
 }

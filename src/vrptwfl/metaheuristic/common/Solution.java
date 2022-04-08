@@ -144,11 +144,12 @@ public class Solution {
             double earliestStartAtInsertion = Math.max(endServicePred + distToCustomer, earliestStartCustomer);
             double latestStartAtInsertion = Math.min(startServiceSucc - distFromCustomer - this.data.getServiceDurations()[customer], latestStartCustomer);
             
+            
+            // XXX:(if Config.enableGLS) -> check for violations in calculatePenaltyCosts()
             // Check end service time of dependencies to predecessor jobs [customerId, endServiceTime, LocationIdx];
             double[] infoOfLatestPredJob = this.getEndServiceTimeOfLatestPredJob(customer);
             // if a predecessor job couldn't be scheduled, the current job can also not be scheduled; break
-            if (infoOfLatestPredJob[1] == -1)
-            	return possibleInsertions;
+            if (infoOfLatestPredJob[1] == -1) return possibleInsertions;
             else if  (infoOfLatestPredJob[1] > 0){
             	double distToPredecessorJob = data.getDistanceBetweenLocations(DataUtils.getLocationIndex((int) infoOfLatestPredJob[0], this), location);
             	earliestStartAtInsertion = Math.max(earliestStartAtInsertion, infoOfLatestPredJob[1] + distToPredecessorJob);            	
@@ -164,7 +165,7 @@ public class Solution {
             // check available capacity
 			// int loc = DataUtils.getPreferredLocationIndex(customer, location, this.data);
     		for (int capacity = 0; capacity < this.data.getLocationCapacity()[location]; capacity ++) {
-    		    // Key: Location e.g. 1
+    		    // Key: Location e.g. 1; where start of planning horizon = 0 and end of planning horizon = 230
     		    //        --> HashMap - Key: capacitySlot e.g.:  0  (..., 1, 2, ...) 
     		    //                      Value: ArrayList
     		    // 								(null, 0) _ (167,177) _ (230, null)
@@ -177,14 +178,14 @@ public class Solution {
     				if (timeSucc[0] < endServicePred) 
     					continue; 
     				
-    				//TODO CHRIS - die Überprüfung passt noch nicht
+    				// TODO Chris - die Überprüfung passt noch nicht
     				if (timePred[1] < earliestStartAtInsertion & 
     					timeSucc[0] > latestStartAtInsertion + serviceTime & 
     					earliestStartAtInsertion + serviceTime < startServiceSucc & 
     					endServicePred < earliestStartAtInsertion) {
 						
     					double timeStart = earliestStartAtInsertion;
-						// TODO: retrieve multiple solutions (possible that first match not the best one)
+						// TODO_DONE: retrieve multiple solutions (possible that first match not the best one)
 						double[] possibleInsertion = new double[]{locationIdx, capacity, timeStart, additionalTravelCosts, entryIdx};
 						possibleInsertions.add(possibleInsertion);
     				}
@@ -202,7 +203,7 @@ public class Solution {
         
         for (Vehicle vehicle: this.getVehicles()) {
             // generate insertion for unused vehicle only once, otherwise regrets between all unused vehicles will be zero
-        	  //TODO: can't be applied, as skill lvl is important (individually set for each vehicle/therapist)
+        	  // XXX: can't be applied, as skill lvl is important (individually set for each vehicle/therapist)
 //            if (!vehicle.isUsed()) {
 //                if (triedUnusedVehicle) 
 //                	continue;
@@ -297,9 +298,6 @@ public class Solution {
 	 * Result is stored in the class variable totalCosts.
 	 */
     private void calculateCostsFromVehicles() {
-//        this.totalCosts = 0.;
-//        for (Vehicle veh: vehicles)
-//        	this.totalCosts += veh.getTourLength();
         this.vehicleTourCosts = 0.;
         for (Vehicle veh: vehicles)
         	this.vehicleTourCosts += veh.getTourLength();
@@ -494,7 +492,7 @@ public class Solution {
      * @return list of vehicles
      */
     public ArrayList<Vehicle> getVehicles() {
-        return vehicles; // TODO how to handle escaping reference ?
+        return vehicles; // TODO Alex - how to handle escaping reference ?
     }
     
     /**
@@ -707,12 +705,12 @@ public class Solution {
         	}
         }
         
-        //TODO: copy anything from triedInsertions ??? -> solution is in a new state 
+        // Copy from triedInsertions -> solution is in a new state 
         sol.triedInsertions = new HashMap<Integer, ArrayList<double[]>>();
         for  (Map.Entry<Integer, ArrayList<double[]>> entry: this.triedInsertions.entrySet()) {
     		sol.triedInsertions.put(entry.getKey(), new ArrayList<double[]>(entry.getValue()));
         }
-        
+ 
         return sol;
     }
 
@@ -733,7 +731,7 @@ public class Solution {
     }
     
     public int hashCode_tmp() {
-    	// TODO: when Flexible locations come into play; check whether the vehiclesInfo 
+    	// TODO Chris - when flexible locations come into play; check whether the vehiclesInfo 
     	// still contains the relevant information or do we have to encode the locations, too.
     	// E.G. customer A(1)-B(1) with their preferential locations (1). 
     	// -> delete B(1) from series
@@ -757,7 +755,7 @@ public class Solution {
 						else if (o1.get(customerFirst) > o2.get(customerFirst)) {
 							return 1;
 						}
-						// TODO: check for first customer should be sufficient
+						// TODO Chris - check for first customer should be sufficient
 						// equality not possible; customer only assigned once
 					}
 				}
@@ -783,7 +781,7 @@ public class Solution {
     public void printSolution() {
         int nActiveVehicles = this.getNActiveVehicles();
         System.out.println("VehicleCosts:" + this.vehicleTourCosts + " - SwappingCosts:" + this.swappingCosts + " - PenaltyCosts: " + this.penaltyCosts);
-        System.out.println("Solution total costs: " + this.totalCosts + "\tn vehicles used: " + nActiveVehicles); // TODO logger debug!
+        System.out.println("Solution total costs: " + this.totalCosts + "\tn vehicles used: " + nActiveVehicles); // TODO Alex - logger debug!
         for (Vehicle veh: this.vehicles) {
             if (veh.isUsed()) {
                 veh.printTour(this);
@@ -796,12 +794,12 @@ public class Solution {
     // DEPRECATED
     //
     //public Solution(ArrayList<Vehicle> vehicles, ArrayList<Integer> notAssignedCustomers) {
-    	// TODO muss hier auch infeasible rein?
+    	// TODO Alex - muss hier auch infeasible rein?
     	// this.vehicles = vehicles;
     	//  this.calculateCostsFromVehicles();
     	//  this.notAssignedCustomers = notAssignedCustomers;
     	//
-    	//  if (notAssignedCustomers.isEmpty()) { // TODO brauchen wir einen Test dafür (?) --> eher wenn Lösung in ALNS bearbeitet wurde, ob dann noch alles passt
+    	//  if (notAssignedCustomers.isEmpty()) { // TODO Alex - brauchen wir einen Test dafür (?) --> eher wenn Lösung in ALNS bearbeitet wurde, ob dann noch alles passt
     	//      this.isFeasible = true;
     	//  }
     //}

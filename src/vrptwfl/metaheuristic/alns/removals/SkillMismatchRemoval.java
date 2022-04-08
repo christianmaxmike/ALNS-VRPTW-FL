@@ -22,7 +22,7 @@ public class SkillMismatchRemoval extends AbstractRemoval{
 		List<Integer> removedCustomers = new ArrayList<Integer>();
 		
 		while (nRemovals > 0) {
-			//TODO: Chris - how to do cast check w/o suppress warnings
+			//TODO Chris - how to do cast check w/o suppress warnings
 			@SuppressWarnings("unchecked")
 			ArrayList<Integer> copyList = (ArrayList<Integer>) solution.getAssignedCustomers().clone();
 	        copyList.sort(new Comparator<Integer>() {

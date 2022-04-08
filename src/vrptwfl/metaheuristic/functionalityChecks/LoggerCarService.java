@@ -3,7 +3,7 @@ package vrptwfl.metaheuristic.functionalityChecks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO read documentary http://logback.qos.ch/manual/introduction.html
+// TODO Alex - read documentary http://logback.qos.ch/manual/introduction.html
 
 // based on https://www.youtube.com/watch?v=oiaEP57nsmI by Marcus Biel
 public class LoggerCarService {

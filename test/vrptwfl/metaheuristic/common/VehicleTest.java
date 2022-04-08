@@ -43,10 +43,10 @@ public class VehicleTest {
 //        assertTrue(vehicle.getPossibleInsertions(customer, data).isEmpty());
 //    }
 
-    // TODO 1-2 Test, dass berechnete Insertions korrekt sind
+    // TODO Alex - 1-2 Test, dass berechnete Insertions korrekt sind
     //  {customer, vehicle.id, i+1, earliestStartAtInsertion, additionTravelCosts}
     // nur das vehicle oben übrig lassen
 
-    // TODO Test, dass Insertion geklappt, hat (bisschen komplizierters Beispiel mit min 4 Kunden in Liste)
+    // TODO Alex - Test, dass Insertion geklappt, hat (bisschen komplizierters Beispiel mit min 4 Kunden in Liste)
     // 4 Kunden in tour einfügen
 }

@@ -160,7 +160,7 @@ public class Data {
     	for (int n = 0; n < swappingCosts.length; n++) {
     		for (int m = n+1; m < swappingCosts[n].length; m++) {
     			double dist = this.distanceMatrix[n][m];
-    			double swapCost = Math.pow(dist, Config.factorSwappingCosts);
+    			double swapCost = Math.pow(dist, Config.exponentSwappingLocations);
     			this.swappingCosts[n][m] = swapCost;
     			this.swappingCosts[m][n] = swapCost;
     		}

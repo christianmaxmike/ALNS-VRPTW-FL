@@ -32,7 +32,7 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
         this.backtrackJump = Config.backtrackJump;
     }
     
-    // TODO: loggen wie oft zurückgesprungen worden ist
+    // TODO Chris - loggen wie oft zurückgesprungen worden ist
     public Solution runBacktracking(Solution solution) { 
     	// Try backtracking for x trials
     	for (int trial = 0; trial<Config.backtrackTrials; trial++) {

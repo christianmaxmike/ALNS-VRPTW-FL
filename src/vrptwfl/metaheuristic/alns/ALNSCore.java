@@ -195,7 +195,7 @@ public class ALNSCore {
             repairOp.solve(solutionTemp);
 
             
-            // update neighbor graph if new solution was found (TODO check if the solution is really a new one (hashtable?)
+            // update neighbor graph if new solution was found (TODO Alex - check if the solution is really a new one (hashtable?)
             if (Config.useHistoricNodePairRemovalRandom || Config.useHistoricNodePairRemovalDeterministic) this.updateNeighborGraph(solutionTemp);
 
             if (iteration % 1000 == 0) {
@@ -380,7 +380,7 @@ public class ALNSCore {
     	if (this.currentSigma < 0) {
     		return;
     	}    	    	
-    	// TODO: Chris - Wahrscheinlichkeiten mittracken und mal plotten
+    	// TODO Chris - Wahrscheinlichkeiten mittracken und mal plotten
     	{
         	this.destroyOperators[this.currentDestroyOpIdx].incrementDraws();
         	this.destroyOperators[this.currentDestroyOpIdx].addToPI(this.currentSigma);
@@ -487,7 +487,7 @@ public class ALNSCore {
     //
     // DEPRECATED FUNCTIONS - START
     //
-    // TODO hier brauchen wir auch noch Test cases
+    // TODO Alex - hier brauchen wir auch noch Test cases
     private Solution checkImprovement_orig(Solution solutionTemp, Solution solutionCurrent, Solution solutionBestGlobal) {
         if (solutionTemp.isFeasible()) {
             if (solutionBestGlobal.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon) {
@@ -521,9 +521,9 @@ public class ALNSCore {
 //            }
 //        }
 //
-//        // TODO: feasible nur relevant fuer beste globale loesung
+//        // TODO Alex - feasible nur relevant fuer beste globale loesung
 //        // was current solution feasible ?
-//        // TODO hier kommt dann wahrscheinlichkeit etc rein, dass trotzdem schlechtere loesung
+//        // TODO Alex - hier kommt dann wahrscheinlichkeit etc rein, dass trotzdem schlechtere loesung
 //        //  angenommen wird
 //
 //        // no improvement

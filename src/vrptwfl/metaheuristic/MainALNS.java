@@ -113,7 +113,7 @@ public class MainALNS {
         Config.upperBoundRemovals = Math.min(ub1,  ub2);
 
         // set penalty (costs) for unserved customers
-        Config.penaltyUnservedCustomer = maxDistance * Config.costFactorUnservedCustomer;
+        Config.penaltyUnservedCustomer = maxDistance * Config.costUnservedCustomerViolation;
     }
     
     /**
@@ -180,7 +180,7 @@ public class MainALNS {
     // TODO Alex : performance
     // - LRU cache (last recent usage)
     
-    // TODO 23.02.2022 ; Chris
+    // TODO Chris - 23.02.2022
     // ###
     // - [v] simulated annealing  [Ropke&Pisinger, p.2416 COR]  // alter code könnte helfen
     // - [v] adaptive Komponente: Wahrscheinlichkeit von destroy und insertion 
@@ -200,13 +200,13 @@ public class MainALNS {
     //  3) Test Construction
     //  4) ggf. weiter Tests, wenn Solution object anders aussieht nach ALNS
 
-    // TODO 2: tests für geladene instanzen
+    // TODO Alex - 2: tests für geladene instanzen
     
-    // TODO 3: Logik ALNS anfangen (50_000 iteration random destroy, und regret repairs)
+    // TODO Alex - 3: Logik ALNS anfangen (50_000 iteration random destroy, und regret repairs)
 
-    // TODO 4: greedy repair
+    // TODO Alex - 4: greedy repair
 
-    // TODO moegliches hashing
+    // TODO Alex - moegliches hashing
     //  - bereits generierte Loesungen
     //  - ggf. earliest, latest possible starts in partial routes (pred_id, pred_time,)
 

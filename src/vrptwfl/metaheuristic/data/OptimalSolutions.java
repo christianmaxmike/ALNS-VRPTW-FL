@@ -52,7 +52,7 @@ public class OptimalSolutions {
             entry("R107",  new int[] {4, 7, 11}),
             entry("R108",  new int[] {4, 6, 10}),
             entry("R109",  new int[] {5, 8, 13}),
-            entry("R110",  new int[] {4, 7, 12}), // TODO or {5, 7, 12};
+            entry("R110",  new int[] {4, 7, 12}), // NOTE or {5, 7, 12};
             entry("R111",  new int[] {5, 7, 12}),
             entry("R112",  new int[] {4, 6, 10}),
             entry("C101",  new int[] {3, 5, 10}),

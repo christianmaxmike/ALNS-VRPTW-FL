@@ -103,7 +103,7 @@ public class RandomRemoval extends AbstractRemoval {
         // NOTE: these positions are the positions in the tours (not the customer ids!)
         List<Integer> sortedPositionsToRemove =  CalcUtils.getSortedUniqueRandomNumbersInRange(nRemovals, 0, this.data.getnCustomers() - solution.getNotAssignedCustomers().size() - 1);
 
-        // TODO wieder raus, stattdessen TEST CASE!! jeweils 1x, dass ranges immer passen (keiner außerhalb)
+        // TODO Alex - wieder raus, stattdessen TEST CASE!! jeweils 1x, dass ranges immer passen (keiner außerhalb)
 //        System.out.println("\n\nRemovals " + nRemovals + "\t[" + Config.lowerBoundRemovals + ", " + Config.upperBoundRemovals + "]");
 //        System.out.println(sortedPositionsToRemove);
 
@@ -121,7 +121,7 @@ public class RandomRemoval extends AbstractRemoval {
 //            runningPositionNr += nCustomersInTourBeforeRemoval;
 //        }
 
-    // TODO Testcase, mit genau den Touren und den Indices, ob das auch alles so passt
+    // TODO Alex - Testcase, mit genau den Touren und den Indices, ob das auch alles so passt
 //        Tour of vehicle 0 (n=9):
 //        0 -> 40 -> 26 -> 28 -> 27 -> 53 -> 12 -> 4 -> 24 -> 68 -> 0
 //        Tour of vehicle 1 (n=7):

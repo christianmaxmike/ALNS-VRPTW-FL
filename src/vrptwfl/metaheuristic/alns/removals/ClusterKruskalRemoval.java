@@ -8,7 +8,7 @@ import vrptwfl.metaheuristic.utils.DataUtils;
 
 import java.util.*;
 
-// TODO: if multiple locations
+// TODO Alex - if multiple locations
 //  option 1: remove customers based on closest current location s
 //  option 2: remove customers based on closest possible locations
 
@@ -57,7 +57,7 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
             // int referenceCustomerLocationIdx = DataUtils.getLocationIndex(referenceCustomer.intValue(), customerLocationReferences[referenceCustomer.intValue()], solution.getData());
             
             // find customer close to reference customer (however, preferably one from a tour that has not yet been processed)
-            // TODO: Chris - adapt to multiple locations
+            // TODO Chris - adapt to multiple locations
             // double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[referenceCustomer];
             double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[referenceCustomerLocationIdx];
             ArrayList<double[]> closest = new ArrayList<>();
@@ -113,7 +113,7 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
             // partition customers in route into two clusters
             // apply Kruskal's algorithm but stop when two disconnected parts are left
             // choose one cluster at random, and remove customers
-//            System.out.println("kruskal raus"); // TODO wieder raus
+//            System.out.println("kruskal raus");
             customersToRemove = this.applyKruskalToGetCustomersToBeRemoved(vehicle, solution);
         }
         return customersToRemove;
@@ -274,7 +274,7 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
 
             for (int i = 1; i < this.parent.length; i++) {
                 // call find on each node such that the value is parent is the representative
-//                clusterIds[i] = find(i); // TODO wieder raus
+//                clusterIds[i] = find(i);
 //                clusterIds[i] = (clusterIds[i] == origValueFirstCluster) ? 0 : 1;
                 clusterIds[i] = (find(i) == origValueFirstCluster) ? 0 : 1;
                 if (clusterIds[i] == targetId) positions.add(i);

@@ -83,8 +83,8 @@ public class RegretInsertion extends AbstractInsertion {
         return nextInsertion;
     }
 
-    // TODO die zwei Methoden zu Insertion helpers auslagern
-    // TODO: Testcase, dass k<2 nicht akzeptiert wird
+    // TODO Alex - die zwei Methoden zu Insertion helpers auslagern
+    // TODO Alex - Testcase, dass k<2 nicht akzeptiert wird
     // Method is public such that logic can be tested
     public double calculateRegret(int k, ArrayList<double[]> possibleInsertionsForCustomer) {
         double regret = 0.;

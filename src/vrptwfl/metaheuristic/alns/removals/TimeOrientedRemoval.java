@@ -67,7 +67,7 @@ public class TimeOrientedRemoval extends AbstractRemoval {
         if (firstCustomer == -1) return removedCustomers;
 
         // 2) --- get customers closest to the reference customer ---
-        // TODO: Chris: auf mehrere locations anpassen
+        // TODODone: Chris: auf mehrere locations anpassen
         // double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[firstCustomer];
         double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[firstCustomerLocationIdx];
         List<double[]> closest = new ArrayList<>();

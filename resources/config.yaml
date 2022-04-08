@@ -11,11 +11,15 @@ upper_bound_nr_of_removals: 60
 upper_bound_factor_nr_of_removals: 0.4
 
 
-### PENALTIES SETTINGS
-# unserved customers
-cost_factor_unserved_customer: 5.0  # cost for unserviced customers is equal to this number times the maximum distance in the graph
-# location factor for swapping costs
-factorSwappingCosts: 1
+### GLS SETTINGS
+enable_gls: true
+# penalties settings
+exponent_swapping_locations: 1								# exponent for swapping costs: (loc2 - loc1) ^ exp
+cost_factor_unserved_customer: 5.0  						# cost for unserviced customers is equal to this number times the maximum distance in the graph
+cost_timeWindow_violation: 0.5								# TW violation
+cost_predJobs_violation: 10.0								# Predecessor jobs violation
+cost_capacity_violation: 1.0								# capacity violation
+maxTimeWindowViolation
 
 
 ### DEFINE ACTIVE OPERATORS (DESTROY + REPAIR)									# SOLOMON			HOSPITAL
@@ -36,7 +40,6 @@ use_worst_removal_deterministic: false	 					# default: false	# v					# v
 use_worst_removal_random: false  							# default: true		# v					# v
 use_skill_mismatch_removal_deterministic: true
 use_skill_mismatch_removal_random: false
-
 # insertions
 use_greedy_insert: false									# default: true		# v
 use_skill_matching_insert: true

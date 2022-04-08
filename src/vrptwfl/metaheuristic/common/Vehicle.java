@@ -279,8 +279,8 @@ public class Vehicle {
             this.isUsed = false;
 
         // Calculate new tour costs after removal
-        // TODO: Chris - costs have already been calculated, attach complete removal array as parameter
-        // TODO: Chris - likewise to abstractInsertion
+        // TODO Chris - costs have already been calculated, attach complete removal array as parameter
+        // TODO Chris - likewise to abstractInsertion
         
         int locSucc = solution.getData().getCustomersToLocations().get(solution.getData().getOriginalCustomerIds()[succ]).get(solution.getCustomerAffiliationToLocations()[succ]);
         int locPred = solution.getData().getCustomersToLocations().get(solution.getData().getOriginalCustomerIds()[pred]).get(solution.getCustomerAffiliationToLocations()[pred]);
@@ -515,7 +515,7 @@ public class Vehicle {
      */
     public void printTour(Solution sol) {
     	DecimalFormat df = new DecimalFormat("0.0");
-        System.out.println("Tour of vehicle " + this.id + " (n=" +  this.nCustomersInTour +  ") (TourCosts:" + df.format(this.tourLength) + "):"); // TODO logger debug
+        System.out.println("Tour of vehicle " + this.id + " (n=" +  this.nCustomersInTour +  ") (TourCosts:" + df.format(this.tourLength) + "):"); // TODO Alex -logger debug
         System.out.print(this.customers.get(0) + " --(" + sol.getData().getDistanceBetweenLocations(0, sol.getData().getCustomersToLocations().get(sol.getData().getOriginalCustomerIds()[this.customers.get(1)]).get(sol.getCustomerAffiliationToLocations()[this.customers.get(1)])) + ")-> ");
         for (int i = 1; i < this.customers.size() - 1; i++) {
         	int originalCustomerId = sol.getData().getOriginalCustomerIds()[this.customers.get(i)];
@@ -561,7 +561,7 @@ public class Vehicle {
             customer = succ;
             succ = this.customers.get(i+1);
 
-            // TODO den Teil vorher ueber globalen Cache probieren
+            // TODO Alex - den Teil vorher ueber globalen Cache probieren
             double distToCustomer = data.getDistanceBetweenCustomers(pred, customer);
             double distFromCustomer = data.getDistanceBetweenCustomers(customer, succ);
             double distWithoutCustomer = data.getDistanceBetweenCustomers(pred, succ);
@@ -619,7 +619,7 @@ public class Vehicle {
         double earliestStartCustomer = data.getEarliestStartTimes()[customer];
         double latestStartCustomer = data.getLatestStartTimes()[customer];
 
-        // TODO fuer die Methode brauchen wir auf jeden Fall ein paar Testcases
+        // TODO Alex - fuer die Methode brauchen wir auf jeden Fall ein paar Testcases
         // iterate over all customers in tour
         for (int i = 0; i < this.customers.size() - 1; i++ ) {
             int pred = this.customers.get(i);
@@ -647,13 +647,12 @@ public class Vehicle {
 /*
     public int applyRemoval_old(int removePosition, Data data) {
 
-        // TODO wieder raus
     	// System.out.println("Apply removal (v=" + this.id + ", remove=" + removePosition + ")");
 
         // gather information
         int customer = this.customers.get(removePosition);
-        //  System.out.println(customer); // TODO wieder raus
-        //  System.out.println(this.customers); // TODO wieder raus
+        //  System.out.println(customer); 
+        //  System.out.println(this.customers); 
 
         int pred = this.customers.get(removePosition - 1);
         int succ = this.customers.get(removePosition + 1);
@@ -675,7 +674,7 @@ public class Vehicle {
         double distFromCustomer = data.getDistanceBetweenCustomers(customer, succ);
 
         double reductionTravelCosts = distToCustomer + distFromCustomer - data.getDistanceBetweenCustomers(pred, succ);
-        // TODO hier koennte man auch den Cache nutzen
+        // TODO Alex - hier koennte man auch den Cache nutzen
         this.tourLength -= reductionTravelCosts;
 
         return customer;

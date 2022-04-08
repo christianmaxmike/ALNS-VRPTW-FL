@@ -82,7 +82,7 @@ public class KeepTrackOfNBestSolutions {
     }
     
     
-    // TODO
+    // TODO Alex - 
     //  store best n solutions
     //  assign hash key to solutions
     //  store hash key in hash table

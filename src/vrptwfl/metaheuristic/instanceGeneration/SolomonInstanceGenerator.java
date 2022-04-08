@@ -70,8 +70,8 @@ public class SolomonInstanceGenerator {
             latestStartTimes.add(lineCustomer.get(5));
             serviceDurations.add(lineCustomer.get(6));
             
-            // TODO CHRIS: check capacity slots only for critical locations - check count of overlappings of all jobs
-            // TODO CHRIS: pre-processing - identify critical locations
+            // TODO Chris - check capacity slots only for critical locations - check count of overlappings of all jobs
+            // TODO Chris - pre-processing - identify critical locations
             
             locationCapacity.add(1); 
             requiredSkillLvl.add(0);

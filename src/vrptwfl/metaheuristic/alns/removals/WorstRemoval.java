@@ -27,31 +27,31 @@ public class WorstRemoval extends AbstractRemoval {
 
         List<Integer> removedCustomers = new ArrayList<>();
 
-//        Map<int[], Double> myCache; // TODO hier gehts mitm Guava Cache weiter
+//        Map<int[], Double> myCache; // TODO Alex - hier gehts mitm Guava Cache weiter
 
-        // TODO kann man ausnuzen, dass bei jedem removal immer nur ein vehicle betroffen ist?
+        // TODO Alex - kann man ausnutzen, dass bei jedem removal immer nur ein vehicle betroffen ist?
         //  eigentlich duerfte deswegen nur eine
 
         while (nRemovals > 0) {
 
-            // TODO fuer jeden Kunden in Loesung: gib mir position und costReduction zurueck
+            // TODO Alex - fuer jeden Kunden in Loesung: gib mir position und costReduction zurueck
 
             // calculate cost of removing customers from route
             ArrayList<double[]> possibleRemovals = solution.getPossibleRemovalsSortedByCostReduction();
 
-            // TODO cache already calculated removals [pred, cust, succ]; wenn es das schon gibt, nicht neu rechnen
+            // TODO Alex - cache already calculated removals [pred, cust, succ]; wenn es das schon gibt, nicht neu rechnen
 
             int idx = 0;
             if (this.randomize) {
                 double rand = Config.randomGenerator.nextDouble();
                 idx = (int) Math.floor(Math.pow(rand, Config.worstRemovalExponent) * possibleRemovals.size());
             }
-//            System.out.println(possibleRemovals.get(0)[3] +"\t"+ possibleRemovals.get(possibleRemovals.size()-1)[3]); // TODO wieder raus
+            // System.out.println(possibleRemovals.get(0)[3] +"\t"+ possibleRemovals.get(possibleRemovals.size()-1)[3]);
             double[] removal = possibleRemovals.get(idx);
 
 
             // apply removal {customer, vehicle.id, i, travelTimeReduction}
-            // TODO ggf. eigene applyRemovalMethode, wo kosten nicht nochmal ausgerechnet werden muessen
+            // TODO Alex - ggf. eigene applyRemovalMethode, wo kosten nicht nochmal ausgerechnet werden muessen
             solution.getVehicles().get((int) removal[1]).applyRemoval((int) removal[2], this.data, solution);
             removedCustomers.add((int) removal[0]);
 
