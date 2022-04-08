@@ -206,6 +206,8 @@ public class ALNSCore {
             }
 
             solutionCurrent = this.checkImprovement(solutionTemp, solutionCurrent, solutionBestGlobal);
+            
+            
             if (iteration % 1000 == 0) {
                 System.out.println();
                 System.out.println("Cost curr " + solutionCurrent.getTotalCosts());
@@ -217,7 +219,7 @@ public class ALNSCore {
             this.updateWeightofOperators(iteration);
             this.updateTemperature();
         }
-
+        
         return solutionBestGlobal;
     }
 

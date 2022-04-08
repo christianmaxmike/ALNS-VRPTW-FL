@@ -18,7 +18,7 @@ public class SkillMatchingInsertion extends AbstractInsertion {
 	@Override
 	public double[] getNextInsertion(Solution solution) {
 		double[] nextInsertion = new double[8];
-        nextInsertion[4] = Config.bigMRegret;
+        nextInsertion[4] = -1;
         
         solution.getNotAssignedCustomers().sort(new Comparator<Integer>() {
 

@@ -19,22 +19,23 @@ cost_factor_unserved_customer: 5.0  						# cost for unserviced customers is equ
 cost_timeWindow_violation: 0.5								# TW violation
 cost_predJobs_violation: 10.0								# Predecessor jobs violation
 cost_capacity_violation: 1.0								# capacity violation
-maxTimeWindowViolation
+cost_skillLvl_violation: 5.0
+max_timeWindow_violation: 10.0
 
 
 ### DEFINE ACTIVE OPERATORS (DESTROY + REPAIR)									# SOLOMON			HOSPITAL
 # removals
 use_cluster_removal_kruskal: false							# default: true		# x					# 
 use_historic_node_pair_removal_deterministic: false 		# default: false	# v					# 
-use_historic_node_pair_removal_random: false				# default: true		# v 					# 
+use_historic_node_pair_removal_random: false				# default: true		# v 				# 
 use_historic_request_pair_removal: false  					# default: false	# not implemented	# not implemented
 use_random_removal: false  									# default: true		# v					# 
 use_random_route_removal: false  							# default: true		# v					# 
-use_shaw_simplified_deterministic: false 					# default:false		# x					# 
-use_shaw_simplified_random: false 					 		# default:true		# x					# 
-use_time_oriented_removal_jungwirth_deterministic: false	# default:false		# x					# 
+use_shaw_simplified_deterministic: false 					# default: false	# x					# 
+use_shaw_simplified_random: false 					 		# default: true		# x					# 
+use_time_oriented_removal_jungwirth_deterministic: false	# default: false	# x					# 
 use_time_oriented_removal_jungwirth_random: false  			# default: true		# x					# 
-use_time_oriented_removal_pisinger_deterministic: false 	# default:false		# x 					# 
+use_time_oriented_removal_pisinger_deterministic: false 	# default: false	# x 				# 
 use_time_oriented_removal_pisinger_random: false 			# default: true		# x					# 
 use_worst_removal_deterministic: false	 					# default: false	# v					# v
 use_worst_removal_random: false  							# default: true		# v					# v
@@ -63,7 +64,7 @@ skill_mismatch_removal_exponent: 3
 
 
 ### BACKTRACKING SETTINGS (for initial solution)
-enable_backtracking: true
+enable_backtracking: false
 backtrackTrials : 4			 								# how many restarts
 backtrackJump: 5
 backtrackJumpToLevel: 5

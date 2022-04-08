@@ -32,7 +32,10 @@ public class Solution {
     private double totalCosts;
     private double vehicleTourCosts;
     private double swappingCosts;
-    private double penaltyCosts;
+    private double penaltyUnservedCustomers;
+    private double penaltyTimeWindowViolation;
+    private double penaltyPredJobsViolation;
+    private double penaltySkillViolation;
     private boolean isFeasible = false;
     private HashMap<Integer, HashMap<Integer, ArrayList<Double[]>>> map; // location -> capacitySlot -> list of service time tuples [start, end]
     private int[] customersAssignedLocations;     // length: customer size + 1 (depot)
@@ -290,7 +293,9 @@ public class Solution {
         this.calculateCostsFromVehicles();
         this.calculateSwappingCostsForLocations();
         this.calculatePenaltyCosts();
-        this.totalCosts = this.vehicleTourCosts + this.swappingCosts + this.penaltyCosts;
+        this.totalCosts = this.vehicleTourCosts + 
+        		this.swappingCosts + 
+        		this.penaltyUnservedCustomers;
 	}
 
 	/**
@@ -323,8 +328,6 @@ public class Solution {
      * @param removedCustomers: list of removed customers
      */
     public void updateSolutionAfterRemoval(List<Integer> removedCustomers) {
-        //this.calculateCostsFromVehicles();
-        //this.calculateSwappingCostsForLocations();
     	this.calculateTotalCosts();
         if (!removedCustomers.isEmpty()) {
             this.notAssignedCustomers.addAll(removedCustomers);
@@ -337,10 +340,6 @@ public class Solution {
      * Update the solution's state after an insertion operation. 
      */
     public void updateSolutionAfterInsertion() {
-        //this.calculateCostsFromVehicles();
-        //this.calculateSwappingCostsForLocations();
-    	//this.calculatePenaltyCosts();
-
     	this.addInfeasiblesToNotAssigned();
         this.calculateTotalCosts();
     }
@@ -350,15 +349,85 @@ public class Solution {
      * variable totalCosts.
      */
     private void calculatePenaltyCosts() {
-        this.addCostsForUnservedCustomers();
+        this.calcCostsForUnservedCustomers();
+        this.calcCostsForTimeWindowViolation();
+        this.calcCostsForPredJobsViolation();
+        this.calcCostsForSkillViolation();
     }
 
     /**
      * The function aggregates the penalty costs for unassigned customers.
      */
-    private void addCostsForUnservedCustomers() {
-        //this.totalCosts += this.notAssignedCustomers.size() * Config.penaltyUnservedCustomer;
-        this.penaltyCosts = this.notAssignedCustomers.size() * Config.penaltyUnservedCustomer;
+    private void calcCostsForUnservedCustomers() {
+    	// Compute penalty for unscheduled customers
+        this.penaltyUnservedCustomers = this.notAssignedCustomers.size() * Config.penaltyUnservedCustomer;
+    }
+    
+    private void calcCostsForSkillViolation() {
+    	this.penaltySkillViolation = 0;
+    	// Iterate customers
+    	for (int i = 1; i < this.data.getCustomers().length; i++) {
+    		// Get customer id
+    		int customerID = this.data.getCustomers()[i];
+    		
+    		// Check whether customer is scheduled; if not -> no skill violation possible
+    		if (this.customersAssignedToVehicles[customerID] == -1)
+    			continue;
+    		
+    		// Check if vehicles skill level satisfies the customer's required skill level
+    		if (this.data.getRequiredSkillLvl()[customerID] > this.vehicles.get(this.customersAssignedToVehicles[customerID]).getSkillLvl())
+    			// Aggregate penalty costs 
+    			this.penaltySkillViolation += Config.costSkillLvlViolation;
+    	}
+    }
+    
+    private void calcCostsForPredJobsViolation() {
+    	this.penaltyPredJobsViolation = 0;
+    	// Iterate given predecessor jobs and check for violations
+    	for (Map.Entry<Integer, ArrayList<Integer>> entry : this.data.getPredCustomers().entrySet()) {
+    		// Check for customers if there exist predecessor jobs
+    		if (entry.getValue().size() == 0) continue;
+    		else {
+    			// Iterate predecessor jobs
+    			for (Integer predJobOrigIdx : entry.getValue()) {
+    				// get customer id in the current scheduling problem (!= original customer ids)
+    				int predJobId = Arrays.asList(this.data.getOriginalCustomerIds()).indexOf(predJobOrigIdx);
+    				// check whether the predecessor job is scheduled or not (-1: not scheduled)
+    				if (this.customersAssignedToVehicles[predJobId] == -1)
+    					// Aggregate penalty costs
+    					this.penaltyPredJobsViolation += Config.costPredJobsViolation;
+    				//TODO Chris - predecessor job can be scheduled but we also have
+    				// to check the service times for possible violations
+    				// predecessor job has to be already finished when succeeding job
+    				// starts
+    			}
+    		}
+    	}
+    }
+    
+    private void calcCostsForTimeWindowViolation() {
+    	this.penaltyTimeWindowViolation = 0;
+    	// Iterate customers and check for tw violations
+    	for (int i = 0; i<this.data.getCustomers().length; i++) {
+    		// Get customer id
+    		int customerID = this.data.getCustomers()[i];
+    		
+    		// Check whether customer is scheduled; if not -> no time window violation possible
+    		if (this.customersAssignedToVehicles[customerID] == -1)
+    			continue;
+
+    		// get vehicle where current customer is scheduled
+    		Vehicle vehicleOfInterest = this.vehicles.get(this.customersAssignedToVehicles[customerID]);
+    		// Get customer's index within the route
+    		int idxInRoute = vehicleOfInterest.getCustomers().indexOf(customerID);
+    		// check for TW violation
+    		// i) the current scheduling is earlier compared to the given earliest starting point for the customer
+    		// ii) the current scheduling is later compared to the given latest ending points for the customer
+    		if (this.data.getEarliestStartTimes()[customerID] > vehicleOfInterest.getStartOfServices().get(idxInRoute) 
+    				|| this.data.getLatestStartTimes()[customerID] + this.data.getServiceDurations()[customerID] < vehicleOfInterest.getEndOfServices().get(idxInRoute))
+    			// Aggregate penalty for time window violations
+    			this.penaltyTimeWindowViolation += Config.costTimeWindowViolation;
+    	}
     }
 
     /**
@@ -685,6 +754,11 @@ public class Solution {
         sol.setTempInfeasibleCustomers(new ArrayList<>(this.tempInfeasibleCustomers));
         sol.setTotalCosts(this.totalCosts);
         sol.setFeasible(this.isFeasible);
+        sol.penaltyUnservedCustomers = this.penaltyUnservedCustomers;
+        sol.penaltyPredJobsViolation = this.penaltyPredJobsViolation;
+        sol.penaltySkillViolation = this.penaltySkillViolation;
+        sol.penaltyTimeWindowViolation = this.penaltyTimeWindowViolation;
+        sol.swappingCosts = this.swappingCosts;
 
         ArrayList<Vehicle> newVehicles = new ArrayList<>();
         for (Vehicle veh: this.vehicles) {
@@ -780,7 +854,7 @@ public class Solution {
      */
     public void printSolution() {
         int nActiveVehicles = this.getNActiveVehicles();
-        System.out.println("VehicleCosts:" + this.vehicleTourCosts + " - SwappingCosts:" + this.swappingCosts + " - PenaltyCosts: " + this.penaltyCosts);
+        System.out.println("VehicleCosts:" + this.vehicleTourCosts + " - SwappingCosts:" + this.swappingCosts + " - penUnserved: " + this.penaltyUnservedCustomers + " - penSkillLvl:" + this.penaltySkillViolation + " - penTW:" + this.penaltyTimeWindowViolation + " - penPred:" + this.penaltyPredJobsViolation);
         System.out.println("Solution total costs: " + this.totalCosts + "\tn vehicles used: " + nActiveVehicles); // TODO Alex - logger debug!
         for (Vehicle veh: this.vehicles) {
             if (veh.isUsed()) {

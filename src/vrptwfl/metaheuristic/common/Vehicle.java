@@ -34,6 +34,7 @@ public class Vehicle {
      * @param id: vehicle id
      * @param capacityLimit: capacity limit
      * @param latestEndOfService: the latest end time of any service to be scheduled
+     * @param skillLvl: skill level of vehicle
      */
     public Vehicle(int id, int capacityLimit, double latestEndOfService, int skillLvl) {
         this.id = id;
@@ -85,34 +86,37 @@ public class Vehicle {
     public ArrayList<double[]> getPossibleInsertions(int customer, Data data, Solution solution) {
         ArrayList<double[]> possibleInsertions = new ArrayList<>();
 
-        // insufficient skill level
+        // XXX : GLS - if (!Config.enableGLS) {...} 
+        // SKILL CHECK - insufficient skill level
         if (this.skillLvl < data.getRequiredSkillLvl()[customer])
         	return possibleInsertions;
         
-        // if capacity limit would be reached, the customer cannot be inserted
+        // CAPACITY CHECK - if capacity limit is reached, the customer can't be inserted
         if (this.capacityUsed + data.getDemands()[customer] > this.capacityLimit) 
         	return possibleInsertions;
 
+        // Get service interval for customer
         double earliestStartCustomer = data.getEarliestStartTimes()[customer];
         double latestStartCustomer = data.getLatestStartTimes()[customer];
 
         for (int i = 0; i < this.customers.size() - 1; i++ ) {
+        	// Get predecessor end and successor start time
             int pred = this.customers.get(i);
             int succ = this.customers.get(i+1);
             double endServicePred = this.endOfServices.get(i);
             double startServiceSucc = this.startOfServices.get(i+1);
             
-            // return arr in format [location, capacitySlot, startTimeService, costs, entryIdxInLoc]
-            // locationIdx, capacity, timeStart, additionalTravelCosts, entryIdx};
+            // Get possible insertions - return array in format 
+            // [location, capacitySlot, startTimeService, costs, entryIdxInLoc]
             ArrayList<double[]> customersPossibleLTW = solution.getAvailableLTWForCustomer(customer, 
             		                                                     (int) earliestStartCustomer, 
             		                                                     (int) latestStartCustomer,
             		                                                     data.getServiceDurations()[customer],
             															 pred, succ,
             															 (int) endServicePred, (int) startServiceSucc);
-            if (customersPossibleLTW.size() == 0) // no match could be found
+            if (customersPossibleLTW.size() == 0)  // no match
             	continue;
-            else // possible insertion found
+            else  // add matches
             	for (int newEntry = 0 ; newEntry<customersPossibleLTW.size(); newEntry++)
             		// customer, vehicleId, posInRoute, starTime, costs, location, capacity, entryIdxInLoc
             		possibleInsertions.add(new double[] {customer, 
@@ -217,8 +221,8 @@ public class Vehicle {
      */
     public void applyInsertion(double[] insertion, Data data, Solution solution) {
         // insertion: customer - vehicle id - positionInRoute - timeStart - additionCosts - locationIdx - capacitySlot - MapEntryIdx
-    	//if ((int) insertion[0] == 3)
-        //	System.out.println();
+    	if ((int) insertion[0] == 0 && (int) insertion[0] == 1)
+        	System.out.println();
     	
     	int pos = (int) insertion[2];  
         int customer = (int) insertion[0]; 
@@ -288,9 +292,6 @@ public class Vehicle {
         double distToCustomer = solution.getData().getDistanceBetweenLocations(locPred, locCustomer);
         double distFromCustomer = solution.getData().getDistanceBetweenLocations(locCustomer, locSucc);
         
-        // double distToCustomer = solution.getDistanceBetweenCustomersByAffiliations(pred, customer);        
-        // double distFromCustomer = solution.getDistanceBetweenCustomersByAffiliations(customer, succ);
-        // double reductionTravelCosts = distToCustomer + distFromCustomer - solution.getDistanceBetweenCustomersByAffiliations(pred, succ);
         double reductionTravelCosts = distToCustomer + distFromCustomer - solution.getData().getDistanceBetweenLocations(locPred, locSucc);
         
         solution.freeCustomerAffiliationToLocation(customer);
@@ -298,7 +299,6 @@ public class Vehicle {
         solution.freeCustomerAffiliationToVehicle(customer);
         this.tourLength -= reductionTravelCosts;
 
-        // this.printTour(solution);
         // return id of removed customer
         return customer;
     }

@@ -24,7 +24,7 @@ public class MainALNS {
 	
 	/**
 	 * Constructor of the MainALNS class. 
-	 * A FileWrite object is initialized for results logging
+	 * A FileWriter object is initialized for results logging
 	 */
 	public MainALNS(String outputFile) {
 		try {
@@ -58,14 +58,14 @@ public class MainALNS {
         System.out.println("Init solution - temp infeasible customers:" + solutionConstr.getTempInfeasibleCustomers());
         System.out.println("Customers for scheduling:" + Arrays.toString(data.getOriginalCustomerIds()));
         solutionConstr.printSolution();
-        System.exit(0);
+        // System.exit(0);
 
         // ALNS
         ALNSCore alns = new ALNSCore(data);
         Solution solutionALNS = alns.runALNS(solutionConstr);
 
-        System.out.println("Init solution - not assigned customers   :" + solutionALNS.getNotAssignedCustomers());
-        System.out.println("Init solution - temp infeasible customers:" + solutionALNS.getTempInfeasibleCustomers());
+        System.out.println("ALNS solution - not assigned customers   :" + solutionALNS.getNotAssignedCustomers());
+        System.out.println("ALNS solution - temp infeasible customers:" + solutionALNS.getTempInfeasibleCustomers());
         System.out.println("Customers for scheduling:" + Arrays.toString(data.getOriginalCustomerIds()));
         long finishTimeConstruction = System.currentTimeMillis();
         long timeElapsed = (finishTimeConstruction - startTimeConstruction);
@@ -73,8 +73,6 @@ public class MainALNS {
 
         // TODO Alex: brauchen irgendwas, um Lösung zu speichern (ZF und Touren startzeiten etc.)
 
-        System.out.println(solutionALNS.getNotAssignedCustomers());
-        System.out.println(solutionALNS.getTempInfeasibleCustomers());
         solutionALNS.printSolution();
 
         int i = -1;
@@ -98,7 +96,9 @@ public class MainALNS {
     }
 
     /**
-     * Sets the upper bound for number of removals in each ALNS iteration
+     * Sets the upper bound for number of removals in each ALNS iteration and the
+     * penalty of unserved customers by multiplying the costs of unserved customers
+     * with the maximal distance between all locations.
      * (see Pisinger & Ropke 2007, C&OR §6.1.1 p. 2417)
      * @param nCustomers: number of customers
      * @param maxDistance: maximal distance in the input locations
@@ -117,7 +117,7 @@ public class MainALNS {
     }
     
     /**
-     * Loads the attached solomon instance.
+     * Loads the attached solomon instance with n customers.
      * @param instanceName filename of solomon instance
      * @param nCustomers number of customers being scheduled for the solomon instance
      * @return array containing the data object in the 0-th position
@@ -170,31 +170,17 @@ public class MainALNS {
 //        	final MainALNS algo = new MainALNS(outFile);
 //        	algo.runALNS(d, instanceName);        	
 //        }
-        // Alex: Add TimeLimit (?)
+        // TODO Alex: Add TimeLimit (?)
     }
     
     //
-    // ### TODOs ###
+    // ### alte TODOs ###
     //
-    
-    // TODO Alex : performance
+
+    // TODO Alex - 0: performance
     // - LRU cache (last recent usage)
     
-    // TODO Chris - 23.02.2022
-    // ###
-    // - [v] simulated annealing  [Ropke&Pisinger, p.2416 COR]  // alter code könnte helfen
-    // - [v] adaptive Komponente: Wahrscheinlichkeit von destroy und insertion 
-    //     nicht mehr uniformly distributed, sondern Wahrscheinlichkeit nach historischem 
-    //     Erfolg p- und p+ (sigma-Werte)
-    // - [v] hashcode für einzelne solutions
-    // 
-    // !!Tracking für die profs; Was sind meine contributions!!
-    // - [v] Prüfen ob alle Operatoren Von Pisinger&Ropke mit aufgenommen worden sind für VRPTW
-    //   - wenn ja: top
-    //   - wenn nein, -> Implementieren!
-    // ###
-
-    // TODO Alex : morgen früh 28.05.2021
+    // TODO Alex - 1: morgen früh 28.05.2021
     //  1) Min- und Max-Anzahl removals pro iteration (siehe ALNS Paper)
     //  2) Test Vehicles
     //  3) Test Construction
@@ -206,7 +192,7 @@ public class MainALNS {
 
     // TODO Alex - 4: greedy repair
 
-    // TODO Alex - moegliches hashing
+    // TODO Alex - 5: moegliches hashing
     //  - bereits generierte Loesungen
     //  - ggf. earliest, latest possible starts in partial routes (pred_id, pred_time,)
 

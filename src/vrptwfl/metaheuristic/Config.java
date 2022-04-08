@@ -40,6 +40,8 @@ public class Config {
     public static double costTimeWindowViolation;
     public static double costPredJobsViolation;
     public static double costCapacityViolation;
+    public static double costSkillLvlViolation;
+    public static double maxTimeWindowViolation;
 
     // --- ALNS OEPRATORS TO USE ---
     // removals
@@ -220,6 +222,8 @@ public class Config {
         costTimeWindowViolation = (double) obj.get("cost_timeWindow_violation");
         costPredJobsViolation = (double) obj.get("cost_predJobs_violation");
         costCapacityViolation = (double) obj.get("cost_capacity_violation");
+        costSkillLvlViolation = (double) obj.get("cost_skillLvl_violation");
+        maxTimeWindowViolation = (double) obj.get("max_timeWindow_violation");
         
         // --- LOCATION SETTINGS (for solomon instances) ---
         numberOfLocationsPerCustomer = (int) obj.get("numberOfLocationsPerCustomer");
