@@ -8,10 +8,20 @@ import vrptwfl.metaheuristic.utils.CalcUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-// randomly select routes and then remove customers from the route
-// Mancini 2016, page 107 - (Transportation Research Part C)
+/**
+ * This class implements the random route removal heuristic which randomly removes all
+ * customers from the selected route.
+ * (Mancini 2016, page 107 - (Transportation Research Part C))
+ * @author Alexander Jungwirth
+*/
 public class RandomRouteRemoval extends AbstractRemoval {
 
+	/**
+	 * Constructor for the random route removal class. 
+	 * The attached data object is forwarded to the parent class 
+	 * AbstractRemoval.
+	 * @param data: data object
+	 */
     public RandomRouteRemoval(Data data) {
         super(data);
     }

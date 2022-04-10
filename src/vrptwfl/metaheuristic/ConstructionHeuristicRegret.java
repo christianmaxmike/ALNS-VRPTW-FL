@@ -6,18 +6,37 @@ import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
 
+/**
+ * Class implements the construction heuristic combining k-regret with
+ * the backtracking mechanism. 
+ * 
+ * @author Christian M.M. Frey, Alexander Jungwirth
+ *
+ */
 public class ConstructionHeuristicRegret {
 
     private Data data;
 
+    /**
+     * Constructor of the construction heuristic.
+     * 
+     * @param data: data object
+     */
     public ConstructionHeuristicRegret(Data data) {
         this.data = data;
     }
 
-    // k defines what regret measure to use
-    //  e.g. k=3 means difference between best insertion and 3rd best insertion
+    /**
+     * Runs the construction heuristic and returns the solution object.
+     * The parameter k sets which regret measure to use, e.g.,
+     * k=2 means difference between the best insertion and 3rd best insertion.
+     * @param k: defines what regret measure to use
+     * @return Solution object after construction
+     * @throws ArgumentOutOfBoundsException
+     */
     public Solution constructSolution(int k) throws ArgumentOutOfBoundsException {
     	Solution emptySolution = Solution.getEmptySolution(data);
+    	emptySolution.setIsConstruction(true);
     	// SkillMatchingInsertion inserter = new SkillMatchingInsertion(data);
         if (!Config.enableBacktracking) {
         	RegretInsertion inserter = new RegretInsertion(k, data);

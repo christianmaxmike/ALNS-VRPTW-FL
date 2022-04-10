@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Practical heart of the adaptive large neighborhood search applied 
+ * Practical heart of the adaptive large neighborhood search (ALNS) applied 
  * on the vehicle routing problem with time windows and flexible locations.
  * This class initializes and stores the repair and destroy operators as
  * well as the visited solutions.
@@ -33,7 +33,6 @@ public class ALNSCore {
 
     private AbstractInsertion[] repairOperators;
     private AbstractRemoval[] destroyOperators;
-    
     private int currentDestroyOpIdx;
     private int currentRepairOpIdx;
     private int currentSigma; 
@@ -159,18 +158,19 @@ public class ALNSCore {
     // MAIN FUNCTIONALITY
     //
     /**
-     * This method starts the adpative large neighborhood search. 
+     * This method starts the adaptive large neighborhood search (ALNS). 
      * The initial solution on which the ALNS starts is attached as parameter.
      * @param solutionConstr: initial solution
      * @return best found solution
      * @throws ArgumentOutOfBoundsException
      */
     public Solution runALNS(Solution solutionConstr) throws ArgumentOutOfBoundsException {
+    	solutionConstr.setIsConstruction(false);
 
     	// initialize temperature for simulated annealing - added 03/03/22
     	initTemperature(solutionConstr.getTotalCosts());
     	
-        // init ALNS
+        // Get copies of initial solutions
         Solution solutionCurrent = solutionConstr.copyDeep();
         Solution solutionBestGlobal = solutionConstr.copyDeep();
 
@@ -178,7 +178,7 @@ public class ALNSCore {
         if (Config.useHistoricNodePairRemovalRandom || Config.useHistoricNodePairRemovalDeterministic) 
         	this.updateNeighborGraph(solutionConstr);
 
-
+        // Start ALNS
         for (int iteration = 1; iteration <= Config.alnsIterations; iteration++) {
             Solution solutionTemp = solutionCurrent.copyDeep();
             // TODO Alex: random auswaehlen aus Operatoren (geht das irgendwie mit Lambdas besser ?)
@@ -207,7 +207,6 @@ public class ALNSCore {
 
             solutionCurrent = this.checkImprovement(solutionTemp, solutionCurrent, solutionBestGlobal);
             
-            
             if (iteration % 1000 == 0) {
                 System.out.println();
                 System.out.println("Cost curr " + solutionCurrent.getTotalCosts());
@@ -219,7 +218,6 @@ public class ALNSCore {
             this.updateWeightofOperators(iteration);
             this.updateTemperature();
         }
-        
         return solutionBestGlobal;
     }
 
@@ -260,7 +258,7 @@ public class ALNSCore {
      */
     private Solution checkImprovement(Solution solutionTemp, Solution solutionCurrent, Solution solutionBestGlobal) {
         // CASE 1 : check if improvement of global best
-        if (solutionTemp.isFeasible()) {
+        if (solutionTemp.isFeasible() || Config.enableGLS) {
             if (solutionBestGlobal.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon) {
             	this.currentSigma = Config.sigma1;
                 solutionBestGlobal.setSolution(solutionTemp);
@@ -296,7 +294,6 @@ public class ALNSCore {
         	this.currentSigma = -1;
         	return solutionCurrent;
         }
-
     }
     
     /**

@@ -5,6 +5,11 @@ import java.util.List;
 
 import vrptwfl.metaheuristic.common.Solution;
 
+/**
+ * General helper functions for data transformations (e.g., list to array function)
+ * @author Alexander Jungwirth, Christian M.M. Frey
+ *
+ */
 public class DataUtils {
 
 	/**
@@ -45,9 +50,35 @@ public class DataUtils {
     	return intArray;
     }
 
-    
+    /**
+     * Retrieve the location index a customer is currently assigned to.
+     * The possible locations are stored within the data object whereas 
+     * the current assignment to one of its possible location is dependent
+     * on the current solution object.
+     * @param customerId: customer id
+     * @param solution: solution object
+     * @return location index 
+     */
     public static int getLocationIndex (int customerId, Solution solution) {
     	return solution.getData().getCustomersToLocations().get(solution.getData().getOriginalCustomerIds()[customerId]).get(solution.getCustomerAffiliationToLocations()[customerId]);
     }
     
+    /**
+     * Retrieve the location indices of all customers.
+     * The possible locations are stored within the data object whereas 
+     * the current assignment to one of its possible location is dependent
+     * on the current solution object.
+     * @param solution: solution object
+     * @return array with all location indices for all customers being scheduled
+     */
+    public static int[] getLocationIdxOfAllCustomers(Solution solution) {
+    	int[] locs = new int[solution.getData().getCustomers().length+1]; //<- Depot + 1
+    	for (int customerID = 1; customerID<locs.length; customerID++) {
+    		if (solution.getCustomerAffiliationToLocations()[customerID] != -1)
+    			locs[customerID] = getLocationIndex(customerID, solution);
+    		else 
+    			locs[customerID] = -1;
+    	}
+    	return locs;
+    }
 }

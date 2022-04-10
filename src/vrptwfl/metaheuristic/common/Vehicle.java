@@ -1,6 +1,8 @@
 package vrptwfl.metaheuristic.common;
 
 import com.google.common.base.Objects;
+
+import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.utils.DataUtils;
 
@@ -8,9 +10,13 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 /**
- * This class implements a vehicle object
+ * This class implements a vehicle/therapist object
+ * 
+ * @author: Alexander Jungwirth, Christian M.M. Frey
  */
 public class Vehicle {
+	
+    // TODO Alex: Methode für cost increase und reduction (tour laenge)
 
     private int id;
     private int capacityLimit;
@@ -86,10 +92,12 @@ public class Vehicle {
     public ArrayList<double[]> getPossibleInsertions(int customer, Data data, Solution solution) {
         ArrayList<double[]> possibleInsertions = new ArrayList<>();
 
-        // XXX : GLS - if (!Config.enableGLS) {...} 
+        // XXX : GLS - SKILL Violation
         // SKILL CHECK - insufficient skill level
-        if (this.skillLvl < data.getRequiredSkillLvl()[customer])
-        	return possibleInsertions;
+        if (!Config.enableGLS || solution.isConstruction()) {
+        	if (this.skillLvl < data.getRequiredSkillLvl()[customer])
+        		return possibleInsertions;        	
+        }
         
         // CAPACITY CHECK - if capacity limit is reached, the customer can't be inserted
         if (this.capacityUsed + data.getDemands()[customer] > this.capacityLimit) 
@@ -108,7 +116,7 @@ public class Vehicle {
             
             // Get possible insertions - return array in format 
             // [location, capacitySlot, startTimeService, costs, entryIdxInLoc]
-            ArrayList<double[]> customersPossibleLTW = solution.getAvailableLTWForCustomer(customer, 
+            ArrayList<double[]> customersPossibleLTW = solution.getPossibleLTWInsertionsForCustomer(customer, 
             		                                                     (int) earliestStartCustomer, 
             		                                                     (int) latestStartCustomer,
             		                                                     data.getServiceDurations()[customer],
@@ -135,7 +143,7 @@ public class Vehicle {
      * Retrieve the possible removals of customers within the vehicle's route
      * @param data: Data object
      * @param solution: Solution object where customer shall be removed
-     * @return  list with all possible removals
+     * @return list with all possible removals
      */
     public ArrayList<double[]> getPossibleRemovals(Data data, Solution solution) {
         ArrayList<double[]> possibleRemovals = new ArrayList<>();
@@ -207,10 +215,6 @@ public class Vehicle {
         return possibleRemovals;
     }
 
-
-    // TODO Alex: Methode für cost increase und reduction (tour laenge)
-
-
     /**
      * This method realizes the insertion of an customer within the 
      * scheduling and updates the vehicles information, correspondingly.
@@ -221,8 +225,6 @@ public class Vehicle {
      */
     public void applyInsertion(double[] insertion, Data data, Solution solution) {
         // insertion: customer - vehicle id - positionInRoute - timeStart - additionCosts - locationIdx - capacitySlot - MapEntryIdx
-    	if ((int) insertion[0] == 0 && (int) insertion[0] == 1)
-        	System.out.println();
     	
     	int pos = (int) insertion[2];  
         int customer = (int) insertion[0]; 
@@ -249,10 +251,6 @@ public class Vehicle {
         						  start+duration,
         						  (int) insertion[7]);
         this.isUsed = true;
-        
-        //System.out.println();
-        //System.out.println("After insertion");
-        //this.printTour(solution);
     }
 
     /**
@@ -283,17 +281,18 @@ public class Vehicle {
             this.isUsed = false;
 
         // Calculate new tour costs after removal
-        // TODO Chris - costs have already been calculated, attach complete removal array as parameter
-        // TODO Chris - likewise to abstractInsertion
-        
+        // TODO_DONE Chris - costs have to be calculated if call comes from applyRemovalForCustomer(...)
+        // Get locations
         int locSucc = solution.getData().getCustomersToLocations().get(solution.getData().getOriginalCustomerIds()[succ]).get(solution.getCustomerAffiliationToLocations()[succ]);
         int locPred = solution.getData().getCustomersToLocations().get(solution.getData().getOriginalCustomerIds()[pred]).get(solution.getCustomerAffiliationToLocations()[pred]);
         int locCustomer = solution.getData().getCustomersToLocations().get(solution.getData().getOriginalCustomerIds()[customer]).get(solution.getCustomerAffiliationToLocations()[customer]);
+        // Calculate distances
         double distToCustomer = solution.getData().getDistanceBetweenLocations(locPred, locCustomer);
         double distFromCustomer = solution.getData().getDistanceBetweenLocations(locCustomer, locSucc);
-        
+        // Calculate cost reduction
         double reductionTravelCosts = distToCustomer + distFromCustomer - solution.getData().getDistanceBetweenLocations(locPred, locSucc);
         
+        // Deallocat customer's information from the current solution object
         solution.freeCustomerAffiliationToLocation(customer);
         solution.freeCustomerAffiliationToCapacity(customer);
         solution.freeCustomerAffiliationToVehicle(customer);
@@ -302,7 +301,6 @@ public class Vehicle {
         // return id of removed customer
         return customer;
     }
-    
     
     public int applyRemovalForCustomer(int customer, Data data, Solution solution) {
         // find position of customer in tour
@@ -313,10 +311,17 @@ public class Vehicle {
     //
     // CUSTOM GETTERS
     // 
+    /**
+     * Calculates the swapping costs for locations of all customers within the 
+     * vehicle's route.
+     * @param s: current solution object
+     * @return the total swapping costs
+     */
     public double getSwappingCosts(Solution s) {
     	double swappingCosts = 0.0;
-    	for ( int i = 1 ; i < this.customers.size()-1; i++)
-    		swappingCosts += s.getData().getSwappingCosts()[s.getData().getCustomersPreferredLocation()[this.customers.get(i)]][s.getCustomerAffiliationToLocations()[this.customers.get(i)]];
+    	for (int i = 1 ; i < this.customers.size()-1; i++)
+    		swappingCosts += s.getData().getSwappingCosts()[s.getData().getCustomersPreferredLocation()[this.customers.get(i)]]
+    													   [DataUtils.getLocationIndex(this.customers.get(i), s)];
     	return swappingCosts;
     }
     
@@ -480,6 +485,10 @@ public class Vehicle {
         return isUsed;
     }
     
+    /**
+     * Returns the vehicle's/therapist's skill level 
+     * @return skill level
+     */
     public int getSkillLvl() {
     	return skillLvl;
     }

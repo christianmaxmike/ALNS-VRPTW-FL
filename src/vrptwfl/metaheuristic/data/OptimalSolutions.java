@@ -4,6 +4,10 @@ import java.util.Map;
 
 import static java.util.Map.entry;
 
+/**
+ * This class stores the best scores reported in the literature for
+ * the solomon instances. 
+ */
 public class OptimalSolutions {
 
     // private static OptimalSolutions opt = new OptimalSolutions();
@@ -73,8 +77,4 @@ public class OptimalSolutions {
             entry("RC107", new int[] {3, 6, 12}),
             entry("RC108", new int[] {3, 6, 11})
     );
-
-    public static void main(String[] args) {
-        System.out.println(optimalObjFuncValue.get("R101")[1]);
-    }
 }

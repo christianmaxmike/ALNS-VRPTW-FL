@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
  * as well as the occupancy of capacity slots of all locations for the 
  * whole range of possible service times. We also have an indicator if 
  * the solution object leads to a feasible solution or not.
+ * 
+ * @author: Christian M.M. Frey, Alexander Jungwirth
  */
 public class Solution {
 
@@ -37,6 +39,7 @@ public class Solution {
     private double penaltyPredJobsViolation;
     private double penaltySkillViolation;
     private boolean isFeasible = false;
+    private boolean isConstruction = false;
     private HashMap<Integer, HashMap<Integer, ArrayList<Double[]>>> map; // location -> capacitySlot -> list of service time tuples [start, end]
     private int[] customersAssignedLocations;     // length: customer size + 1 (depot)
     private int[] customersAssignedCapacitySlot;  // length: customer size + 1 (depot)
@@ -91,15 +94,17 @@ public class Solution {
         
         start.triedInsertions = new HashMap<Integer, ArrayList<double[]>>();
         
-        // Create array indicating to which coords a customer is assigned to (-1: no assignment)
+        // Create array indicating to which location a customer is assigned to (-1: no assignment)
         start.customersAssignedLocations = new int[data.getCustomers().length+1];
         Arrays.fill(start.customersAssignedLocations, -1);
         start.customersAssignedLocations[0] = 0;  // <- Depot
         
+        // Create array indicating to which capacity slot a customer is assigned to (-1: no assignment)
         start.customersAssignedCapacitySlot = new int[data.getCustomers().length+1];
         Arrays.fill(start.customersAssignedCapacitySlot, -1);
         start.customersAssignedCapacitySlot[0] = 0; // -> Depot
         
+        // Create array indicating to which vehicle a customer is assigned to (-1: no assignment)
         start.customersAssignedToVehicles = new int[data.getCustomers().length + 1];
         Arrays.fill(start.customersAssignedToVehicles, -1);
         start.customersAssignedToVehicles[0] = 0; // -> Depot
@@ -134,15 +139,15 @@ public class Solution {
      * @param startServiceSucc: start service time of successor
      * @return
      */
-    public ArrayList<double[]> getAvailableLTWForCustomer(int customer, int earliestStartCustomer, int latestStartCustomer, int serviceTime, int pred, int succ, int endServicePred, int startServiceSucc) {
+    public ArrayList<double[]> getPossibleLTWInsertionsForCustomer(int customer, int earliestStartCustomer, int latestStartCustomer, int serviceTime, int pred, int succ, int endServicePred, int startServiceSucc) {
     	ArrayList<double[]> possibleInsertions = new ArrayList<double[]>();
     	for (int locationIdx=0; locationIdx < this.data.getCustomersToLocations().get(this.data.getOriginalCustomerIds()[customer]).size() ; locationIdx ++) {
+    		// Get current location id for customer (e.g. customer 1 with locations: 3, 4 ; locationIdx refers to 0 -> 3, 1 -> 4)
     		int location = this.data.getCustomersToLocations().get(this.data.getOriginalCustomerIds()[customer]).get(locationIdx);
     		
     		// Get travel distances from and to the customer
     		double distToCustomer = data.getDistanceBetweenLocations(DataUtils.getLocationIndex(pred, this), location);
     		double distFromCustomer = data.getDistanceBetweenLocations(location, DataUtils.getLocationIndex(succ, this));
-    		//double distFromCustomer = getDistance(succ, location);
         	// Check earliest and latest insertions to fit predecessor's and successor's service time
             double earliestStartAtInsertion = Math.max(endServicePred + distToCustomer, earliestStartCustomer);
             double latestStartAtInsertion = Math.min(startServiceSucc - distFromCustomer - this.data.getServiceDurations()[customer], latestStartCustomer);
@@ -150,23 +155,23 @@ public class Solution {
             
             // XXX:(if Config.enableGLS) -> check for violations in calculatePenaltyCosts()
             // Check end service time of dependencies to predecessor jobs [customerId, endServiceTime, LocationIdx];
-            double[] infoOfLatestPredJob = this.getEndServiceTimeOfLatestPredJob(customer);
-            // if a predecessor job couldn't be scheduled, the current job can also not be scheduled; break
-            if (infoOfLatestPredJob[1] == -1) return possibleInsertions;
-            else if  (infoOfLatestPredJob[1] > 0){
-            	double distToPredecessorJob = data.getDistanceBetweenLocations(DataUtils.getLocationIndex((int) infoOfLatestPredJob[0], this), location);
-            	earliestStartAtInsertion = Math.max(earliestStartAtInsertion, infoOfLatestPredJob[1] + distToPredecessorJob);            	
-            }
-            
+            // if there is no latest predecessor job, the subprocedure returns an array consisting of -1's ,ie., [-1,-1,-1]
+            if (!Config.enableGLS || this.isConstruction) {
+	            double[] infoOfLatestPredJob = this.getEndServiceTimeOfLatestPredJob(customer);
+	            // if a predecessor job couldn't be scheduled, the current job can also not be scheduled; break
+	            if (infoOfLatestPredJob[1] == -1) return possibleInsertions;
+	            else if  (infoOfLatestPredJob[1] > 0){
+	            	double distToPredecessorJob = data.getDistanceBetweenLocations(DataUtils.getLocationIndex((int) infoOfLatestPredJob[0], this), location);
+	            	earliestStartAtInsertion = Math.max(earliestStartAtInsertion, infoOfLatestPredJob[1] + distToPredecessorJob);            	
+	            }
+            }            
             // check if location is feasible at all w.r.t to service times
             // E.g. : 10 < 10.00004 - 1e-6  ; just prevent numerical instability
             // if (latestStartCustomer < earliestStartAtInsertion - Config.epsilon) break;
             if (latestStartAtInsertion < earliestStartAtInsertion - Config.epsilon) break;
  
-//			double additionalTravelCosts = distToCustomer + distFromCustomer - getDistanceBetweenCustomersByAffiliations(pred, succ);
 			double additionalTravelCosts = distToCustomer + distFromCustomer - data.getDistanceBetweenLocations(DataUtils.getLocationIndex(pred, this), DataUtils.getLocationIndex(succ, this));
             // check available capacity
-			// int loc = DataUtils.getPreferredLocationIndex(customer, location, this.data);
     		for (int capacity = 0; capacity < this.data.getLocationCapacity()[location]; capacity ++) {
     		    // Key: Location e.g. 1; where start of planning horizon = 0 and end of planning horizon = 230
     		    //        --> HashMap - Key: capacitySlot e.g.:  0  (..., 1, 2, ...) 
@@ -363,17 +368,20 @@ public class Solution {
         this.penaltyUnservedCustomers = this.notAssignedCustomers.size() * Config.penaltyUnservedCustomer;
     }
     
+    /**
+     * Calculate penalty costs for all skill violations.
+     * A skill violation occurs if a customer/patient is handled by a vehicle/therapist 
+     * whose skill level is below the required one of a customer. 
+     */
     private void calcCostsForSkillViolation() {
     	this.penaltySkillViolation = 0;
     	// Iterate customers
     	for (int i = 1; i < this.data.getCustomers().length; i++) {
     		// Get customer id
-    		int customerID = this.data.getCustomers()[i];
-    		
+    		int customerID = this.data.getCustomers()[i];    		
     		// Check whether customer is scheduled; if not -> no skill violation possible
     		if (this.customersAssignedToVehicles[customerID] == -1)
     			continue;
-    		
     		// Check if vehicles skill level satisfies the customer's required skill level
     		if (this.data.getRequiredSkillLvl()[customerID] > this.vehicles.get(this.customersAssignedToVehicles[customerID]).getSkillLvl())
     			// Aggregate penalty costs 
@@ -381,6 +389,13 @@ public class Solution {
     	}
     }
     
+    /**
+     * Calculate penalty costs for all predecessor jobs violation.
+     * A predecessor job violation occurs if there is a customer whose predecessor 
+     * jobs are not scheduled yet, respectively, which is scheduled in a non-consecutive
+     * ordering.
+     * TODO Chris - time windows checks
+     */
     private void calcCostsForPredJobsViolation() {
     	this.penaltyPredJobsViolation = 0;
     	// Iterate given predecessor jobs and check for violations
@@ -391,7 +406,7 @@ public class Solution {
     			// Iterate predecessor jobs
     			for (Integer predJobOrigIdx : entry.getValue()) {
     				// get customer id in the current scheduling problem (!= original customer ids)
-    				int predJobId = Arrays.asList(this.data.getOriginalCustomerIds()).indexOf(predJobOrigIdx);
+    				int predJobId = Arrays.stream(this.data.getOriginalCustomerIds()).boxed().collect(Collectors.toList()).indexOf(predJobOrigIdx);
     				// check whether the predecessor job is scheduled or not (-1: not scheduled)
     				if (this.customersAssignedToVehicles[predJobId] == -1)
     					// Aggregate penalty costs
@@ -405,9 +420,16 @@ public class Solution {
     	}
     }
     
+    /**
+     * Calculate penalty costs for all time window violations. 
+     * A time window violation occurs if the customer's service time window
+     * is not in the range in which a customer has to be handled according to the
+     * input information. The maximal violation of the service times are predefined
+     * by the max_timeWindow_violation parameter in the configuration file (default: 10 time units)
+     */
     private void calcCostsForTimeWindowViolation() {
     	this.penaltyTimeWindowViolation = 0;
-    	// Iterate customers and check for tw violations
+    	// Iterate customers and check for time window violations
     	for (int i = 0; i<this.data.getCustomers().length; i++) {
     		// Get customer id
     		int customerID = this.data.getCustomers()[i];
@@ -485,18 +507,28 @@ public class Solution {
     	return new double[] {customerIdOfLatestPredJob, endServiceTimeOfLatestPredJob, locationIdOfLatestPredJob};
     }
     
+    /**
+     * Returns whether the predecessor jobs of the attached customer are already scheduled.
+     * Returns false if there is at least one job which is not scheduled yet,
+     * otherwise true is returned.
+     * @param customerId customer id whose predecessor jobs are checked
+     * @return false if one predecessor job is not scheduled, otherwise true
+     */
     public boolean checkSchedulingOfPredecessors (int customerId) {
-    	boolean flag = true;
+    	// Get predecessor job of attached customer
     	ArrayList<Integer> predIds = this.data.getPredCustomers().get(this.data.getOriginalCustomerIds()[customerId]);
     	for (int originalPredCustomerId: predIds) {
+    		// Get the predecessor id being handled in the current run
     		int predCustomerId = Arrays.stream(this.data.getOriginalCustomerIds()).boxed().collect(Collectors.toList()).indexOf(originalPredCustomerId);
+    		// check whether the predecessor job in list of infeasible customers
     		int existenceOfPredecessor = this.tempInfeasibleCustomers.indexOf(predCustomerId);
+    		// check infeasibility AND if the customer is not assigned to any vehicle 
     		if (existenceOfPredecessor == -1 && this.customersAssignedToVehicles[predCustomerId] == -1) {
     			return false;
     		}
-    		
     	}
-    	return flag;
+    	// All predecessor jobs are scheduled -> Return true
+    	return true;
     }
     
     /**
@@ -538,6 +570,14 @@ public class Solution {
      */
     public boolean isFeasible() {
         return isFeasible;
+    }
+    
+    /**
+     * Returns whether the current solution is from the construction phase.
+     * @return is solution from the initial construction step
+     */
+    public boolean isConstruction(){
+    	return isConstruction;
     }
     
     /**
@@ -606,7 +646,12 @@ public class Solution {
     	return data;
     }
     
-    
+    /**
+     * Get a mapping containing information about tuples which have already been
+     * explored in the backtracking tree. The key values are the customer ids. 
+     * The values stores double arrays with information about the insertions. 
+     * @return mapping of already explored insertions
+     */
     public HashMap<Integer, ArrayList<double[]>> getTriedInsertions() {
     	return triedInsertions;
     }
@@ -691,6 +736,14 @@ public class Solution {
     }
     
     /**
+     * Set whether the current solution is in the construction phase
+     * @param isConstruction: boolean indicating if the solution is in construction phase.
+     */
+    public void setIsConstruction(boolean isConstruction) {
+    	this.isConstruction = isConstruction;
+    }
+    
+    /**
      * Set list of temporary infeasible customers.
      * @param tempInfeasibleCustomers: list of temporary infeasible customers
      */
@@ -711,13 +764,17 @@ public class Solution {
     }
     
     /**
-     * Deallocates a customer's affiliation to a capacity slot.
+     * Deallocates a customer's assignment to a capacity slot.
      * @param customer: customer's id
      */
     public void freeCustomerAffiliationToCapacity(int customer) {
     	this.customersAssignedCapacitySlot[customer] = -1;
     }
     
+    /**
+     * Deallocates a customer' assignment to a vehicle/therapist
+     * @param customer: customer's id 
+     */
     public void freeCustomerAffiliationToVehicle(int customer) {
     	this.customersAssignedToVehicles[customer] = -1;
     }
@@ -759,6 +816,8 @@ public class Solution {
         sol.penaltySkillViolation = this.penaltySkillViolation;
         sol.penaltyTimeWindowViolation = this.penaltyTimeWindowViolation;
         sol.swappingCosts = this.swappingCosts;
+        sol.vehicleTourCosts = this.vehicleTourCosts;
+        sol.isConstruction = this.isConstruction;
 
         ArrayList<Vehicle> newVehicles = new ArrayList<>();
         for (Vehicle veh: this.vehicles) {

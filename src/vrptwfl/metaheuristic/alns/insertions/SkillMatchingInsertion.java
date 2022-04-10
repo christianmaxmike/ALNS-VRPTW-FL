@@ -9,8 +9,21 @@ import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
 
+/**
+ * This class implements an insertion heuristic according to the skill matches. 
+ * The heuristic calculates the skill discrepancy of a customer to the available 
+ * vehicles. If the skill discrepancy is lower, i.e., there are not many vehicles
+ * that can serve the customer at hand, the customer is favored over other 
+ * customers. 
+ * @author Christian M.M. Frey
+ */
 public class SkillMatchingInsertion extends AbstractInsertion {
 
+	/**
+	 * Constructor of the skill matching heuristic. The attached data
+	 * object is forwarded to its parent class AbstractInsertion.
+	 * @param data: data object
+	 */
 	public SkillMatchingInsertion(Data data) {
 		super(data);
 	}

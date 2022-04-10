@@ -75,7 +75,11 @@ public abstract class AbstractInsertion {
         return solution;
     }
 
-    
+    /**
+     * Starts the insertion heuristic with the backtracking mechanism. 
+     * @param solution: solution object the backtracking starts with
+     * @return the solution after the backtracking 
+     */
     public final Solution solveBacktrack (Solution solution) {
     	Solution sol = this.runBacktracking(solution);
     	return sol;

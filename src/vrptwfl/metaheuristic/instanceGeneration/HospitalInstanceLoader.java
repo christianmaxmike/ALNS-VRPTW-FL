@@ -27,27 +27,27 @@ public class HospitalInstanceLoader {
 		Data[] data;
 		if (Config.solveAsTwoProblems) {
 			data = new Data[2];
-			data[0] = new Data(instanceName);
-			data[1] = new Data(instanceName);
+			data[0] = new Data(instanceName + "_m"); // m: morning shift
+			data[1] = new Data(instanceName + "_e"); // e: evening shift
 		} else {
 			data = new Data[1];
 			data[0] = new Data(instanceName);
 		}
 
-		// create gson loader
+		// create GSON loader
 		HospitalGSONLoader dataLoader = new HospitalGSONLoader();
 		
 		try {
-			// load instance from json
+			// load instance from JSON
 			ImportedInstance instance = dataLoader.loadHospitalInstanceFromJSON(instanceName);
 			
+			// Load therapists
 			ImportedTherapist[] therapists =  instance.getTherapists(); 
 			
 			// if split regular shift is activated 
-			if(Config.splitRegularShift) {
+			if(Config.splitRegularShift) 
 				therapists = this.splitRegularShifts(therapists);
-			}
-
+			
 			// generate working patterns and vehicles
 			if (Config.solveAsTwoProblems) {
 				// note the therapists below are already split because splitRegularShifts is always true if solveAsTwoProblems
@@ -69,15 +69,11 @@ public class HospitalInstanceLoader {
 				data[1].setVehicleCapacity(vehicleCapacity);
 				data[0].setVehiclesSkillLvl(DataUtils.convertListToArray(mTherapistsSkill));
 				data[1].setVehiclesSkillLvl(DataUtils.convertListToArray(eTherapistsSkill));
-				
-				
-				
-				// Vehicle[] vehicles = this.generateVehicles(therapists, wp, vehicleCapacity);
-				// _data.setVehicles(vehicles);
 
 				// this.generateWorkingPatternAndVehicles(data[0], morningTherapists, vehicleCapacity, logger, 0);
 				// this.generateWorkingPatternAndVehicles(data[1], eveningTherapists, vehicleCapacity, logger, 1);
 			} else {
+				//TODO Chris - create data object if there is not solveAsTwoProblems activated
 				//this.generateWorkingPatternAndVehicles(data[0], therapists, vehicleCapacity, logger, 0);
 			}
 
@@ -164,7 +160,7 @@ public class HospitalInstanceLoader {
 	}
 	
 	/**
-	 * Handles Data transfer to initialize the attached data object
+	 * Handles Data transfer to initialize the attached data object.
 	 * @param jobInformation
 	 * @param data
 	 */
@@ -222,6 +218,7 @@ public class HospitalInstanceLoader {
 		int eveningIdx = 1;
 
 		// init depot values
+		// =0 can be disregarded; for the sake of comprehensibility it is shown...
 		morningJobInformation[0][0] = 0;
 		morningJobInformation[1][0] = endMorningShift;
 		morningJobInformation[2][0] = 0;
@@ -285,12 +282,10 @@ public class HospitalInstanceLoader {
 //			job.setEveningJob(false);
 //		}
 		
-		// TODO Chris - handle mandatory jobs
 		ArrayList<double[][]> morningEveningInfo = new ArrayList<double[][]>();
 		morningEveningInfo.add(morningJobInformation);
 		morningEveningInfo.add(eveningJobInformation);
 		return morningEveningInfo;
-
 	}
 
 //	private Job[][] getJobsForMorningAndEveningShift(Job[] realJobs, Data[] _data) {
@@ -409,7 +404,7 @@ public class HospitalInstanceLoader {
 				idx++;
 				input.setId(idx);
 				input.setWasSplit(false);
-				input.setConnectionId(null);
+				// input.setConnectionId(null);
 				listSplitShifts.add(input);
 			} else {
 				// if regular shift 
@@ -418,14 +413,14 @@ public class HospitalInstanceLoader {
 				idx++;
 				ImportedTherapist morning = new ImportedTherapist(idx, input.getSkill(), true, true);
 				morning.setWasSplit(true);
-				morning.setConnectionId(connectionId);
+				// morning.setConnectionId(connectionId);
 				listSplitShifts.add(morning);
 				
 				// b) create evening shift
 				idx++;
 				ImportedTherapist evening = new ImportedTherapist(idx, input.getSkill(), true, false);
 				evening.setWasSplit(true);
-				evening.setConnectionId(connectionId);
+				// evening.setConnectionId(connectionId);
 				listSplitShifts.add(evening);
 			}
 		}
@@ -503,11 +498,16 @@ public class HospitalInstanceLoader {
 			if (r.getCapacity() > 0)
 				locationCapacity.add(r.getCapacity());
 			else
-				locationCapacity.add(1);
+				locationCapacity.add(5);
 		}
 		return locationCapacity;
 	}
 	
+	/**
+	 * Returns the maximal distance with the attached distance matrix.
+	 * @param distMatrix matrix containing distances between locations
+	 * @return maximal value in the matrix
+	 */
 	private double getMaxDistanceInGraph(double[][] distMatrix) {
 		double max = -1;
 		for (int i=0; i<distMatrix.length; i++) 
@@ -517,8 +517,6 @@ public class HospitalInstanceLoader {
 		return max;
 	}
 	
-
-
 	//
 	// CODE FROM BAD CODE / EXACT PROCEDURE
 	//

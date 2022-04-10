@@ -21,7 +21,8 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
 
     @Override
     List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) {        
-        // int[] customerLocationReferences = solution.getCustomerAffiliationToLocations().clone();
+    	// Get location ids before any removals are processed (assignment to locations will also be deleted for a removal)
+    	int[] customerLocations = DataUtils.getLocationIdxOfAllCustomers(solution);
         
     	List<Integer> removedCustomers = new ArrayList<>();
 
@@ -52,7 +53,8 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
             int idxC = Config.randomGenerator.nextInt(removedCustomers.size());
             Integer referenceCustomer = removedCustomers.get(idxC);
             // int firstCustomerPreferencedLocation = customerLocationReferences[referenceCustomer];
-            int referenceCustomerLocationIdx = DataUtils.getLocationIndex(referenceCustomer, solution);
+            // int referenceCustomerLocationIdx = DataUtils.getLocationIndex(referenceCustomer, solution);
+            int referenceCustomerLocationIdx = customerLocations[referenceCustomer];
 
             // int referenceCustomerLocationIdx = DataUtils.getLocationIndex(referenceCustomer.intValue(), customerLocationReferences[referenceCustomer.intValue()], solution.getData());
             
@@ -72,7 +74,8 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
                     	continue;
                     // int customerPreferencedLocation = customerLocationReferences[customer];
                     // int customersLocation = DataUtils.getLocationIndex(customer, solution);
-                    int customersLocation = DataUtils.getLocationIndex(customer, solution);
+                    // int customersLocation = DataUtils.getLocationIndex(customer, solution);
+                    int customersLocation = customerLocations[customer];
                     closest.add(new double[] {customer, vehicle.getId(), distanceToFirstCustomer[customersLocation]});
                     // closest.add(new double[] {customer, vehicle.getId(), distanceToFirstCustomer[customer]});
                 }

@@ -128,12 +128,12 @@ public class SolomonInstanceGenerator {
     }
     
     // TODO Alex: main wieder entfernen
-    public static void main(String[] args) throws IOException {
-        SolomonInstanceGenerator generator = new SolomonInstanceGenerator();
-        try {
-            generator.loadInstance("R101.txt", 100);
-        } catch (ArgumentOutOfBoundsException e) {
-            e.printStackTrace();
-        }
-    }
+//    public static void main(String[] args) throws IOException {
+//        SolomonInstanceGenerator generator = new SolomonInstanceGenerator();
+//        try {
+//            generator.loadInstance("R101.txt", 100);
+//        } catch (ArgumentOutOfBoundsException e) {
+//            e.printStackTrace();
+//        }
+//    }
 }

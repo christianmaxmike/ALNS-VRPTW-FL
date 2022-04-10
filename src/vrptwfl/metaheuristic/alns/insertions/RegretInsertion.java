@@ -9,12 +9,22 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.ListIterator;
 
+/**
+ * This class implements the k-regret insertion heuristic. 
+ *
+ * @author Alexander Jungwirth, Christian M.M. Frey
+ *
+ */
 public class RegretInsertion extends AbstractInsertion {
 
     private int k;
 
-    // k defines what regret measure to use
-    //  e.g. k=3 means difference between best insertion and 3rd best insertion
+    /**
+     * Initialize k-regret insertion heuristic
+     * @param k: k defines what regret measure to use; e.g. k=3 means difference between best insertion and 3rd best insertion
+     * @param data
+     * @throws ArgumentOutOfBoundsException
+     */
     public RegretInsertion(int k, Data data) throws ArgumentOutOfBoundsException {
 
         super(data);
@@ -34,7 +44,7 @@ public class RegretInsertion extends AbstractInsertion {
         // Chris; new nextInsertion : [customerID, vehicleID, idxPositionInRoute, serviceStartTime, additionalCosts, preferencedLocation, capacitySlot]
         double[] nextInsertion = new double[8]; 
         // positionInRoute is defined as the position at which the customer will be inserted
-        nextInsertion[4] = Config.bigMRegret;
+        nextInsertion[4] = -1; //Config.bigMRegret;
 
         ListIterator<Integer> iter = solution.getNotAssignedCustomers().listIterator();
         /*

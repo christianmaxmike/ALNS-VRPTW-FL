@@ -10,16 +10,24 @@ import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
 
+/**
+ * This class implements the backtracking mechanism using the 
+ * k-regret heuristic for its insertions. 
+ *
+ * @author Christian M.M. Frey
+ *
+ */
 public class RegretInsertionBacktracking extends AbstractInsertion {
 	
     private int k;
     private int backtrackJump;    
+    private int noBackTrackJumps;
     private ArrayList<Solution> solutionSequence;
     private Solution bestInitialSolution = null;
 
 
    /**
-    * Runs backtracking w/ k-regret heuristic
+    * Initialize k-regret w/ backtracking heuristic
     * @param k: k defines what regret measure to use; e.g. k=3 means difference between best insertion and 3rd best insertion
     * @param data
     * @throws ArgumentOutOfBoundsException
@@ -30,12 +38,15 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
         	throw new ArgumentOutOfBoundsException("regret parameter k must be greater than one. Value passed was " + k + ".");
         this.k = k;
         this.backtrackJump = Config.backtrackJump;
+        this.noBackTrackJumps = 0;
     }
     
     // TODO Chris - loggen wie oft zurückgesprungen worden ist
-    public Solution runBacktracking(Solution solution) { 
+    public Solution runBacktracking(Solution solution) {
+    	
     	// Try backtracking for x trials
     	for (int trial = 0; trial<Config.backtrackTrials; trial++) {
+    		this.noBackTrackJumps = 0;
     		System.out.println("Backtracking Trial:" + trial);
     		
     		// Get a copy of the 'empty' solution
@@ -94,9 +105,12 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
     				// delete all successors from the current path (=old (explored) branch in the backtracking-tree)
     				for (int removeIdx = solutionSequence.size()-1 ; removeIdx > jumpToSolIdx; removeIdx--)
     					solutionSequence.remove(removeIdx);
+    				
+    				// increment counter for number of backtrack jumps
+    				this.noBackTrackJumps ++;
     			}
     		}
-    		
+    		System.out.println("Number of backtrack jumps in this trial: " + this.noBackTrackJumps);
     	}
     	
         // update best solution object, then return it
@@ -114,7 +128,7 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
         double[] nextInsertion = new double[8]; 
         // positionInRoute is defined as the position at which the customer will be inserted
         nextInsertion[0] = -1;
-        nextInsertion[4] = Config.bigMRegret;
+        nextInsertion[4] = -1; //Config.bigMRegret;
 
         ListIterator<Integer> iter = solution.getNotAssignedCustomers().listIterator();
 
@@ -192,7 +206,12 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
         return regret;
     }
     
-    
+    /**
+     * Retrieve the index to the position the backtracking mechanism
+     * is jumping back.
+     * @param depth: the current depth of the backtracking tree
+     * @return jump index 
+     */
     private int getJumpIdx(int depth) {
     	int jumpToSolIdx = 0;
     	if (Config.backtrackBySteps)

@@ -21,12 +21,24 @@ import java.util.Arrays;
 public class MainALNS {
 	
 	private FileWriter writer;
+	private boolean isSolomonInstance;
+	private String instanceName;
 	
 	/**
 	 * Constructor of the MainALNS class. 
 	 * A FileWriter object is initialized for results logging
 	 */
-	public MainALNS(String outputFile) {
+	public MainALNS(String instanceName, String outputFile, boolean isSolomonInstance) {
+		this.instanceName = instanceName;
+		this.isSolomonInstance = isSolomonInstance;
+		initFileWriter(outputFile);
+	}
+	
+	/**
+	 * Initialize a file writer for logging of results. 
+	 * @param outputFile name of output file
+	 */
+	private void initFileWriter(String outputFile) {
 		try {
 			this.writer = new FileWriter("./"+outputFile, true);
 		} catch (IOException e) {
@@ -46,53 +58,31 @@ public class MainALNS {
 	 * @throws ArgumentOutOfBoundsException
 	 */
     public void runALNS(Data data, String instanceName) throws ArgumentOutOfBoundsException {
+        // --- INIT STEPS ---
+    	this.setInstanceSpecificParameters(data.getnCustomers(), data.getMaxDistanceInGraph());
 
-        this.setInstanceSpecificParameters(data.getnCustomers(), data.getMaxDistanceInGraph());
-
-        // Initial Solution
+        // --- INITIAL SOLUTION ---
         ConstructionHeuristicRegret construction = new ConstructionHeuristicRegret(data);
         long startTimeConstruction = System.currentTimeMillis();
         Solution solutionConstr = construction.constructSolution(2);
-        
-        System.out.println("Init solution - not assigned customers   :" + solutionConstr.getNotAssignedCustomers());
-        System.out.println("Init solution - temp infeasible customers:" + solutionConstr.getTempInfeasibleCustomers());
-        System.out.println("Customers for scheduling:" + Arrays.toString(data.getOriginalCustomerIds()));
-        solutionConstr.printSolution();
-        // System.exit(0);
+        // Print initial solution
+        printToConsole("Init solution", solutionConstr);
 
-        // ALNS
+        // --- ALNS SOLUTION ---
         ALNSCore alns = new ALNSCore(data);
         Solution solutionALNS = alns.runALNS(solutionConstr);
-
-        System.out.println("ALNS solution - not assigned customers   :" + solutionALNS.getNotAssignedCustomers());
-        System.out.println("ALNS solution - temp infeasible customers:" + solutionALNS.getTempInfeasibleCustomers());
-        System.out.println("Customers for scheduling:" + Arrays.toString(data.getOriginalCustomerIds()));
-        long finishTimeConstruction = System.currentTimeMillis();
-        long timeElapsed = (finishTimeConstruction - startTimeConstruction);
+        long timeElapsed = (System.currentTimeMillis() - startTimeConstruction);
+        // Print ALNS(+GLS) solution
+        printToConsole("ALNS solution", solutionALNS);
         System.out.println("Time for construction " + timeElapsed + " ms.");
 
+        // --- LOGGING ---
+        if (this.isSolomonInstance)
+        	logResultSolomon(data, solutionALNS, timeElapsed);
+        else 
+        	logResultHospital(data, solutionALNS, timeElapsed);
+
         // TODO Alex: brauchen irgendwas, um Lösung zu speichern (ZF und Touren startzeiten etc.)
-
-        solutionALNS.printSolution();
-
-        int i = -1;
-        if (data.getnCustomers() == 25)		    i = 0;
-        else if (data.getnCustomers() == 50)	i = 1;
-        else if (data.getnCustomers() == 100)	i = 2;
-        else return; // no optimal value stored --> Quit
-        
-        // Calculate optimality gap
-        double optimalObjFuncVal = OptimalSolutions.optimalObjFuncValue.get(instanceName)[i];
-        double gap = CalcUtils.calculateGap(optimalObjFuncVal, solutionALNS.getTotalCosts());
-        System.out.println("Gap: " + gap);
-        
-        // Write result
-        try {
-			writer.append(instanceName + "," + solutionALNS.getTotalCosts() + "," + gap + "," + timeElapsed + "\n");
-	        writer.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
     }
 
     /**
@@ -104,10 +94,12 @@ public class MainALNS {
      * @param maxDistance: maximal distance in the input locations
      */
     private void setInstanceSpecificParameters(int nCustomers, double maxDistance) {
-        int lb1 = Config.lowerBoundRemovalsMax;
+        // Set lower bound for removals
+    	int lb1 = Config.lowerBoundRemovalsMax;
         int lb2 = (int) Math.round(nCustomers * Config.lowerBoundRemovalsFactor);
         Config.lowerBoundRemovals = Math.min(lb1,  lb2);
 
+        // Set upper bound for removals
         int ub1 = Config.upperBoundRemovalsMax;
         int ub2 = (int) Math.round(nCustomers * Config.upperBoundRemovalsFactor);
         Config.upperBoundRemovals = Math.min(ub1,  ub2);
@@ -122,7 +114,7 @@ public class MainALNS {
      * @param nCustomers number of customers being scheduled for the solomon instance
      * @return array containing the data object in the 0-th position
      */
-    public static Data[] loadSolomonInstance(String instanceName, int nCustomers) {
+    private static Data[] loadSolomonInstance(String instanceName, int nCustomers) {
     	SolomonInstanceGenerator generator = new SolomonInstanceGenerator();
         Data[] data = new Data[1];
         try {
@@ -139,11 +131,71 @@ public class MainALNS {
      * @param instanceName filename of hospital instance
      * @return array containing data objects (if solveAsTwoProblems is activate in config file -> array contains morning/evening data objects)
      */
-    public static Data[] loadHospitalInstance(String instanceNam) {
+    private static Data[] loadHospitalInstance(String instanceName) {
     	HospitalInstanceLoader loader = new HospitalInstanceLoader();
         Data[] dataArr;
-        dataArr = loader.loadHospitalInstanceFromJSON("hospital_instance_i060_b1_f6_v01");
+        dataArr = loader.loadHospitalInstanceFromJSON("hospital_instance_i020_b1_f6_v01");
         return dataArr;
+    }
+    
+    /**
+     * Logging of result for solomon instances. Information being logged:
+     * <name of instance>, <total costs>, <elapsed time>, <optimality gap>
+     * @param data current solomon data object
+     * @param solutionALNS Solution object
+     * @param timeElapsed elapsed time being logged
+     */
+    private void logResultSolomon(Data data, Solution solutionALNS, long timeElapsed) {
+        int i = -1;
+        if (data.getnCustomers() == 25) i = 0;
+        else if (data.getnCustomers() == 50) i = 1;
+        else if (data.getnCustomers() == 100) i = 2;
+        else ; // no optimal value stored 
+        
+        // Calculate optimality gap
+        double optimalObjFuncVal = -1;
+        double gap = -1;
+        if (i!=-1) {
+        	optimalObjFuncVal = OptimalSolutions.optimalObjFuncValue.get(this.instanceName)[i];
+        	gap = CalcUtils.calculateGap(optimalObjFuncVal, solutionALNS.getTotalCosts());        	
+        	System.out.println("Optimality Gap: " + gap);
+        }        
+        
+        // Write result
+        try {
+			writer.append(instanceName + "," + solutionALNS.getTotalCosts() + "," + timeElapsed + "," + gap + "\n");
+	        writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    /**
+     * Logging of result for hospital instances. Information being logged:
+     * <name of instance>, <total costs>, <elapsed time> 
+     * @param data current hospital data object
+     * @param solutionALNS Solution object
+     * @param timeElapsed elapsed time being logged
+     */
+    private void logResultHospital(Data data, Solution solutionALNS, long timeElapsed) {
+    	try {
+    		writer.append(this.instanceName + "," + solutionALNS.getTotalCosts() + "," + timeElapsed + "\n");
+    		writer.close();
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    	}
+    }
+    
+    /**
+     * Prints the solution to the standard output console
+     * @param prefix Prefix being used for the output
+     * @param s: solution object
+     */
+    private void printToConsole (String prefix, Solution s) {
+        System.out.println(prefix + " - not assigned customers   :" + s.getNotAssignedCustomers());
+        System.out.println(prefix + " - temp infeasible customers:" + s.getTempInfeasibleCustomers());
+        System.out.println("Customers for scheduling:" + Arrays.toString(s.getData().getOriginalCustomerIds()));
+        s.printSolution();
     }
 
     /**
@@ -156,15 +208,14 @@ public class MainALNS {
         String instanceName = args[0];
         boolean isSolomonInstance = Boolean.parseBoolean(args[1]);
         int nCustomers = 25;
-        String outFile = args.length > 1 ? args[1] : "results.txt";
+        String outFile = args.length > 2 ? args[2] : "results.txt";
         
         Data[] data;
         if (isSolomonInstance)
         	data = loadSolomonInstance(instanceName, nCustomers);
         else
         	data = loadHospitalInstance(instanceName);
-        
-    	final MainALNS algo = new MainALNS(outFile);
+    	final MainALNS algo = new MainALNS(instanceName, outFile, isSolomonInstance);
     	algo.runALNS(data[0], instanceName);        	
 //        for (Data d: data) {
 //        	final MainALNS algo = new MainALNS(outFile);

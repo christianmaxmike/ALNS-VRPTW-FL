@@ -12,6 +12,10 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
 
+/**
+ * Configuration class.
+ * @author Alexander Jungwirth, Christian M.M. Frey
+ */
 public class Config {
 
     // --- GENERAL ---
@@ -114,7 +118,7 @@ public class Config {
     public static boolean printHospitalLoaderInfo;
     
 
-    //TODO Chris - make singleton pattern
+    //TODO Chris - make singleton pattern (getInstance())
     private static Config conf = new Config();
 
     // private to prevent anyone else from instantiating

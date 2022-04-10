@@ -8,11 +8,20 @@ import vrptwfl.metaheuristic.utils.CalcUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-
-// Randomly remove customers
-// Ropke and Pisinger 2006, page 460 (Transportation Science)
+/**
+ * This class implements the random removal heuristic which randomly removes a customer
+ * from the vehicle's route it is assigned to. 
+ * (Ropke and Pisinger 2006, page 460 (Transportation Science))
+ * @author Alexander Jungwirth
+*/
 public class RandomRemoval extends AbstractRemoval {
 
+	/**
+	 * Constructor for the random removal class. 
+	 * The attached data object is forwarded to the parent class 
+	 * AbstractRemoval.
+	 * @param data: data object
+	 */
     public RandomRemoval(Data data) {
         super(data);
     }
@@ -91,10 +100,8 @@ public class RandomRemoval extends AbstractRemoval {
                 }
             }
         }
-
         return removedCustomers;
     }
-
 
     @Override
     public List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) {
@@ -108,7 +115,6 @@ public class RandomRemoval extends AbstractRemoval {
 //        System.out.println(sortedPositionsToRemove);
 
         return this.removeCustomersFromTours(solution, sortedPositionsToRemove);
-
     }
 
 //        // access all customers assigned to vehicles (only these can be removed)

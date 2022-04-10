@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
  * distances between the customers, earliest and latest service times, demands of the 
  * customers, the number of customers/vehicles, as well as the possible locations a
  * customers can be served.
+ * 
+ * @author: Christian M.M. Frey, Alexander Jungwirth
  */
 public class Data {
 
@@ -39,11 +41,9 @@ public class Data {
     private int[] customersPreferredLocationId;
     HashMap<Integer, ArrayList<Integer>> predCustomers;
     
-    // Key: CustomerID
-    // Values: LocationIds
+    // Key: CustomerID - Values: LocationIds
     private HashMap<Integer, ArrayList<Integer>> customerToLocations;
 
-    
 	/**
 	 * Constructor for data object.
 	 * @param instanceName: filename of instance being processed
@@ -538,29 +538,4 @@ public class Data {
     public void setDemandOfCustomer(int customer, int demand) {
         this.demands[customer] = demand;
     }
-    
-    
-    //
-    // DEPRECATED
-    //
-//  /**
-//  * Retrieve the distance between to location referenced by parameters i and j directing to the
-//  * first row of xcoords and ycoords data.
-//  * @param i: identifier of first location
-//  * @param j: identifier of second location
-//  * @return distance between two locations
-//  */
-// private double getDistanceValue(int i, int j) {
-//     //double diffX = this.xcoords[i] - this.xcoords[j];
-//     //double diffY = this.ycoords[i] - this.ycoords[j];
-// 	double diffX = this.multipleXCoords[0][i] - this.multipleXCoords[0][j];
-// 	double diffY = this.multipleYCoords[0][i] - this.multipleYCoords[0][j];
-//
-//     double distance = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY,2));
-//     // round to
-//     distance = Math.round(distance * Config.roundingPrecisionFactor)/Config.roundingPrecisionFactor;
-//     return distance;
-// }
- 
-
 }
