@@ -11,6 +11,10 @@ public class HistoricRequestNodeRemoval extends AbstractRemoval {
         super(data);
     }
 
+	/**
+	 * {@inheritDoc}
+	 * Executes the removal.
+	 */
     @Override
     public List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) {
         return null;

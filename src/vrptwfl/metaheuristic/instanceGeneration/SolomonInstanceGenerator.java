@@ -14,15 +14,26 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * Class for loading solomon instances. 
+ * 
+ * @author Christian M.M. Frey
+ *
+ */
 public class SolomonInstanceGenerator {
-
-    private String[] readInstanceTextFile(String fileName) throws IOException {
-        String locationOfSolomonInstances = "./instances/Instances-Solomon/";
-        String entireTextFile = Files.readString(Path.of(locationOfSolomonInstances + fileName));
-        entireTextFile = entireTextFile.replaceAll("\r\n", "\n"); // windows carriage returns
-        return entireTextFile.split("\n"); // former by Alex (\r\n)
-    }
     
+    /**
+     * Starting point for loading a solomon instance. The input instance 
+     * is processed with the number of customers being attached as parameters. 
+     * Valid options for calculating also an optimality gap being reported in
+     * the literature are 25,50,100. A data object is returned such that it 
+     * can be processed by the ALNS framework.
+     * @param fileName: name of instance
+     * @param nCustomers: number of customers
+     * @return data object
+     * @throws ArgumentOutOfBoundsException
+     * @throws IOException
+     */
     public Data loadInstance(String fileName, int nCustomers) throws ArgumentOutOfBoundsException, IOException {
         String[] lines = readInstanceTextFile(fileName);
 
@@ -45,11 +56,8 @@ public class SolomonInstanceGenerator {
         List<Integer> serviceDurations = new ArrayList<>();
         List<Integer> requiredSkillLvl = new ArrayList<>();
         List<Integer> preferredLocations = new ArrayList<>();
-        
         HashMap<Integer, ArrayList<Integer>> predJobs = new HashMap<Integer, ArrayList<Integer>>();
-        
         HashMap<Integer, ArrayList<Integer>> customerToLocations = new HashMap<Integer, ArrayList<Integer>>();
-
         HashMap<java.awt.geom.Point2D, Integer> coordsToId = new HashMap<java.awt.geom.Point2D, Integer>();
 
         int locationId = 0;
@@ -57,39 +65,42 @@ public class SolomonInstanceGenerator {
         for (int i=9; i < 10 + nCustomers; i++ ) { // nCustomers + one additional for depot
             List<Integer> lineCustomer = getIntegerArrayFromLine(lines[i]);
             
+            // check whether location is already known, otherwise add it to possible locations
             java.awt.geom.Point2D c = new java.awt.geom.Point2D.Double(lineCustomer.get(1), lineCustomer.get(2));
             if (coordsToId.get(c) == null)
             	coordsToId.put(c, locationId++);
             
+            // Add location to the list of possible locations a customer can be served
             if (customerToLocations.get(lineCustomer.get(0)) == null)
             	customerToLocations.put(lineCustomer.get(0), new ArrayList<Integer>());
             customerToLocations.get(lineCustomer.get(0)).add(coordsToId.get(c));
             
+            // Add customer's information
             demands.add(lineCustomer.get(3));
             earliestStartTimes.add(lineCustomer.get(4));
             latestStartTimes.add(lineCustomer.get(5));
             serviceDurations.add(lineCustomer.get(6));
-            
-            // TODO Chris - check capacity slots only for critical locations - check count of overlappings of all jobs
-            // TODO Chris - pre-processing - identify critical locations
-            
             locationCapacity.add(1); 
             requiredSkillLvl.add(0);
-            
             preferredLocations.add(coordsToId.get(c));
+            // in solomon instances, there are no predecessor jobs -> empty lists
             predJobs.put(lineCustomer.get(0), new ArrayList<Integer>());
+                        
+            // TODO Chris - check capacity slots only for critical locations - check count of overlappings of all jobs
+            // 			  - pre-processing - identify critical locations
+            
         }
         
         for (int nLocations = 1; nLocations < Config.numberOfLocationsPerCustomer; nLocations++) {
         	for (int customerId = 1; customerId < customerToLocations.size()-1; customerId++) {
         		customerToLocations.get(customerId).add(customerToLocations.get(customerId+1).get(customerToLocations.get(customerId+1).size()-1));
         	}
-        	customerToLocations.get(customerToLocations.size()-1).add(
-        			customerToLocations.get(1).get(nLocations-1));
+        	customerToLocations.get(customerToLocations.size()-1).add(customerToLocations.get(1).get(nLocations-1));
         }
 
         List<Integer> customerIds = IntStream.rangeClosed(1, nCustomers).boxed().collect(Collectors.toList());
         
+        // Create and return data object
         return new Data(
                 instanceName,
                 nCustomers,
@@ -109,11 +120,36 @@ public class SolomonInstanceGenerator {
                 DataUtils.convertListToArray(preferredLocations)
         );
     }
+    
+	/**
+	 * Read the input file and return the information in a string array.
+	 * @param fileName: instance name to be processed
+	 * @return string array with the loaded information
+	 * @throws IOException
+	 */
+    private String[] readInstanceTextFile(String fileName) throws IOException {
+        String locationOfSolomonInstances = "./instances/Instances-Solomon/";
+        String entireTextFile = Files.readString(Path.of(locationOfSolomonInstances + fileName));
+        entireTextFile = entireTextFile.replaceAll("\r\n", "\n"); // windows carriage returns
+        return entireTextFile.split("\n"); // former by Alex (\r\n)
+    }
 
+    /**
+     * Calls getIntegerArrayFromLine with no verbosity.
+     * @param line: line to be processed
+     * @return list of integers = information in the processed line.
+     */
     private List<Integer> getIntegerArrayFromLine(String line) {
         return getIntegerArrayFromLine(line, false);
     }
 
+    /**
+     * Returns the information from the processed line and converts
+     * them into integer values.
+     * @param line: line to be processed
+     * @param verbose: verbosity (for debugging purpose)
+     * @return list of integers = information in the processed line.
+     */
     private List<Integer> getIntegerArrayFromLine(String line, boolean verbose) {
         String numbersLine = line.replaceAll("[^0-9]+", " ");
         String[] strArray = numbersLine.split(" ");
@@ -127,7 +163,7 @@ public class SolomonInstanceGenerator {
         return intArrayList;
     }
     
-    // TODO Alex: main wieder entfernen
+    // DEBUG - Main kann wieder entfernen
 //    public static void main(String[] args) throws IOException {
 //        SolomonInstanceGenerator generator = new SolomonInstanceGenerator();
 //        try {

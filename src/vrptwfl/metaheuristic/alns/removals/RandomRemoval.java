@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class implements the random removal heuristic which randomly removes a customer
- * from the vehicle's route it is assigned to. 
+ * This class implements the random removal heuristic 
+ * which randomly removes a customer from the vehicle's route it is assigned to. 
  * (Ropke and Pisinger 2006, page 460 (Transportation Science))
  * @author Alexander Jungwirth
 */
@@ -103,6 +103,10 @@ public class RandomRemoval extends AbstractRemoval {
         return removedCustomers;
     }
 
+	/**
+	 * {@inheritDoc}
+	 * Executes the removal.
+	 */
     @Override
     public List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) {
 
@@ -110,7 +114,7 @@ public class RandomRemoval extends AbstractRemoval {
         // NOTE: these positions are the positions in the tours (not the customer ids!)
         List<Integer> sortedPositionsToRemove =  CalcUtils.getSortedUniqueRandomNumbersInRange(nRemovals, 0, this.data.getnCustomers() - solution.getNotAssignedCustomers().size() - 1);
 
-        // TODO Alex - wieder raus, stattdessen TEST CASE!! jeweils 1x, dass ranges immer passen (keiner außerhalb)
+        // DEBUG Alex - wieder raus, stattdessen TEST CASE!! jeweils 1x, dass ranges immer passen (keiner außerhalb)
 //        System.out.println("\n\nRemovals " + nRemovals + "\t[" + Config.lowerBoundRemovals + ", " + Config.upperBoundRemovals + "]");
 //        System.out.println(sortedPositionsToRemove);
 
@@ -127,7 +131,7 @@ public class RandomRemoval extends AbstractRemoval {
 //            runningPositionNr += nCustomersInTourBeforeRemoval;
 //        }
 
-    // TODO Alex - Testcase, mit genau den Touren und den Indices, ob das auch alles so passt
+    // DEBUG Alex - Testcase, mit genau den Touren und den Indices, ob das auch alles so passt
 //        Tour of vehicle 0 (n=9):
 //        0 -> 40 -> 26 -> 28 -> 27 -> 53 -> 12 -> 4 -> 24 -> 68 -> 0
 //        Tour of vehicle 1 (n=7):

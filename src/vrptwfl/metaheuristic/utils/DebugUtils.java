@@ -4,8 +4,8 @@ import java.util.Arrays;
 
 /**
  * Helper functions for debugging.
+ * 
  * @author Alexander Jungwirth
- *
  */
 public class DebugUtils {
 

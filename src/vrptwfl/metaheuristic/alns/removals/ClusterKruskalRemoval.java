@@ -11,14 +11,26 @@ import java.util.*;
 // TODO Alex - if multiple locations
 //  option 1: remove customers based on closest current location s
 //  option 2: remove customers based on closest possible locations
-
-// Ropke & Pisinger 2006 EJOR 171, pp. 750-775
+/**
+ * This class implements the Cluster Kruskal removal heuristic.
+ * (cf. Ropke & Pisinger 2006 EJOR 171, pp. 750-775)
+ * 
+ * @author: Alexander Jungwirth, Christian M.M. Frey
+ */
 public class ClusterKruskalRemoval extends AbstractRemoval {
 
+    /**
+     * Constructor for the cluster kruskal removal heuristic.
+     * @param data: data object
+     */
     public ClusterKruskalRemoval(Data data) {
         super(data);
     }
 
+	/**
+	 * {@inheritDoc}
+	 * Executes the removal.
+	 */
     @Override
     List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) {        
     	// Get location ids before any removals are processed (assignment to locations will also be deleted for a removal)
@@ -59,7 +71,7 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
             // int referenceCustomerLocationIdx = DataUtils.getLocationIndex(referenceCustomer.intValue(), customerLocationReferences[referenceCustomer.intValue()], solution.getData());
             
             // find customer close to reference customer (however, preferably one from a tour that has not yet been processed)
-            // TODO Chris - adapt to multiple locations
+            // TODO_DONE Chris - adapt to multiple locations
             // double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[referenceCustomer];
             double[] distanceToFirstCustomer = this.data.getDistanceMatrix()[referenceCustomerLocationIdx];
             ArrayList<double[]> closest = new ArrayList<>();
@@ -107,6 +119,12 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
         return removedCustomers;
     }
 
+    /**
+     * Retrieve customer ids which are shall be removed.
+     * @param vehicle: vehicle object to get customers scheduled within a tour
+     * @param solution: solution object
+     * @return list of customers to be removed
+     */
     private ArrayList<Integer> getCustomersToRemove(Vehicle vehicle, Solution solution) {
         ArrayList<Integer> customersToRemove = new ArrayList<>();
         if (vehicle.getnCustomersInTour() < 3) {
@@ -116,21 +134,28 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
             // partition customers in route into two clusters
             // apply Kruskal's algorithm but stop when two disconnected parts are left
             // choose one cluster at random, and remove customers
-//            System.out.println("kruskal raus");
             customersToRemove = this.applyKruskalToGetCustomersToBeRemoved(vehicle, solution);
         }
         return customersToRemove;
     }
 
-    // KIT 08: Minimum Spanning Trees
-    // slides 257-
-    // https://www.youtube.com/watch?v=99FvOZTogzA
+    /**
+     * Applies the kruskal algorithm to get the customer which shall be removed.
+     * The idea is to generate two connected graphs defined with the kruskal algorithm
+     * and remove the customers belonging to one of them.
+     *  src: KIT 08: Minimum Spanning Trees
+     *       slides 257-
+     *       https://www.youtube.com/watch?v=99FvOZTogzA
+     * @param vehicle: vehicle object
+     * @param solution: solution object
+     * @return list of customers identifiers which are removed
+     */
     private ArrayList<Integer> applyKruskalToGetCustomersToBeRemoved(Vehicle vehicle, Solution solution) {
 
         int nNodes = vehicle.getnCustomersInTour();
-        // TODO Alex: wieder raus
-//        System.out.println("Vehicle " + vehicle.getId());
-//        System.out.println("nNodes " + nNodes);
+        // DEBUG Alex: wieder raus
+        //  System.out.println("Vehicle " + vehicle.getId());
+        //  System.out.println("nNodes " + nNodes);
 
         // T: UnionFind(n)
         UnionFind T = new UnionFind(nNodes);
@@ -169,6 +194,12 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
         return customersToRemove;
     }
 
+    /**
+     * create edges between customers.
+     * @param vehicle: vehicle object
+     * @param solution: solution object
+     * @return list of edges
+     */
     // edges consider positions of customers in tour (not the customer id)
     private ArrayList<Edge> createEdges(Vehicle vehicle, Solution solution) {
         ArrayList<Edge> edges = new ArrayList<>();
@@ -178,6 +209,7 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
                 int customerI = vehicle.getRealCustomers().get(i);
                 int customerJ = vehicle.getRealCustomers().get(j);
 
+                // TODO: Chris - Datautils get location
                 int locCustomerI = solution.getData().getCustomersToLocations().get(solution.getData().getOriginalCustomerIds()[customerI]).get(solution.getCustomerAffiliationToLocations()[customerI]);
                 int locCustomerJ = solution.getData().getCustomersToLocations().get(solution.getData().getOriginalCustomerIds()[customerJ]).get(solution.getCustomerAffiliationToLocations()[customerJ]);
 
@@ -192,44 +224,78 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
         return edges;
     }
 
+    /**
+     * This class implements an edge used in the kruskal algorithm.
+     * An edge as a source and destination point with costs being defined
+     * for this connection.
+     * 
+     * @author Alexander Jungwirth
+     */
     class Edge implements Comparable<Edge> {
 
         int source;
         int destination;
         double cost;
 
+        /**
+         * Constructor for an edge.
+         * @param source: source node
+         * @param destination: destination node
+         * @param cost: cost for edge
+         */
         public Edge(int source, int destination, double cost){
             this.source = source;
             this.destination = destination;
             this.cost = cost;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public int compareTo(Edge o) {
             return Double.compare(this.cost, o.cost);
         }
 
+        /**
+         * Prints the edge information.
+         */
         public void print() {
             System.out.println("<" + this.source + ", " + this.destination + ">");
         }
     }
 
+    /**
+     * This class implements the Union-fin data structure.
+     *  src: KIT 08: Minimum Spanning Trees
+     *       slides 257-
+     *       https://www.youtube.com/watch?v=99FvOZTogzA
+	 *
+     * @author Alexander Jungwirth
+     */
     // union-find data structure (uses path compression and ranks)
     class UnionFind {
 
         int numberOfNodes;
         int[] parent; // parent information of each node
 
+        /**
+         * Constructor for the UnionFind data structure
+         * @param nNodes: number of nodes
+         */
         public UnionFind(int nNodes) {
             this.numberOfNodes = nNodes;
-
             this.parent = new int[this.numberOfNodes]; // at the beginning each node is its own parent
             Arrays.fill(this.parent, this.numberOfNodes + 1); // these are all representatives with rank 0
         }
 
-        // find representative of tree: representative = unique identifier for subtree
-        // path compression used
-        // values between 1 and n are references to real parents, values greater than n are ranks
+        /**
+         * find representative of tree: representative = unique identifier for subtree
+         * path compression used
+         * values between 1 and n are references to real parents, values greater than n are ranks
+         * @param i: index
+         * @return
+         */
         public int find(int i) {
             if (this.parent[i] > this.numberOfNodes) {
                 return i;
@@ -240,7 +306,12 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
             }
         }
 
-        // link two trees
+        /**
+         * Link two trees.
+         * @param i: first node
+         * @param j: second node
+         */
+        // 
         public void link(int i, int j) {
             // assert i and j are leaders of different subsets
             if (parent[i] < parent[j]) {
@@ -256,10 +327,19 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
             }
         }
 
+        /**
+         * Unions two subtrees.
+         * @param i: first node
+         * @param j: second node
+         */
         public void union(int i, int j) {
             if (find(i) != find(j)) link(find(i), find(j));
         }
 
+        /**
+         * Returns the position within the routes which are removed
+         * @return list of integers which are removed from the tours.
+         */
         public ArrayList<Integer> getTourPositionsToBeRemoved() {
 
             ArrayList<Integer> positions = new ArrayList<>();
@@ -283,7 +363,7 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
                 if (clusterIds[i] == targetId) positions.add(i);
             }
 
-            // TODO Alex: wieder raus
+            // DEBUG Alex: wieder raus
 //            // set values for the two clusters to either 0 or 1
 //            int origValueFirstCluster = clusterIds[0];
 //            for (int i = 0; i < clusterIds.length; i++) {
@@ -296,8 +376,6 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
 //            }
 
             return  positions;
-
         }
     }
-
 }

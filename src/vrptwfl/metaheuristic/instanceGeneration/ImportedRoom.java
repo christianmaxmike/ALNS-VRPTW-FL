@@ -72,6 +72,7 @@ public class ImportedRoom {
 	//
 	/**
 	 * String formatting of the ImportedRoom object.
+	 * {@inheritDoc}
 	 */
 	@Override
     public String toString() {

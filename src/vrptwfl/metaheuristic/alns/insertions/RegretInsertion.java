@@ -35,6 +35,14 @@ public class RegretInsertion extends AbstractInsertion {
         this.k = k;
     }
 
+    /**
+     * Retrieve the next possible insertions following the k-regret heuristic. 
+     * The method iterates all unscheduled customers, identifies the next possible insertions for them, and
+     * yields the next insertion according to the k-regret heuristic.
+     * The regret scores are calculated by the function calculateRegret.
+     * 
+     * @param solution solution object storing information about the scheduled and un-scheduled customers
+     */
     @Override
     public double[] getNextInsertion(Solution solution) {
         // initialize values
@@ -47,16 +55,6 @@ public class RegretInsertion extends AbstractInsertion {
         nextInsertion[4] = -1; //Config.bigMRegret;
 
         ListIterator<Integer> iter = solution.getNotAssignedCustomers().listIterator();
-        /*
-        int[] unscheduledCostumers = DataUtils.convertListToArray(solution.getNotAssignedCustomers());
-        Integer[] indexes = IntStream.range(0, unscheduledCostumers.length).boxed().toArray(Integer[]::new);
-        Arrays.sort(indexes, Comparator.<Integer>comparingDouble(i -> solution.getData().getRequiredSkillLvl()[unscheduledCostumers[i]]).reversed());
-        int[] it = new int[unscheduledCostumers.length];
-        for (int i = 0 ; i< unscheduledCostumers.length; i++)
-        	it[i] = unscheduledCostumers[indexes[i]];
-        ArrayList<Integer> list = (ArrayList<Integer>) Arrays.stream(it).boxed().collect(Collectors.toList());
-        ListIterator<Integer> iter = list.listIterator();
-        */
         
         while(iter.hasNext()) {
 
@@ -95,8 +93,15 @@ public class RegretInsertion extends AbstractInsertion {
 
     // TODO Alex - die zwei Methoden zu Insertion helpers auslagern
     // TODO Alex - Testcase, dass k<2 nicht akzeptiert wird
-    // Method is public such that logic can be tested
-    public double calculateRegret(int k, ArrayList<double[]> possibleInsertionsForCustomer) {
+    /**
+     * Calculate the regret scores for the possible insertions for a customer. 
+     * The parameter k defines what regret measure to use; 
+     * e.g. k=3 means difference between best insertion and 3rd best insertion
+     * @param k: regret measure
+     * @param possibleInsertionsForCustomer: list of possible insertions for a customer
+     * @return regret score
+     */
+    private double calculateRegret(int k, ArrayList<double[]> possibleInsertionsForCustomer) {
         double regret = 0.;
         possibleInsertionsForCustomer.sort(Comparator.comparing(a -> a[4])); // sort by additional costs
 
@@ -130,5 +135,4 @@ public class RegretInsertion extends AbstractInsertion {
 	public Solution runBacktracking(Solution initSolution) {
 		return initSolution;
 	}
-
 }

@@ -5,6 +5,8 @@ import vrptwfl.metaheuristic.data.Data;
 
 /**
  * This class implements an abstract insertion object
+ * 
+ * @author: Alexander Jungwirth, Christian M.M. Frey
  */
 public abstract class AbstractInsertion {
 
@@ -71,7 +73,7 @@ public abstract class AbstractInsertion {
         // update solution object, then return it
         solution.updateSolutionAfterInsertion();
 
-        // TODO Chris - call by reference, den return value könnte man sich wohl sparen
+        // NOTE Chris - call by reference, den return value könnte man sich wohl sparen
         return solution;
     }
 

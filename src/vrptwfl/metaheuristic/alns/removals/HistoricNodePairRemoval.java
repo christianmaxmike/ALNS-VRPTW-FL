@@ -8,17 +8,32 @@ import vrptwfl.metaheuristic.data.Data;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class implements the Historic Node Pair removal heuristic.
+ * 
+ * @author: Alexander Jungwirth, Christian M.M. Frey
+ */
 public class HistoricNodePairRemoval extends AbstractRemoval {
 
     private boolean randomize;
     private ALNSCore alns;
 
+    /**
+     * Constructor for the historic node pair removal heuristic.
+     * @param data: data object
+     * @param ALNSCore: alns core object
+     * @param randomize: use randomized version
+     */
     public HistoricNodePairRemoval(Data data, ALNSCore alns, boolean randomize) {
         super(data);
         this.randomize = randomize;
         this.alns = alns;
     }
 
+	/**
+	 * {@inheritDoc}
+	 * Executes the removal.
+	 */
     @Override
     public List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) {
 
@@ -39,8 +54,6 @@ public class HistoricNodePairRemoval extends AbstractRemoval {
 
             nRemovals--;
         }
-
-
         return removedCustomers;
     }
 }

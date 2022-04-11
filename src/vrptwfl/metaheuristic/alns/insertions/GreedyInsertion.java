@@ -12,6 +12,7 @@ import java.util.ListIterator;
  * This class implements the greedy insertion heuristic.
  * The heuristic greedily inserts customers according to their currently 
  * best insertions scores.
+ * 
  * @author: Alexander Jungwirth, Christian M.M. Frey
  */
 public class GreedyInsertion extends AbstractInsertion {

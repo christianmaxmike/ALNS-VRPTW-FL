@@ -302,6 +302,13 @@ public class Vehicle {
         return customer;
     }
     
+    /**
+     * Applies a removal of the attached customer
+     * @param customer: identifier of customer to be removed
+     * @param data: data object
+     * @param solution: solution object
+     * @return identifier of customer being removed
+     */
     public int applyRemovalForCustomer(int customer, Data data, Solution solution) {
         // find position of customer in tour
         int position = this.customers.indexOf(customer);
@@ -497,6 +504,9 @@ public class Vehicle {
     //
     // EQUALITY & HASHING
     //
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -510,6 +520,9 @@ public class Vehicle {
                 Objects.equal(endOfServices, vehicle.endOfServices);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         return Objects.hashCode(capacityLimit, capacityUsed, tourLength, customers, startOfServices, endOfServices);
@@ -524,7 +537,8 @@ public class Vehicle {
      */
     public void printTour(Solution sol) {
     	DecimalFormat df = new DecimalFormat("0.0");
-        System.out.println("Tour of vehicle " + this.id + " (n=" +  this.nCustomersInTour +  ") (TourCosts:" + df.format(this.tourLength) + "):"); // TODO Alex -logger debug
+    	// TODO Alex -logger debug
+        System.out.println("Tour of vehicle " + this.id + " (n=" +  this.nCustomersInTour +  ") (TourCosts:" + df.format(this.tourLength) + "):"); 
         System.out.print(this.customers.get(0) + " --(" + sol.getData().getDistanceBetweenLocations(0, sol.getData().getCustomersToLocations().get(sol.getData().getOriginalCustomerIds()[this.customers.get(1)]).get(sol.getCustomerAffiliationToLocations()[this.customers.get(1)])) + ")-> ");
         for (int i = 1; i < this.customers.size() - 1; i++) {
         	int originalCustomerId = sol.getData().getOriginalCustomerIds()[this.customers.get(i)];

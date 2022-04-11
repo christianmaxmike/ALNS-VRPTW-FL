@@ -9,19 +9,30 @@ import java.util.List;
 
 /**
  * This class implements the Worst Removal heuristic.
- * Remove customers which yield highest cost reduction if they are removed.
- * Ropke and Pisinger 2006, page 460 (Transportation Science)
+ * Remove customers which yield highest cost reductions when they are removed.
+ * (cf. Ropke and Pisinger 2006, page 460 (Transportation Science))
+ * (see Ropke & Pisinger 2006, p. 460 Algorithm 3 (An ALNS Heuristic for the PDPTW))
+ * 
+ * @author: Alexander Jungwirth
  */
 public class WorstRemoval extends AbstractRemoval {
 
     private final boolean randomize;
 
+    /**
+     * Constructor for the worst removal heuristic. 
+     * @param data: data object
+     * @param randomize: use randomized version
+     */
     public WorstRemoval(Data data, boolean randomize) {
         super(data);
         this.randomize = randomize;
     }
 
-    // see Ropke & Pisinger 2006, p. 460 Algorithm 3 (An ALNS Heuristic for the PDPTW)
+	/**
+	 * {@inheritDoc}
+	 * Executes the removal.
+	 */
     @Override
     public List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) {
 
@@ -48,7 +59,6 @@ public class WorstRemoval extends AbstractRemoval {
             }
             // System.out.println(possibleRemovals.get(0)[3] +"\t"+ possibleRemovals.get(possibleRemovals.size()-1)[3]);
             double[] removal = possibleRemovals.get(idx);
-
 
             // apply removal {customer, vehicle.id, i, travelTimeReduction}
             // TODO Alex - ggf. eigene applyRemovalMethode, wo kosten nicht nochmal ausgerechnet werden muessen

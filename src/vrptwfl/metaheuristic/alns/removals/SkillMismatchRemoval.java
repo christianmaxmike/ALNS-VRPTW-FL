@@ -9,20 +9,36 @@ import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
 
+/**
+ * This class implements the Skill Matching removal heuristic.
+ * It removes customers having the highest dismatch with the required skill leve
+ * of a customer and the skill level provided by the therapist.
+ *
+ * @author: Christian M.M. Frey
+ */
 public class SkillMismatchRemoval extends AbstractRemoval{
 	
     private final boolean randomize;
 
+    /**
+     * Constructor for the skill mismatch removal heuristic.
+     * @param data: data object
+     * @param randomize: use randomized version
+     */
 	public SkillMismatchRemoval(Data data, boolean randomize) {
 		super(data);
 		this.randomize = randomize;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 * Executes the removal.
+	 */
+	@Override
 	public List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) {
 		List<Integer> removedCustomers = new ArrayList<Integer>();
 		
 		while (nRemovals > 0) {
-			//TODO Chris - how to do cast check w/o suppress warnings
 			@SuppressWarnings("unchecked")
 			ArrayList<Integer> copyList = (ArrayList<Integer>) solution.getAssignedCustomers().clone();
 	        copyList.sort(new Comparator<Integer>() {
@@ -60,5 +76,4 @@ public class SkillMismatchRemoval extends AbstractRemoval{
 		}
 		return removedCustomers;
 	}
-
 }

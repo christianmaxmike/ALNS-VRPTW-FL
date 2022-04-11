@@ -144,6 +144,7 @@ public class ImportedTherapist {
 	//
 	/**
 	 * String formatting of the ImportedTherapist object.
+	 * {@inheritDoc}
 	 */
 	@Override
 	public String toString() {

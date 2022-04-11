@@ -114,7 +114,7 @@ public class MainALNS {
      * @param nCustomers number of customers being scheduled for the solomon instance
      * @return array containing the data object in the 0-th position
      */
-    private static Data[] loadSolomonInstance(String instanceName, int nCustomers) {
+    public static Data[] loadSolomonInstance(String instanceName, int nCustomers) {
     	SolomonInstanceGenerator generator = new SolomonInstanceGenerator();
         Data[] data = new Data[1];
         try {
@@ -209,7 +209,6 @@ public class MainALNS {
         boolean isSolomonInstance = Boolean.parseBoolean(args[1]);
         int nCustomers = 25;
         String outFile = args.length > 2 ? args[2] : "results.txt";
-        
         Data[] data;
         if (isSolomonInstance)
         	data = loadSolomonInstance(instanceName, nCustomers);
@@ -224,27 +223,19 @@ public class MainALNS {
         // TODO Alex: Add TimeLimit (?)
     }
     
-    //
     // ### alte TODOs ###
     //
-
     // TODO Alex - 0: performance
     // - LRU cache (last recent usage)
-    
     // TODO Alex - 1: morgen früh 28.05.2021
     //  1) Min- und Max-Anzahl removals pro iteration (siehe ALNS Paper)
     //  2) Test Vehicles
     //  3) Test Construction
     //  4) ggf. weiter Tests, wenn Solution object anders aussieht nach ALNS
-
     // TODO Alex - 2: tests für geladene instanzen
-    
     // TODO Alex - 3: Logik ALNS anfangen (50_000 iteration random destroy, und regret repairs)
-
     // TODO Alex - 4: greedy repair
-
     // TODO Alex - 5: moegliches hashing
     //  - bereits generierte Loesungen
     //  - ggf. earliest, latest possible starts in partial routes (pred_id, pred_time,)
-
 }

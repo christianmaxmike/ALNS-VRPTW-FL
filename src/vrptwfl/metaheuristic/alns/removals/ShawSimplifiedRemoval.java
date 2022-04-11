@@ -9,17 +9,32 @@ import vrptwfl.metaheuristic.utils.DataUtils;
 
 import java.util.*;
 
-// removes customers which are "related".  Here related is defined solely by distance.
-// Ropke and Pisinger 2006, page 759 (EJOR)
+/**
+ * This class implements the Time Oriented heuristic.
+ * It removes customers which are "related".  
+ * Here related is defined solely by distance.
+ * (cf. Ropke and Pisinger 2006, page 759 (EJOR))
+ * 
+ * @author: Alexander Jungwirth, Christian M.M. Frey
+ */
 public class ShawSimplifiedRemoval extends AbstractRemoval {
 
     private final boolean randomize;
 
+    /**
+     * Constructor for the shaw simplified removal heuristic.
+     * @param data: data object
+     * @param randomize: use randomized version
+     */
     public ShawSimplifiedRemoval(Data data, boolean randomize) {
         super(data);
         this.randomize = randomize;
     }
 
+	/**
+	 * {@inheritDoc}
+	 * Executes the removal.
+	 */
     @Override
     // TODO Alex : hier nochmal drüber gehen und vereinfachen und kommentieren
     public List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) {
@@ -39,7 +54,7 @@ public class ShawSimplifiedRemoval extends AbstractRemoval {
             if (posFirstRemoval >= vehicle.getnCustomersInTour()) {
                 posFirstRemoval -= vehicle.getnCustomersInTour();
             } else {
-            	// TODO Chris - adapt to multiple locations
+            	// TODO_DONE Chris - adapt to multiple locations
             	firstCustomer = vehicle.getCustomers().get(posFirstRemoval + 1);
                 // firstCustomerPreferencedLocation = solution.getCustomerAffiliationToLocations()[firstCustomer];
                 firstCustomerLocationIdx = DataUtils.getLocationIndex(firstCustomer, solution);
@@ -172,7 +187,6 @@ public class ShawSimplifiedRemoval extends AbstractRemoval {
         for (double[] d: newDouble) {
             System.out.println("[" + d[0] + ", " + d[1] + "]");
         }
-
     }
 */
 }

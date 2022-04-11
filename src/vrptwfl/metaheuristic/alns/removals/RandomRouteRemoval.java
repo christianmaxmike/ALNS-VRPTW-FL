@@ -12,7 +12,8 @@ import java.util.List;
  * This class implements the random route removal heuristic which randomly removes all
  * customers from the selected route.
  * (Mancini 2016, page 107 - (Transportation Research Part C))
- * @author Alexander Jungwirth
+ * 
+ * @author Alexander Jungwirth, Christian M.M. Frey
 */
 public class RandomRouteRemoval extends AbstractRemoval {
 
@@ -26,6 +27,10 @@ public class RandomRouteRemoval extends AbstractRemoval {
         super(data);
     }
 
+	/**
+	 * {@inheritDoc}
+	 * Executes the removal.
+	 */
     @Override
     public List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) {
 
@@ -48,8 +53,6 @@ public class RandomRouteRemoval extends AbstractRemoval {
                 if (nRemovals == 0) break vehicleIndexLoop;
             }
         }
-
         return removedCustomers;
     }
-
 }

@@ -15,6 +15,7 @@ import vrptwfl.metaheuristic.data.Data;
  * vehicles. If the skill discrepancy is lower, i.e., there are not many vehicles
  * that can serve the customer at hand, the customer is favored over other 
  * customers. 
+ * 
  * @author Christian M.M. Frey
  */
 public class SkillMatchingInsertion extends AbstractInsertion {
@@ -28,11 +29,20 @@ public class SkillMatchingInsertion extends AbstractInsertion {
 		super(data);
 	}
 	
+    /**
+     * Retrieve the next possible insertions following the skill matching insertion heuristic.
+     * The method iterates all unscheduled customers, identifies the next possible insertions for them, and
+     * yields the next insertion according to the best skill matches.
+     * 
+     * @param solution solution object storing information about the scheduled and unscheduled customers
+     */
 	@Override
 	public double[] getNextInsertion(Solution solution) {
 		double[] nextInsertion = new double[8];
         nextInsertion[4] = -1;
         
+        // Sort unscheduled customers according to the number of possible insertions
+        // w.r.t the skill leves of the therapists/vehicles. 
         solution.getNotAssignedCustomers().sort(new Comparator<Integer>() {
 
 			@Override
@@ -53,20 +63,26 @@ public class SkillMatchingInsertion extends AbstractInsertion {
         	
         });
         
+        // Get iterator for unscheduled customers
 		ListIterator<Integer> iter = solution.getNotAssignedCustomers().listIterator();
         
 		// initialize values
         double minCostIncrease = Config.bigMRegret;
 		
+        // the current inspected Skill lvl; if customers have the same skill discrepancy
+        // the best insertion is searched among all of them
 		int inspectedSkillLvl = -1;
         while (iter.hasNext()) {
         	int customer = iter.next();
+        	
+        	// check if a new skill lvl is inspected
         	if (inspectedSkillLvl == -1)
         		inspectedSkillLvl = solution.getData().getRequiredSkillLvl()[customer];
         	else
         		if (solution.getData().getRequiredSkillLvl()[customer] != inspectedSkillLvl)
         			break;
 
+        	// Get possible insertions
         	ArrayList<double[]> possibleInsertionsForCustomer = solution.getPossibleInsertionsForCustomer(customer);
         	
         	if (possibleInsertionsForCustomer.isEmpty()) {
@@ -88,6 +104,10 @@ public class SkillMatchingInsertion extends AbstractInsertion {
 		return nextInsertion;
 	}
 
+    /**
+     * Runs the insertion heuristic with the backtracking logic.
+     * TODO Chris : currently not implemented - ask Alex why Backtracking only w/ k-regret
+     */
 	@Override
 	public Solution runBacktracking(Solution initSolution) {
 		return initSolution;

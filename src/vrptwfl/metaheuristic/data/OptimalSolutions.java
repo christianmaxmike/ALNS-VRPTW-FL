@@ -7,6 +7,8 @@ import static java.util.Map.entry;
 /**
  * This class stores the best scores reported in the literature for
  * the solomon instances. 
+ * 
+ * @author: Alexander Jungwirth
  */
 public class OptimalSolutions {
 

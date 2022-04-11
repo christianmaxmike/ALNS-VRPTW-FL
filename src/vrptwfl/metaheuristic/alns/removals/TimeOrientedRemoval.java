@@ -12,21 +12,36 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-
-// removes customers which are "related" in terms of their start times.
-// Pisinger & Ropke 2007, page 2414 (C&OR)
+/**
+ * This class implements the Time Oriented heuristic.
+ * It removes customers which are "related" in terms of their start times.
+ * (cf. Pisinger & Ropke 2007, page 2414 (C&OR))
+ * 
+ * @author Alexander Jungwirth, Christian M.M. Frey
+ */
 public class TimeOrientedRemoval extends AbstractRemoval {
 
     private final boolean randomize;
     private double weightStartTimeInSolution; // [%] in Pisinger & Ropke = 1; in Jungwirth can be between 0 and 1
 
+    /**
+     * Constructor for the worst removal heuristic. 
+     * @param data: data object
+     * @param randomize: use randomized version
+     * @param weightStartTimeInSolution: use weighted times
+     */
     public TimeOrientedRemoval(Data data, boolean randomize, double weightStartTimeInSolution) throws ArgumentOutOfBoundsException {
         super(data);
         this.randomize = randomize;
-        if (weightStartTimeInSolution < - Config.epsilon || weightStartTimeInSolution > 1 + Config.epsilon) throw new ArgumentOutOfBoundsException("Weight parameter (alpha_1) for time-oriented destroy must be in interval [0,1]. Given was: " + weightStartTimeInSolution + ".");
+        if (weightStartTimeInSolution < - Config.epsilon || weightStartTimeInSolution > 1 + Config.epsilon) 
+        	throw new ArgumentOutOfBoundsException("Weight parameter (alpha_1) for time-oriented destroy must be in interval [0,1]. Given was: " + weightStartTimeInSolution + ".");
         this.weightStartTimeInSolution = weightStartTimeInSolution; // alpha_2 - Wert im draft
     }
 
+	/**
+	 * {@inheritDoc}
+	 * Executes the removal.
+	 */
     @Override
     List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) throws ArgumentOutOfBoundsException {
 

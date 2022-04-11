@@ -7,8 +7,8 @@ import vrptwfl.metaheuristic.common.Solution;
 
 /**
  * General helper functions for data transformations (e.g., list to array function)
- * @author Alexander Jungwirth, Christian M.M. Frey
  *
+ * @author Alexander Jungwirth, Christian M.M. Frey
  */
 public class DataUtils {
 

@@ -9,7 +9,8 @@ import vrptwfl.metaheuristic.utils.CalcUtils;
 import java.util.List;
 
 /**
- * This class implements an abstract removal operation
+ * This class implements an abstract removal operation.
+ * 
  * @author: Alexander Jungwirth, Christian M.M. Frey
  */
 public abstract class AbstractRemoval {
@@ -37,7 +38,7 @@ public abstract class AbstractRemoval {
     // ABSTRACT METHODS
     //
     /**
-     * Abstract method which when implemented defines the individual destroy operation
+     * Abstract method which when implemented defines the individual destroy operation.
      * @param solution: Solution object to be updated
      * @param nRemovals: number of removals to be executed
      * @return List of removed customers

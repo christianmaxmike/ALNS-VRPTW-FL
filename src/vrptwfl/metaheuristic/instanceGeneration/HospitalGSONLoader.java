@@ -9,16 +9,27 @@ import java.nio.charset.StandardCharsets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+/**
+ * Helper class for loading hospital instances. 
+ * It uses a GSONBuilder to get instances of the loaded information. 
+ * The loaded information is stored within an object of type ImportedInstance.
+ * 
+ * @author Alexander Jungwirth, Christian M.M. Frey
+ */
 public class HospitalGSONLoader {
 
-	ImportedInstance loadHospitalInstanceFromJSON(String instanceName) throws IOException {
-
+	/**
+	 * Load the hospital instance being attached as parameter.
+	 * @param instanceName: name of hospital instance being loaded.
+	 * @return loaded instance as instance of class ImportedInstance
+	 * @throws IOException: occurs if file could not be read
+	 */
+	public ImportedInstance loadHospitalInstanceFromJSON(String instanceName) throws IOException {
 		ImportedInstance instance;
 
 		// get path to "InstancesHospital\\*InsertFileName*.json"
 		// String path = GeneralUtil.getPathToDirectoryInstancesHospital() + File.separator + instanceName + ".json";
 		String path = "./instances/Instances-Hospital/" + instanceName + ".json";
-		System.out.println(path);
 
 		// important to take FileInputStream and not InputStream
 		FileInputStream stream = new FileInputStream(path);
@@ -27,8 +38,6 @@ public class HospitalGSONLoader {
 			Gson gson = new GsonBuilder().create();
 			instance = gson.fromJson(reader, ImportedInstance.class);
 		}
-		
 		return instance;
 	}
-
 }

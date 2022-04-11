@@ -24,6 +24,8 @@ import java.util.List;
  * on the vehicle routing problem with time windows and flexible locations.
  * This class initializes and stores the repair and destroy operators as
  * well as the visited solutions.
+ * 
+ * @author: Christian M.M. Frey, Alexander Jungwirth
  */
 public class ALNSCore {
 	

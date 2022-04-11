@@ -187,10 +187,12 @@ public class Solution {
     					continue; 
     				
     				// TODO Chris - die Überprüfung passt noch nicht
+    				// 
     				if (timePred[1] < earliestStartAtInsertion & 
+    					endServicePred < earliestStartAtInsertion &
     					timeSucc[0] > latestStartAtInsertion + serviceTime & 
-    					earliestStartAtInsertion + serviceTime < startServiceSucc & 
-    					endServicePred < earliestStartAtInsertion) {
+    					startServiceSucc > latestStartAtInsertion + serviceTime
+    					) {
 						
     					double timeStart = earliestStartAtInsertion;
 						// TODO_DONE: retrieve multiple solutions (possible that first match not the best one)
@@ -205,13 +207,18 @@ public class Solution {
     }
 
 
+    /**
+     * Retrieve list of possible next insertions for a customer
+     * @param customer: identifier of customer whose next insertions are inspected.
+     * @return list of possible next insertions
+     */
     public ArrayList<double[]> getPossibleInsertionsForCustomer(int customer) {
         ArrayList<double[]> possibleInsertionsForCustomer = new ArrayList<>();
 //        boolean triedUnusedVehicle = false;
         
         for (Vehicle vehicle: this.getVehicles()) {
             // generate insertion for unused vehicle only once, otherwise regrets between all unused vehicles will be zero
-        	  // XXX: can't be applied, as skill lvl is important (individually set for each vehicle/therapist)
+        	  // NOTE: can't be applied, as skill lvl is important (individually set for each vehicle/therapist)
 //            if (!vehicle.isUsed()) {
 //                if (triedUnusedVehicle) 
 //                	continue;
@@ -251,6 +258,12 @@ public class Solution {
         return possibleRemovals;
     }
 
+    /**
+     * Retrieve possible removals according to the information stored within the neighbor graph.
+     * The neighbor graph stores the current best score being observed in any solution so far.
+     * @param neighborGraph: scoring between neighbors
+     * @return list of possible next removals
+     */
     public ArrayList<double[]> getPossibleRemovalsSortedByNeighborGraph(double[][] neighborGraph) {
         ArrayList<double[]> possibleRemovals = new ArrayList<>();
         for (Vehicle vehicle: this.getVehicles()) {
@@ -338,7 +351,8 @@ public class Solution {
             this.notAssignedCustomers.addAll(removedCustomers);
             isFeasible = false;
         }
-        //  this.calculatePenaltyCosts(); // TODO Alex: kann ggf raus, da penalties er nach Insertion berechnet werden muessen
+        // TODO Alex: kann ggf raus, da penalties er nach Insertion berechnet werden muessen
+        // this.calculatePenaltyCosts(); 
     }
 
     /**
@@ -394,7 +408,6 @@ public class Solution {
      * A predecessor job violation occurs if there is a customer whose predecessor 
      * jobs are not scheduled yet, respectively, which is scheduled in a non-consecutive
      * ordering.
-     * TODO Chris - time windows checks
      */
     private void calcCostsForPredJobsViolation() {
     	this.penaltyPredJobsViolation = 0;
@@ -851,6 +864,10 @@ public class Solution {
     //
     // EQUALITY & HASHING
     //
+    /**
+     * Checks equality between two Solution objects.
+     * {@inheritDoc}
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -863,6 +880,13 @@ public class Solution {
                 Objects.equal(vehicles, solution.vehicles);
     }
     
+    /**
+     * Compute a hashCode for the solution object. The hashCode of a solution object
+     * is dependent on the ordering of the scheduled customers within the vehicles.
+     * Hence, two solution objects have the same hashCode if the routes are the same
+     * for two solution objects.
+     * @return hashCode for solution object
+     */
     public int hashCode_tmp() {
     	// TODO Chris - when flexible locations come into play; check whether the vehiclesInfo 
     	// still contains the relevant information or do we have to encode the locations, too.
@@ -888,7 +912,7 @@ public class Solution {
 						else if (o1.get(customerFirst) > o2.get(customerFirst)) {
 							return 1;
 						}
-						// TODO Chris - check for first customer should be sufficient
+						// TODO_DONE Chris - check for first customer should be sufficient
 						// equality not possible; customer only assigned once
 					}
 				}
@@ -900,10 +924,6 @@ public class Solution {
     	return vehiclesInfo.hashCode();
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(notAssignedCustomers, tempInfeasibleCustomers, totalCosts, vehicles, isFeasible);
-    }
 
     //
     // PRINTING
@@ -914,7 +934,8 @@ public class Solution {
     public void printSolution() {
         int nActiveVehicles = this.getNActiveVehicles();
         System.out.println("VehicleCosts:" + this.vehicleTourCosts + " - SwappingCosts:" + this.swappingCosts + " - penUnserved: " + this.penaltyUnservedCustomers + " - penSkillLvl:" + this.penaltySkillViolation + " - penTW:" + this.penaltyTimeWindowViolation + " - penPred:" + this.penaltyPredJobsViolation);
-        System.out.println("Solution total costs: " + this.totalCosts + "\tn vehicles used: " + nActiveVehicles); // TODO Alex - logger debug!
+        // TODO Alex - logger debug!
+        System.out.println("Solution total costs: " + this.totalCosts + "\tn vehicles used: " + nActiveVehicles); 
         for (Vehicle veh: this.vehicles) {
             if (veh.isUsed()) {
                 veh.printTour(this);
@@ -926,6 +947,14 @@ public class Solution {
     //
     // DEPRECATED
     //
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(notAssignedCustomers, tempInfeasibleCustomers, totalCosts, vehicles, isFeasible);
+    }
+
     //public Solution(ArrayList<Vehicle> vehicles, ArrayList<Integer> notAssignedCustomers) {
     	// TODO Alex - muss hier auch infeasible rein?
     	// this.vehicles = vehicles;

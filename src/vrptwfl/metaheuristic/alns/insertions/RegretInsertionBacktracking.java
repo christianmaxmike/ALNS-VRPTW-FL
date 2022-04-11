@@ -25,7 +25,6 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
     private ArrayList<Solution> solutionSequence;
     private Solution bestInitialSolution = null;
 
-
    /**
     * Initialize k-regret w/ backtracking heuristic
     * @param k: k defines what regret measure to use; e.g. k=3 means difference between best insertion and 3rd best insertion
@@ -41,9 +40,7 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
         this.noBackTrackJumps = 0;
     }
     
-    // TODO Chris - loggen wie oft zurückgesprungen worden ist
     public Solution runBacktracking(Solution solution) {
-    	
     	// Try backtracking for x trials
     	for (int trial = 0; trial<Config.backtrackTrials; trial++) {
     		this.noBackTrackJumps = 0;
@@ -118,6 +115,14 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
     	return this.bestInitialSolution;
     }
 
+    /**
+     * Retrieve the next possible insertions following the k-regret heuristic. 
+     * The method iterates all unscheduled customers, identifies the next possible insertions for them, and
+     * yields the next insertion according to the k-regret heuristic.
+     * The regret scores are calculated by the function calculateRegret.
+     * 
+     * @param solution solution object storing information about the scheduled and unscheduled customers
+     */
     @Override
     public double[] getNextInsertion(Solution solution) {
         // initialize values
@@ -187,6 +192,14 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
         return nextInsertion;
     }
 
+    /**
+     * Calculate the regret scores for the possible insertions for a customer. 
+     * The parameter k defines what regret measure to use; 
+     * e.g. k=3 means difference between best insertion and 3rd best insertion
+     * @param k: regret measure
+     * @param possibleInsertionsForCustomer: list of possible insertions for a customer
+     * @return regret score
+     */
     private double calculateRegret(int k, ArrayList<double[]> possibleInsertionsForCustomer) {
         double regret = 0.;
         possibleInsertionsForCustomer.sort(Comparator.comparing(a -> a[4])); // sort by additional costs

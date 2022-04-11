@@ -8,8 +8,8 @@ import java.util.List;
 
 /**
  * Helper functions for calculation.
+ * 
  * @author Alexander Jungwirth, Christian M.M. Frey
- *
  */
 public class CalcUtils {
 
@@ -70,5 +70,4 @@ public class CalcUtils {
 
         return numbersInRange;
     }
-
 }
