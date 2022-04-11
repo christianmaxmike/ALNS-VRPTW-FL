@@ -134,7 +134,7 @@ public class MainALNS {
     private static Data[] loadHospitalInstance(String instanceName) {
     	HospitalInstanceLoader loader = new HospitalInstanceLoader();
         Data[] dataArr;
-        dataArr = loader.loadHospitalInstanceFromJSON("hospital_instance_i020_b1_f6_v01");
+        dataArr = loader.loadHospitalInstanceFromJSON("hospital_instance_i020_b1_f6_v02");
         return dataArr;
     }
     
@@ -215,9 +215,9 @@ public class MainALNS {
         else
         	data = loadHospitalInstance(instanceName);
     	final MainALNS algo = new MainALNS(instanceName, outFile, isSolomonInstance);
-    	algo.runALNS(data[0], instanceName);        	
+    	algo.runALNS(data[1], instanceName);        	
 //        for (Data d: data) {
-//        	final MainALNS algo = new MainALNS(outFile);
+//        	final MainALNS algo = new MainALNS(instanceName, outFile, isSolomonInstance);
 //        	algo.runALNS(d, instanceName);        	
 //        }
         // TODO Alex: Add TimeLimit (?)

@@ -3,7 +3,7 @@ random_seed: 42  # if null, no random seed will be used
 
 
 ### ALNS CONFIGURATION
-alns_iterations: 10_000 # 25_000  # 50_000
+alns_iterations: 25_000 # 25_000  # 50_000
 # Upper bound and lower bound values taken from Ropke C&OR §6.1.1 p. 2417
 lower_bound_nr_of_removals: 30
 lower_bound_factor_nr_of_removals: 0.1
@@ -70,6 +70,7 @@ backtrackJump: 5
 backtrackJumpToLevel: 5
 backtrackJumpToLevelProbabilities: [1.0, 0.6, 0.3, 0.2, 0.1]
 backtrackBySteps: false  									# backtracking by steps (=false) or by levels (=true) 
+maxBacktrackJumps: 10_000
 
 
 ### UPDATE VALUES FOR DESTROY/REPAIR OPS - SIGMAS

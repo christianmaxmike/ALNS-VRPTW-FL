@@ -57,8 +57,8 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
     		// currSolution indicates the current node we try to explore in the backtracking-tree
     		Solution currSolution = initSolution;
     		
-    		// loop while there are un-scheduled customers
-    		while (!currSolution.getNotAssignedCustomers().isEmpty()) {
+    		// loop while there are unscheduled customers
+    		while (!currSolution.getNotAssignedCustomers().isEmpty() && this.noBackTrackJumps < Config.maxBacktrackJumps) {
     			
     			// receive the next possible insertions in the current node in the backtracking-tree
     			// if in a backtrack-node a tuple (customerID, vehicleId,...) has already been tried, it 

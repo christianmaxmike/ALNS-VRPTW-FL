@@ -93,6 +93,7 @@ public class Config {
     public static int backtrackJumpToLevel;
     public static double[] backtrackJumpToLevelProbabilities;
     public static boolean backtrackBySteps;
+    public static int maxBacktrackJumps;
 
     // --- UPDATE VALUES FOR DESTROY/REPAIR OPS ---
     public static int sigma1;
@@ -204,6 +205,7 @@ public class Config {
         backtrackJumpToLevel = (int) obj.get("backtrackJumpToLevel");
         backtrackJumpToLevelProbabilities = DataUtils.convertDoubleListToArr((ArrayList<Double>) obj.get("backtrackJumpToLevelProbabilities"));
         backtrackBySteps = (boolean) obj.get("backtrackBySteps");
+        maxBacktrackJumps = (int) obj.get("maxBacktrackJumps");
 
         // --- UPDATE VALUES FOR DESTROY/REPAIR OPERATORS ---
         sigma1 = (int) obj.get("sigma1");

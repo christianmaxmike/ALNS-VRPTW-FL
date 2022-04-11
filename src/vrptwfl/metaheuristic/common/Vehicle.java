@@ -106,6 +106,11 @@ public class Vehicle {
         // Get service interval for customer
         double earliestStartCustomer = data.getEarliestStartTimes()[customer];
         double latestStartCustomer = data.getLatestStartTimes()[customer];
+        
+        if (Config.enableGLS & !solution.isConstruction()) {
+        	earliestStartCustomer = Math.max(earliestStartCustomer -Config.maxTimeWindowViolation, 0);
+        	latestStartCustomer = Math.min(latestStartCustomer + Config.maxTimeWindowViolation,  solution.getData().getEndOfPlanningHorizon());
+        }
 
         for (int i = 0; i < this.customers.size() - 1; i++ ) {
         	// Get predecessor end and successor start time

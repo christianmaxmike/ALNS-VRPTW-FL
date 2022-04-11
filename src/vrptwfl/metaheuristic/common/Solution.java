@@ -63,6 +63,12 @@ public class Solution {
 	public void setSolution(Solution solutionTemp) {
 		this.notAssignedCustomers = new ArrayList<>(solutionTemp.getNotAssignedCustomers());
 		this.totalCosts = solutionTemp.getTotalCosts();
+		this.penaltyPredJobsViolation = solutionTemp.penaltyPredJobsViolation;
+		this.penaltySkillViolation = solutionTemp.penaltySkillViolation;
+		this.penaltyTimeWindowViolation = solutionTemp.penaltyTimeWindowViolation;
+		this.penaltyUnservedCustomers = solutionTemp.penaltyUnservedCustomers;
+		this.swappingCosts = solutionTemp.swappingCosts;
+		this.vehicleTourCosts = solutionTemp.vehicleTourCosts;
 		this.isFeasible = solutionTemp.isFeasible();
 		this.customersAssignedCapacitySlot = Arrays.copyOf(solutionTemp.getCustomerAffiliationToCapacity(), solutionTemp.getCustomerAffiliationToCapacity().length);
 		this.customersAssignedLocations = Arrays.copyOf(solutionTemp.getCustomerAffiliationToLocations(), solutionTemp.getCustomerAffiliationToLocations().length);
@@ -155,7 +161,7 @@ public class Solution {
             
             // XXX:(if Config.enableGLS) -> check for violations in calculatePenaltyCosts()
             // Check end service time of dependencies to predecessor jobs [customerId, endServiceTime, LocationIdx];
-            // if there is no latest predecessor job, the subprocedure returns an array consisting of -1's ,ie., [-1,-1,-1]
+            // if there is no latest predecessor job, the sub-procedure returns an array consisting of -1's ,ie., [-1,-1,-1]
             if (!Config.enableGLS || this.isConstruction) {
 	            double[] infoOfLatestPredJob = this.getEndServiceTimeOfLatestPredJob(customer);
 	            // if a predecessor job couldn't be scheduled, the current job can also not be scheduled; break
@@ -186,12 +192,15 @@ public class Solution {
     				if (timeSucc[0] < endServicePred) 
     					continue; 
     				
-    				// TODO Chris - die Überprüfung passt noch nicht
-    				// 
+    				// TODO Chris - Check conditions
+    				// i)   predecessor in location ends before current starting point for job
+    				// ii)  predecessor in vehicle's route ends before current starting point for job
+    				// iii) successor in location starts after current job is served
+    				// iv)  successor in vehicle's route starts after current job is served
     				if (timePred[1] < earliestStartAtInsertion & 
     					endServicePred < earliestStartAtInsertion &
-    					timeSucc[0] > latestStartAtInsertion + serviceTime & 
-    					startServiceSucc > latestStartAtInsertion + serviceTime
+    					timeSucc[0] > earliestStartAtInsertion + serviceTime & 
+    					startServiceSucc > earliestStartAtInsertion + serviceTime
     					) {
 						
     					double timeStart = earliestStartAtInsertion;
@@ -313,7 +322,10 @@ public class Solution {
         this.calculatePenaltyCosts();
         this.totalCosts = this.vehicleTourCosts + 
         		this.swappingCosts + 
-        		this.penaltyUnservedCustomers;
+        		this.penaltyUnservedCustomers + 
+        		this.penaltyPredJobsViolation +
+        		this.penaltySkillViolation + 
+        		this.penaltyTimeWindowViolation;
 	}
 
 	/**
@@ -346,13 +358,12 @@ public class Solution {
      * @param removedCustomers: list of removed customers
      */
     public void updateSolutionAfterRemoval(List<Integer> removedCustomers) {
+    	// TODO Chris - do we need to calculate the costs after removals?
     	this.calculateTotalCosts();
         if (!removedCustomers.isEmpty()) {
             this.notAssignedCustomers.addAll(removedCustomers);
             isFeasible = false;
         }
-        // TODO Alex: kann ggf raus, da penalties er nach Insertion berechnet werden muessen
-        // this.calculatePenaltyCosts(); 
     }
 
     /**
@@ -421,7 +432,7 @@ public class Solution {
     				// get customer id in the current scheduling problem (!= original customer ids)
     				int predJobId = Arrays.stream(this.data.getOriginalCustomerIds()).boxed().collect(Collectors.toList()).indexOf(predJobOrigIdx);
     				// check whether the predecessor job is scheduled or not (-1: not scheduled)
-    				if (this.customersAssignedToVehicles[predJobId] == -1)
+    				if (predJobId != -1 && this.customersAssignedToVehicles[predJobId] == -1)
     					// Aggregate penalty costs
     					this.penaltyPredJobsViolation += Config.costPredJobsViolation;
     				//TODO Chris - predecessor job can be scheduled but we also have
@@ -501,10 +512,11 @@ public class Solution {
     	ArrayList<Integer> predIds = this.data.getPredCustomers().get(this.data.getOriginalCustomerIds()[customerId]);
     	for (int originalPredCustomerId : predIds) {
     		int predCustomerId = Arrays.stream(this.data.getOriginalCustomerIds()).boxed().collect(Collectors.toList()).indexOf(originalPredCustomerId);
+    		// if predCustomerID cannot be found, i.e., == -1 ; the predecessor job is handled in the morning shift
     		
     		// if there is a predecessor job which couldn't be scheduled, the current customer
     		// can also not be scheduled and a -1 is returned
-    		if (this.customersAssignedToVehicles[predCustomerId] == -1) {
+    		if (predCustomerId == -1 ||  this.customersAssignedToVehicles[predCustomerId] == -1) {
     			endServiceTimeOfLatestPredJob = -1;    			
     			return new double[] {-1, -1,-1};    			
     		}
@@ -536,9 +548,10 @@ public class Solution {
     		// check whether the predecessor job in list of infeasible customers
     		int existenceOfPredecessor = this.tempInfeasibleCustomers.indexOf(predCustomerId);
     		// check infeasibility AND if the customer is not assigned to any vehicle 
-    		if (existenceOfPredecessor == -1 && this.customersAssignedToVehicles[predCustomerId] == -1) {
+    		if (existenceOfPredecessor == -1)
     			return false;
-    		}
+    		if (this.customersAssignedToVehicles[predCustomerId] == -1)
+    			return false;
     	}
     	// All predecessor jobs are scheduled -> Return true
     	return true;
