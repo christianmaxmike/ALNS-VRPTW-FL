@@ -51,6 +51,7 @@ public class Config {
     // --- ALNS OEPRATORS TO USE ---
     // removals
     public static boolean useClusterRemovalKruskal;
+    public static boolean useKMeansRemoval;
     public static boolean useHistoricNodePairRemovalDeterministic;
     public static boolean useHistoricNodePairRemovalRandom;
     public static boolean useHistoricRequestPairRemoval;
@@ -66,6 +67,8 @@ public class Config {
     public static boolean useWorstRemovalRandom;
     public static boolean useSkillMismatchRemovalRandom;
     public static boolean useSkillMismatchRemovalDeterministic;
+    public static boolean useTimeFlexibilityRemovalRandom;
+    public static boolean useTimeFlexibilityRemovalDeterministic;
     // insertions
     public static boolean useGreedyInsert;
     public static boolean useSkillMatchingInsert;
@@ -79,12 +82,16 @@ public class Config {
 
     // --- ALNS OPERATOR PARAMETERS ---
     public static int historicNodePairRemovalExponent;
+    public static int historicRequestRemovalExponent;
     public static int shawRemovalExponent;
     public static int timeOrientedRemovalExponent;
     public static int timeOrientedNrOfClosest;
     public static double timeOrientedJungwirthWeightStartTimeIinSolution;
     public static int worstRemovalExponent;
     public static int skillMismatchRemovalExponent;
+    public static int timeFlexibilityRemovalExponent;
+    public static int requestGraphSolutionsSize;
+    public static int[] kMeansClusterSettings;
     
     // --- BACKTRACKING SETTINGS ---
     public static boolean enableBacktracking;
@@ -172,6 +179,9 @@ public class Config {
         useWorstRemovalRandom = (boolean) obj.get("use_worst_removal_random");
         useSkillMismatchRemovalRandom = (boolean) obj.get("use_skill_mismatch_removal_random");
         useSkillMismatchRemovalDeterministic = (boolean) obj.get("use_skill_mismatch_removal_deterministic");
+        useTimeFlexibilityRemovalRandom = (boolean) obj.get("use_time_flexibility_removal_random");
+        useTimeFlexibilityRemovalDeterministic = (boolean) obj.get("use_time_flexibility_removal_deterministic");
+        useKMeansRemoval = (boolean) obj.get("use_kmeans_removal");
         // insertions
         useGreedyInsert = (boolean) obj.get("use_greedy_insert");
         useSkillMatchingInsert = (boolean) obj.get("use_skill_matching_insert");
@@ -185,12 +195,16 @@ public class Config {
         regretConsiderAllPossibleInsertionPerRoute = (boolean) obj.get("regret_consider_all_possible_insertion_per_route");
         regretSumOverAllNRegret = (boolean) obj.get("regret_sum_over_all_n_regret");
         historicNodePairRemovalExponent = (int) obj.get("neighbor_graph_removal_exponent");
+        historicRequestRemovalExponent = (int) obj.get("request_graph_removal_exponent");
         shawRemovalExponent = (int) obj.get("shaw_removal_exponent");
         timeOrientedRemovalExponent = (int) obj.get("time_oriented_removal_exponent");
         timeOrientedNrOfClosest = (int) obj.get("time_oriented_nr_of_closest");
         timeOrientedJungwirthWeightStartTimeIinSolution = (double) obj.get("time_oriented_jungwirth_weight_start_time_in_solution");
         worstRemovalExponent = (int) obj.get("worst_removal_exponent");
         skillMismatchRemovalExponent = (int) obj.get("skill_mismatch_removal_exponent");
+        timeFlexibilityRemovalExponent = (int) obj.get("time_flexibility_removal_exponent");
+        requestGraphSolutionsSize = (int) obj.get("request_graph_solutions_size");
+        kMeansClusterSettings = DataUtils.convertListToArray((ArrayList<Integer>) obj.get("kmeansNClusters"));
         // see Ropke C&OR §6.1.1 p. 2417
         // upper bound will be determined instance specific when number of customers is known
         lowerBoundRemovalsFactor = (double) obj.get("lower_bound_factor_nr_of_removals");

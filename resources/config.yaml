@@ -25,22 +25,25 @@ max_timeWindow_violation: 10.0								# default: 10.0
 
 ### DEFINE ACTIVE OPERATORS (DESTROY + REPAIR)									# SOLOMON			HOSPITAL
 # removals
-use_cluster_removal_kruskal: true							# default: true		# x					# 
+use_cluster_removal_kruskal: false							# default: true		# x					# 
 use_historic_node_pair_removal_deterministic: false 		# default: false	# v					# 
-use_historic_node_pair_removal_random: true					# default: true		# v 				# 
-use_historic_request_pair_removal: false  					# default: false	# not implemented	# not implemented
-use_random_removal: true  									# default: true		# v					# 
-use_random_route_removal: true  							# default: true		# v					# 
+use_historic_node_pair_removal_random: false				# default: true		# v 				# 
+use_random_removal: false  									# default: true		# v					# 
+use_random_route_removal: false  							# default: true		# v					# 
 use_shaw_simplified_deterministic: false 					# default: false	# x					# 
-use_shaw_simplified_random: true 					 		# default: true		# x					# 
+use_shaw_simplified_random: false 					 		# default: true		# x					# 
 use_time_oriented_removal_jungwirth_deterministic: false	# default: false	# x					# 
-use_time_oriented_removal_jungwirth_random: true  			# default: true		# x					# 
+use_time_oriented_removal_jungwirth_random: false  			# default: true		# x					# 
 use_time_oriented_removal_pisinger_deterministic: false 	# default: false	# x 				# 
-use_time_oriented_removal_pisinger_random: true 			# default: true		# x					# 
+use_time_oriented_removal_pisinger_random: false 			# default: true		# x					# 
 use_worst_removal_deterministic: false	 					# default: false	# v					# v
-use_worst_removal_random: true  							# default: true		# v					# v
+use_worst_removal_random: false  							# default: true		# v					# v
+use_historic_request_pair_removal: false  					# default: false	# not implemented	# not implemented
 use_skill_mismatch_removal_deterministic: false
-use_skill_mismatch_removal_random: true
+use_skill_mismatch_removal_random: false
+use_time_flexibility_removal_deterministic: false
+use_time_flexibility_removal_random: false
+use_kmeans_removal: true
 # insertions
 use_greedy_insert: true										# default: true		# v
 use_skill_matching_insert: true
@@ -55,12 +58,16 @@ regret_sum_over_all_n_regret: true  						# default in Ropke C&OR §5.2.2 p. 241
 
 ### PARAMS FOR DESTROY OPERATORS
 neighbor_graph_removal_exponent: 6
+request_graph_removal_exponent: 6
 shaw_removal_exponent: 6
 time_oriented_removal_exponent: 6  							# in Pisinger & Ropke C&OR §5.1.5 p. 2414: identical to shaw_removal_exponent
 time_oriented_nr_of_closest: 100  							# maximum number of closest customers to consider when applying time oriented removal
 time_oriented_jungwirth_weight_start_time_in_solution: .75  # alpha_1 in Jungwirth et al. 2021
 worst_removal_exponent: 3
 skill_mismatch_removal_exponent: 3
+time_flexibility_removal_exponent: 3
+request_graph_solutions_size: 100
+kmeansNClusters: [2]
 
 
 ### BACKTRACKING SETTINGS (for initial solution)
@@ -101,7 +108,7 @@ numberOfLocationsPerCustomer: 2 	# set number of locations per customer (for sol
 
 ### HOSPITAL LOADER SETTINGS
 planningIntervals: 5				# 5 min planning interval
-maxCapacityVehicles: 10				# big enough to never be critical
+maxCapacityVehicles: 100			# big enough to never be critical
 solveAsTwoProblems: true			# morning and evening problems separated from each other
 splitRegularShift: true				# split regular shift
 printHospitalLoaderInfo: false		# logging 

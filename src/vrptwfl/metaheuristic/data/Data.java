@@ -37,6 +37,7 @@ public class Data {
     private double[][] distanceMatrix;
     private double[][] swappingCosts;
     private double[][] averageStartTimes;
+    // private double[][] locationCoordinates; // used for kmeans removal
     private int[] originalCustomerIds;
     private int[] customersPreferredLocationId;
     HashMap<Integer, ArrayList<Integer>> predCustomers;
@@ -131,6 +132,7 @@ public class Data {
     	int n = location2Id.size();
     	int m = location2Id.size();
     	this.distanceMatrix = new double[n][m];
+    	// this.locationCoordinates = new double[n][2];
         this.maxDistanceInGraph = 0.;
         
         Map<Object, Object> sortedMap = location2Id.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
@@ -143,9 +145,11 @@ public class Data {
         		this.distanceMatrix[i][j] = distance;
         		this.distanceMatrix[j][i] = distance;
         		
-        		if (distance > this.maxDistanceInGraph + Config.epsilon) {
+        		// this.locationCoordinates[i][0] = ((java.awt.geom.Point2D) sortedMap.get(i)).getX();
+        		// this.locationCoordinates[i][1] = ((java.awt.geom.Point2D) sortedMap.get(i)).getY();
+        		
+        		if (distance > this.maxDistanceInGraph + Config.epsilon) 
         			this.maxDistanceInGraph = distance;
-        		}
         	}
         }
     }

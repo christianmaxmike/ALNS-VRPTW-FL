@@ -286,6 +286,37 @@ public class Solution {
     }
     
     /**
+     * Retrieve possible removals according to the information stored within the request graph.
+     * The request graph stores the number of times two customers have been served by the same
+     * vehicle in the best t observed solutions.
+     * @param requestGraph: number of requests two customers have been served by the same vehicle in x solutions
+     * @return list of possible next removals
+     */
+    public ArrayList<double[]> getPossibleRemovalsSortedByRequestGraph(double[][] requestGraph) {
+    	ArrayList<double[]> possibleRemovals = new ArrayList<>();
+    	for (Vehicle v: this.getVehicles()) {
+    		if (v.isUsed()) {
+    			ArrayList<double[]> removals = v.getPossibleRequestRemovals(requestGraph);
+    			possibleRemovals.addAll(removals);
+    		}
+    	}
+    	// TODO Chris - check historic request removal ordering
+    	// From Ropke & Pisinger, 2006, p.760
+    	// 'A request with a low score is situated in an unsuitable route according
+    	// to the request graph and should be removed.
+    	// Our initial experiments indicated that this was an unpromising approach, 
+    	// probably because it strongly counteracts the diversification mechanisms 
+    	// in the LNS heuristic.
+    	// Instead, the graph is used to define the relatedness between two requests, 
+    	// such that two requests are considered to be related if the weight of the 
+    	// corresponding edge in the request graph is high.'
+    	
+    	// here: high scores first with Collections.reverseOrder()
+    	possibleRemovals.sort(Comparator.comparing(a -> a[3], Collections.reverseOrder()));
+    	return possibleRemovals;
+    }
+    
+    /**
      * Retrieve the list of vehicles being used, i.e., vehicles where at least
      * one customer is scheduled.
      * @return list of used vehicles

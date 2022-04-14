@@ -36,7 +36,6 @@ public class HistoricNodePairRemoval extends AbstractRemoval {
 	 */
     @Override
     public List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) {
-
         List<Integer> removedCustomers = new ArrayList<>();
 
         while (nRemovals > 0) {

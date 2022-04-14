@@ -11,7 +11,7 @@ import vrptwfl.metaheuristic.data.Data;
 
 /**
  * This class implements the Skill Matching removal heuristic.
- * It removes customers having the highest dismatch with the required skill leve
+ * It removes customers having the highest mismatch with the required skill level
  * of a customer and the skill level provided by the therapist.
  *
  * @author: Christian M.M. Frey

@@ -219,6 +219,36 @@ public class Vehicle {
 
         return possibleRemovals;
     }
+    
+    /**
+     * Retrieve possible removals of customers within the vehicle's route based
+     * on the attached request graph.
+     * @param requestGraph: request graph
+     * @return list of all possible removals
+     */
+    public ArrayList<double[]> getPossibleRequestRemovals(double[][] requestGraph) {
+    	ArrayList<double[]> possibleRemovals = new ArrayList<>();
+    	
+    	// if car is not used -> quit
+    	if (!this.isUsed) 
+    		return possibleRemovals;
+    	
+    	// iterate customers
+    	for (int i=1; i<this.customers.size()-1; i++) {
+    		int customerI = this.customers.get(i);
+    		int scoreI = 0;
+    		for (int j=1; j<this.customers.size()-1; j++) {
+    			if (i==j) continue;
+    			
+    			int customerJ = this.customers.get(j);
+    			// aggregate values within the request graph for customerI
+    			scoreI += requestGraph[customerI][customerJ];
+    		}
+    		possibleRemovals.add(new double[] {customerI, this.id, i, scoreI});
+    	}
+    	
+    	return possibleRemovals;
+    }
 
     /**
      * This method realizes the insertion of an customer within the 

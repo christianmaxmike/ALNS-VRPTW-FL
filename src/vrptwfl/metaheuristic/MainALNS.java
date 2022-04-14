@@ -134,7 +134,7 @@ public class MainALNS {
     private static Data[] loadHospitalInstance(String instanceName) {
     	HospitalInstanceLoader loader = new HospitalInstanceLoader();
         Data[] dataArr;
-        dataArr = loader.loadHospitalInstanceFromJSON("hospital_instance_i020_b1_f6_v02");
+        dataArr = loader.loadHospitalInstanceFromJSON("hospital_instance_i060_b1_f6_v01");
         return dataArr;
     }
     

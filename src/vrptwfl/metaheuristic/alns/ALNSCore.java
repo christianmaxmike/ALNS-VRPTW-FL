@@ -16,8 +16,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * Practical heart of the adaptive large neighborhood search (ALNS) applied 
@@ -45,6 +48,10 @@ public class ALNSCore {
     
     //if useNeighborGraphRemoval, then this graph contains information about the best solution in which the edge (i,j) was used
     private double[][] neighborGraph;
+    
+    // RequestRemoval
+    private TreeSet<Solution> solutionSet;
+    private double[][] requestGraph;
 
     /**
      * Constructor for the ALNSCore class. 
@@ -74,15 +81,15 @@ public class ALNSCore {
     private void initDestroyOperators() throws ArgumentOutOfBoundsException {
         List<AbstractRemoval> destroyList = new ArrayList<>();
 
-        if (Config.useClusterRemovalKruskal) destroyList.add(new ClusterKruskalRemoval(data));
+        if (Config.useHistoricNodePairRemovalDeterministic || Config.useHistoricNodePairRemovalRandom) this.initNeighborGraph();
+        if (Config.useHistoricRequestPairRemoval) this.initRequestGraph();
 
         if (Config.useHistoricNodePairRemovalDeterministic) destroyList.add(new HistoricNodePairRemoval(data, this,false));
         if (Config.useHistoricNodePairRemovalRandom) destroyList.add(new HistoricNodePairRemoval(data, this, true));
-        if (Config.useHistoricNodePairRemovalDeterministic || Config.useHistoricNodePairRemovalRandom) this.initNeighborGraph();
-
+        if (Config.useClusterRemovalKruskal) destroyList.add(new ClusterKruskalRemoval(data));
         if (Config.useRandomRemoval) destroyList.add(new RandomRemoval(data));
         if (Config.useRandomRouteRemoval) destroyList.add(new RandomRouteRemoval(data));
-        if (Config.useHistoricRequestPairRemoval) destroyList.add(new HistoricRequestNodeRemoval(data));
+        if (Config.useHistoricRequestPairRemoval) destroyList.add(new HistoricRequestNodeRemoval(data, this, false));
         if (Config.useShawSimplifiedRemovalDeterministic) destroyList.add(new ShawSimplifiedRemoval(data, false));
         if (Config.useShawSimplifiedRemovalRandom) destroyList.add(new ShawSimplifiedRemoval(data, true));
         if (Config.useTimeOrientedRemovalJungwirthDeterministic) destroyList.add(new TimeOrientedRemoval(data, false, Config.timeOrientedJungwirthWeightStartTimeIinSolution));
@@ -93,6 +100,10 @@ public class ALNSCore {
         if (Config.useWorstRemovalRandom) destroyList.add(new WorstRemoval(data, true));
         if (Config.useSkillMismatchRemovalDeterministic) destroyList.add(new SkillMismatchRemoval(data, false));
         if (Config.useSkillMismatchRemovalRandom) destroyList.add(new SkillMismatchRemoval(data, true));
+        if (Config.useTimeFlexibilityRemovalDeterministic) destroyList.add(new TimeFlexibilityRemoval(data, false));
+        if (Config.useTimeFlexibilityRemovalRandom) destroyList.add(new TimeFlexibilityRemoval(data, true));
+        if (Config.useKMeansRemoval) {for (Integer k: Config.kMeansClusterSettings) destroyList.add(new ClusterKMeansRemoval(data, k));};
+        
 
         this.destroyOperators = new AbstractRemoval[destroyList.size()];
         this.destroyOperators = destroyList.toArray(this.destroyOperators);
@@ -136,7 +147,7 @@ public class ALNSCore {
     }
     
     /**
-     * Initializes the neighbor graphs.
+     * Initializes the neighbor graph.
      * Its default entries are initialized with the value of bigMRegret defined in the configuration file.
      */
     private void initNeighborGraph() {
@@ -144,6 +155,21 @@ public class ALNSCore {
         this.neighborGraph = new double[this.data.getnCustomers() + 1][this.data.getnCustomers() + 1];
         // edges are initially set to infinity (or a reasonably high value)
         Arrays.stream(this.neighborGraph).forEach(row -> Arrays.fill(row, Config.bigMRegret));
+    }
+    
+    /**
+     * Initializes the request graph.
+     */
+    private void initRequestGraph() {
+    	this.solutionSet = new TreeSet<Solution>(new Comparator<Solution>() {
+			@Override
+			public int compare(Solution o1, Solution o2) {
+				if (o1.getTotalCosts() < o2.getTotalCosts()) return -1;
+				else if (o1.getTotalCosts() > o2.getTotalCosts()) return +1;
+				else return 0;
+			}
+		});
+    	this.requestGraph = new double[this.data.getnCustomers() + 1][this.data.getnCustomers() + 1];
     }
     
     /**
@@ -179,27 +205,32 @@ public class ALNSCore {
         // add information from construction to neighbor graph
         if (Config.useHistoricNodePairRemovalRandom || Config.useHistoricNodePairRemovalDeterministic) 
         	this.updateNeighborGraph(solutionConstr);
+        if (Config.useHistoricRequestPairRemoval)
+        	this.updateRequestGraph(solutionConstr);
 
         // Start ALNS
         for (int iteration = 1; iteration <= Config.alnsIterations; iteration++) {
             Solution solutionTemp = solutionCurrent.copyDeep();
             // TODO Alex: random auswaehlen aus Operatoren (geht das irgendwie mit Lambdas besser ?)
 
-            // destroy solution
-            //AbstractRemoval destroyOp = getDestroyOperatorAtRandom();
+            // destroy operation
+            // AbstractRemoval destroyOp = getDestroyOperatorAtRandom();
             AbstractRemoval destroyOp = drawDestroyOperator();
             destroyOp.destroy(solutionTemp);
 
-            // repair solution
+            // repair operation
             // returns one repair operator specified in repairOperators
-            //AbstractInsertion repairOp = getRepairOperatorAtRandom();
+            // AbstractInsertion repairOp = getRepairOperatorAtRandom();
             AbstractInsertion repairOp = drawInsertionOperator();
             repairOp.solve(solutionTemp);
 
-            
             // update neighbor graph if new solution was found (TODO Alex - check if the solution is really a new one (hashtable?)
-            if (Config.useHistoricNodePairRemovalRandom || Config.useHistoricNodePairRemovalDeterministic) this.updateNeighborGraph(solutionTemp);
-
+            if (Config.useHistoricNodePairRemovalRandom || Config.useHistoricNodePairRemovalDeterministic) 
+            	this.updateNeighborGraph(solutionTemp);
+            if (Config.useHistoricRequestPairRemoval)
+            	this.updateRequestGraph(solutionTemp);
+            
+            // Verbose
             if (iteration % 1000 == 0) {
                 System.out.println("\n\nIteration " + iteration);
                 System.out.println("Cost temp " + solutionTemp.getTotalCosts());
@@ -207,8 +238,10 @@ public class ALNSCore {
                 System.out.println("Cost glob " + solutionBestGlobal.getTotalCosts());
             }
 
+            // check for improvement of the current solution
             solutionCurrent = this.checkImprovement(solutionTemp, solutionCurrent, solutionBestGlobal);
             
+            // Verbose
             if (iteration % 1000 == 0) {
                 System.out.println();
                 System.out.println("Cost curr " + solutionCurrent.getTotalCosts());
@@ -223,16 +256,19 @@ public class ALNSCore {
         return solutionBestGlobal;
     }
 
+    /**
+     * Update the neighbor graph.
+     * @param solution: solution object
+     */
     // TODO Alex: Testcase um zu checken, ob auch die richtigen werte upgdated werden
     private void updateNeighborGraph(Solution solution) {
         double obj = solution.getTotalCosts();
-
         for (Vehicle vehicle: solution.getVehicles()) {
             if (vehicle.isUsed()) {
                 ArrayList<Integer> customers = vehicle.getCustomers();
-
                 int pred = customers.get(0);
                 int succ = -1;
+                
                 for (int c = 1; c < customers.size(); c++) {
                     succ = customers.get(c);
 
@@ -245,6 +281,53 @@ public class ALNSCore {
         }
     }
     
+    /**
+     * Update request graphs.
+     * @param solution: solution object
+     */
+    private void updateRequestGraph(Solution solution) {
+    	// if size of solution set has not reached its max limit, add new solution
+    	if (this.solutionSet.size() < Config.requestGraphSolutionsSize) {
+    		this.solutionSet.add(solution);
+    		adaptWeightsRequestGraph(solution, +1);
+    	}
+    	// if solution set reached its max; check if new solution has better score
+    	else {
+    		// first check if new solution has a better score to the worst score in the solution set
+    		Solution floorSolution = this.solutionSet.last();
+    		if (floorSolution.getTotalCosts() > solution.getTotalCosts()) {
+    			// remove scores from old solution 
+    			Solution removedSol = this.solutionSet.pollLast();
+    			adaptWeightsRequestGraph(removedSol, -1);
+    			
+    			// add scores from new solution
+    			this.solutionSet.add(solution);
+    			adaptWeightsRequestGraph(solution, +1);
+    		}
+    		else ; // do nothing
+    	}
+    }
+    
+    /**
+     * Adapt weights in the request graph with a value being attached as parameter.
+     * @param solution: solution object - routes which are considered for the update operation
+     * @param value: update value
+     */
+    private void adaptWeightsRequestGraph(Solution solution, double value) {
+    	for (Vehicle v: solution.getVehicles()) {
+    		for (int i = 1 ; i < v.getCustomers().size()-2; i++) {
+    			for (int j = i+1; j<v.getCustomers().size()-1; j++) {
+    				// Get customer ids
+    				int customerI = v.getCustomers().get(i);
+    				int customerJ = v.getCustomers().get(j);
+    				// update request values
+    				this.requestGraph[customerI][customerJ] = Math.max(this.requestGraph[customerI][customerJ] + value, 0);
+    				this.requestGraph[customerJ][customerI] = Math.max(this.requestGraph[customerJ][customerI] + value, 0);
+    			}
+    		}
+    	}
+    }
+
     /**
      * This method is used to check for improvements of the temporary solution.
      * There are four cases:
@@ -381,7 +464,7 @@ public class ALNSCore {
     	if (this.currentSigma < 0) {
     		return;
     	}    	    	
-    	// TODO Chris - Wahrscheinlichkeiten mittracken und mal plotten
+    	// TODO Chris - track and plot distributions
     	{
         	this.destroyOperators[this.currentDestroyOpIdx].incrementDraws();
         	this.destroyOperators[this.currentDestroyOpIdx].addToPI(this.currentSigma);
@@ -478,16 +561,25 @@ public class ALNSCore {
      * Retrieve the neighbor graphs.
      * It comprises all customers in an n x n matrix. 
      * Entries denote the best value found so far for scheduling the customers.
-     * @return 2-dim array denoting the neighbor graphs
+     * @return two-dimensional array denoting the neighbor graph
      */
     public double[][] getNeighborGraph() {
         return neighborGraph;
+    }
+    
+    /**
+     * Retrieve the request graph.
+     * @return two-dimensional array denoting the request graph
+     */
+    public double[][] getRequestGraph() {
+    	return requestGraph;
     }
 
     
     //
     // DEPRECATED FUNCTIONS - START
     //
+/*    
     // TODO Alex - hier brauchen wir auch noch Test cases
     private Solution checkImprovement_orig(Solution solutionTemp, Solution solutionCurrent, Solution solutionBestGlobal) {
         if (solutionTemp.isFeasible()) {
@@ -530,4 +622,5 @@ public class ALNSCore {
 //        // no improvement
 //        return solutionCurrent;
     }
+*/
 }
