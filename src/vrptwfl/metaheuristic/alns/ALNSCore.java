@@ -43,10 +43,15 @@ public class ALNSCore {
     private int currentSigma; 
     private double temperature;
     private double temperatureEnd;
+    private boolean flagPenaltyUnservedCustomer;
+    private boolean flagPenaltyTimeWindow;
+    private boolean flagPenaltyPredecessorJob;
+    private boolean flagPenaltyCapacity;
+    private boolean flagPenaltySkillLvl;
     
     private HashMap<Integer, Solution> visitedSolutions;
     
-    //if useNeighborGraphRemoval, then this graph contains information about the best solution in which the edge (i,j) was used
+    // useNeighborGraphRemoval - this graph contains information about the best solution in which the edge (i,j) was used
     private double[][] neighborGraph;
     
     // RequestRemoval
@@ -252,8 +257,82 @@ public class ALNSCore {
             // Call update operations after each iter.
             this.updateWeightofOperators(iteration);
             this.updateTemperature();
+            
+            // TODO - Chris - its not clear defined in Schiffer et al. what is meant 
+            // by checking if a penalty occurred in the last x iterations 
+            // (just on accepted solutions? on every solution? 
+            // does it need to be a new violation? 
+            // if a violation couldn't be resolved, does it count as a new 
+            // or known violation) 
+            if (solutionTemp == solutionCurrent) // new solution has been accepted
+            	checkForPenalties(solutionTemp);
+            
+            if (iteration % Config.penaltyWeightUpdateIteration == 0) {
+            	updatePenaltyWeights();
+            	resetPenaltyFlags();
+            	System.out.println("Penalty Terms:");
+            	System.out.println("Customers:\t"+Config.penaltyWeightUnservedCustomer);
+            	System.out.println("Pred.Jobs:\t"+Config.penaltyWeightPredecessorJobs);
+            	System.out.println("Time Wind:\t"+Config.penaltyWeightTimeWindow);
+            	System.out.println("Skill lvl:\t"+Config.penaltyWeightSkillLvl);
+            	System.out.println("---");
+            }
         }
         return solutionBestGlobal;
+    }
+    
+    /**
+     * Check whether in the attached solution a penalty occurred. If so,
+     * the flag indicating the occurrence of penalties are set to true.
+     * @param s solution object checked for penalty occurrences
+     */
+    private void checkForPenalties(Solution s) {
+    	if (s.getPenaltyUnservedCustomers() > 0) this.flagPenaltyUnservedCustomer = true;
+    	if (s.getPenaltyTimeWindowViolation() > 0) this.flagPenaltyTimeWindow = true;
+    	if (s.getPenaltyPredJobsViolation() > 0) this.flagPenaltyPredecessorJob = true;
+    	if (s.getPenaltySkillViolation() > 0) this.flagPenaltySkillLvl = true;
+    }
+    
+    /**
+     * Update all penalty weights. The function calls for every penalty weight
+     * the sub-procedure singleUpdatePenaltyWeight.
+     */
+    private void updatePenaltyWeights () {
+    	Config.penaltyWeightUnservedCustomer = this.singleUpdatePenaltyWeight(Config.penaltyWeightUnservedCustomer, Config.penaltyWeightUnservedCustomerRange, this.flagPenaltyUnservedCustomer);
+    	Config.penaltyWeightTimeWindow = this.singleUpdatePenaltyWeight(Config.penaltyWeightTimeWindow, Config.penaltyWeightTimeWindowRange, this.flagPenaltyTimeWindow);
+    	Config.penaltyWeightCapacity = this.singleUpdatePenaltyWeight(Config.penaltyWeightCapacity, Config.penaltyWeightCapacityRange, this.flagPenaltyCapacity);
+    	Config.penaltyWeightPredecessorJobs = this.singleUpdatePenaltyWeight(Config.penaltyWeightPredecessorJobs, Config.penaltyWeightPredecessorJobsRange, this.flagPenaltyPredecessorJob);
+    	Config.penaltyWeightSkillLvl = this.singleUpdatePenaltyWeight(Config.penaltyWeightSkillLvl, Config.penaltyWeightSkillLvlRange, this.flagPenaltySkillLvl);
+    }
+    
+    /**
+     * Update a single penalty term. 
+     * The weights are multiplied by Config.penaltyWeightOmega if a penalty 
+     * occurred during the last Config.penaltyWeightUpdateIteration iterations, 
+     * and are divided by Config.penaltyWeightOmega if no penalty occurred 
+     * during the last Config.penaltyWeightUpdateIteration iterations. 
+     * Thus, we are capable of switching between diversifying and intensifying 
+     * search phases.
+     * @param value penalty term to be updated
+     * @param range penalty range (set in configuration file)
+     * @param flag indicator whether penalty occurred in the last x iterations
+     * @return updated penalty term
+     */
+    private double singleUpdatePenaltyWeight (double value, double[] range, boolean flag) {
+    	if (flag) value = Math.min(value * Config.penaltyWeightOmega, range[1]);
+    	else value = Math.max(value / Config.penaltyWeightOmega, range[0]);
+    	return value;
+    }
+    
+    /**
+     * Reset all penalty flags to state 'false'.
+     */
+    private void resetPenaltyFlags() {
+    	this.flagPenaltyUnservedCustomer = false;
+    	this.flagPenaltyTimeWindow = false;
+    	this.flagPenaltyPredecessorJob = false;
+    	this.flagPenaltyCapacity = false;
+    	this.flagPenaltySkillLvl = false;
     }
 
     /**
@@ -317,7 +396,7 @@ public class ALNSCore {
     	for (Vehicle v: solution.getVehicles()) {
     		for (int i = 1 ; i < v.getCustomers().size()-2; i++) {
     			for (int j = i+1; j<v.getCustomers().size()-1; j++) {
-    				// Get customer ids
+    				// Get customer identifiers
     				int customerI = v.getCustomers().get(i);
     				int customerJ = v.getCustomers().get(j);
     				// update request values

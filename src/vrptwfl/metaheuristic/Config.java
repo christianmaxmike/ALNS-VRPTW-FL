@@ -15,7 +15,7 @@ import java.util.Random;
 /**
  * Configuration class.
  * 
- * @author Alexander Jungwirth, Christian M.M. Frey
+ * @author Christian M.M. Frey, Alexander Jungwirth
  */
 public class Config {
 
@@ -47,6 +47,19 @@ public class Config {
     public static double costCapacityViolation;
     public static double costSkillLvlViolation;
     public static double maxTimeWindowViolation;
+    // Penalty Weights
+    public static double[] penaltyWeightUnservedCustomerRange;
+    public static double[] penaltyWeightTimeWindowRange;
+    public static double[] penaltyWeightPredecessorJobsRange;
+    public static double[] penaltyWeightCapacityRange;
+    public static double[] penaltyWeightSkillLvlRange;
+    public static double penaltyWeightUnservedCustomer;
+    public static double penaltyWeightTimeWindow;
+    public static double penaltyWeightPredecessorJobs;
+    public static double penaltyWeightCapacity;
+    public static double penaltyWeightSkillLvl;
+    public static double penaltyWeightOmega;
+    public static int penaltyWeightUpdateIteration;
 
     // --- ALNS OEPRATORS TO USE ---
     // removals
@@ -245,7 +258,21 @@ public class Config {
         costCapacityViolation = (double) obj.get("cost_capacity_violation");
         costSkillLvlViolation = (double) obj.get("cost_skillLvl_violation");
         maxTimeWindowViolation = (double) obj.get("max_timeWindow_violation");
+        // penalty weights
+        penaltyWeightUnservedCustomerRange = DataUtils.convertDoubleListToArr((ArrayList<Double>) obj.get("penalty_weight_unserved_customer_range"));
+        penaltyWeightTimeWindowRange = DataUtils.convertDoubleListToArr((ArrayList<Double>) obj.get("penalty_weight_timeWindow_range"));
+        penaltyWeightPredecessorJobsRange = DataUtils.convertDoubleListToArr((ArrayList<Double>) obj.get("penalty_weight_predecessor_range"));
+        penaltyWeightCapacityRange = DataUtils.convertDoubleListToArr((ArrayList<Double>) obj.get("penalty_weight_capacity_range"));
+        penaltyWeightSkillLvlRange = DataUtils.convertDoubleListToArr((ArrayList<Double>) obj.get("penalty_weight_skillLvl_range"));
+        penaltyWeightUnservedCustomer = (double) obj.get("penalty_weight_unserved_customer");
+        penaltyWeightTimeWindow = (double) obj.get("penalty_weight_timeWindow");
+        penaltyWeightPredecessorJobs = (double) obj.get("penalty_weight_predecessor");
+        penaltyWeightCapacity = (double) obj.get("penalty_weight_capacity");
+        penaltyWeightSkillLvl = (double) obj.get("penalty_weight_skillLvl");
+        penaltyWeightOmega = (double) obj.get("penalty_weight_omega");
+        penaltyWeightUpdateIteration = (int) obj.get("penalty_weight_update_iteration");
         
+    
         // --- LOCATION SETTINGS (for solomon instances) ---
         numberOfLocationsPerCustomer = (int) obj.get("numberOfLocationsPerCustomer");
         

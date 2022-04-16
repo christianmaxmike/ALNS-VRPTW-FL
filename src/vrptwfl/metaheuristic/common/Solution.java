@@ -353,10 +353,10 @@ public class Solution {
         this.calculatePenaltyCosts();
         this.totalCosts = this.vehicleTourCosts + 
         		this.swappingCosts + 
-        		this.penaltyUnservedCustomers + 
-        		this.penaltyPredJobsViolation +
-        		this.penaltySkillViolation + 
-        		this.penaltyTimeWindowViolation;
+        		(Config.penaltyWeightUnservedCustomer * this.penaltyUnservedCustomers) + 
+        		(Config.penaltyWeightPredecessorJobs * this.penaltyPredJobsViolation) +
+        		(Config.penaltyWeightSkillLvl * this.penaltySkillViolation) + 
+        		(Config.penaltyWeightTimeWindow * this.penaltyTimeWindowViolation);
 	}
 
 	/**
@@ -713,6 +713,38 @@ public class Solution {
     	return triedInsertions;
     }
     
+    /**
+     * Retrieve penalty score for unserved customers
+     * @return penalty for unserved customers
+     */
+    public double getPenaltyUnservedCustomers () {
+    	return this.penaltyUnservedCustomers;
+    }
+    
+    /**
+     * Retrieve penalty score for predecessor jobs violation
+     * @return penalty for predecessor job violations
+     */
+    public double getPenaltyPredJobsViolation () {
+    	return this.penaltyPredJobsViolation;
+    }
+    
+    /**
+     * Retrieve penalty score for time window violations
+     * @return penalty for time window violations
+     */
+    public double getPenaltyTimeWindowViolation () {
+    	return this.penaltyTimeWindowViolation;
+    }
+    
+    /**
+     * Retrieve penalty score for skill violations
+     * @return penalty for skill violations
+     */
+    public double getPenaltySkillViolation () {
+    	return this.penaltySkillViolation;
+    }
+    
 
     //
     // CUSTOM SETTER FUNCS
@@ -964,7 +996,6 @@ public class Solution {
 			}
     	}
     	);
-    	
     	return vehiclesInfo.hashCode();
     }
 
