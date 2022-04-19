@@ -243,4 +243,11 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
     	}
     	return jumpToSolIdx;
     }
+    
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFormattedClassName() {
+		return "Regret Insertion Backtracking (k=" + this.k + ")";
+	}
 }

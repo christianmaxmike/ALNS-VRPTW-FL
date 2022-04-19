@@ -12,6 +12,7 @@ import java.util.List;
  * This class implements the random removal heuristic 
  * which randomly removes a customer from the vehicle's route it is assigned to. 
  * (Ropke and Pisinger 2006, page 460 (Transportation Science))
+ * 
  * @author Alexander Jungwirth
 */
 public class RandomRemoval extends AbstractRemoval {
@@ -120,7 +121,6 @@ public class RandomRemoval extends AbstractRemoval {
 
         return this.removeCustomersFromTours(solution, sortedPositionsToRemove);
     }
-
 //        // access all customers assigned to vehicles (only these can be removed)
 //        int runningPositionNr = 0;
 //        for (Vehicle vehicle: solution.getVehicles()) {
@@ -130,6 +130,15 @@ public class RandomRemoval extends AbstractRemoval {
 //            // raise running position number
 //            runningPositionNr += nCustomersInTourBeforeRemoval;
 //        }
+    
+    
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFormattedClassName() {
+		return "Random";
+	}
+
 
     // DEBUG Alex - Testcase, mit genau den Touren und den Indices, ob das auch alles so passt
 //        Tour of vehicle 0 (n=9):

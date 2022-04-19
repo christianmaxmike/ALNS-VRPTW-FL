@@ -70,4 +70,11 @@ public class TimeFlexibilityRemoval extends AbstractRemoval {
 		}
 		return removedCustomers;
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFormattedClassName() {
+		return "Time Flexibility (" + (this.randomize?"determ.":"random") + ")";
+	}
 }

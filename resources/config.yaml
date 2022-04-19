@@ -57,6 +57,8 @@ use_skill_mismatch_removal_random: true
 use_time_flexibility_removal_deterministic: true
 use_time_flexibility_removal_random: true
 use_kmeans_removal: true
+use_route_eliminiation_least: true
+use_route_eliminiation_most: true
 # insertions
 use_greedy_insert: true										# default: true		# v
 use_skill_matching_insert: true
@@ -80,7 +82,7 @@ worst_removal_exponent: 3
 skill_mismatch_removal_exponent: 3
 time_flexibility_removal_exponent: 3
 request_graph_solutions_size: 100
-kmeansNClusters: [2]
+kmeansNClusters: [3, 6]
 
 
 ### BACKTRACKING SETTINGS (for initial solution)

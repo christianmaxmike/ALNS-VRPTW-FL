@@ -55,4 +55,12 @@ public class RandomRouteRemoval extends AbstractRemoval {
         }
         return removedCustomers;
     }
+    
+    
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFormattedClassName() {
+		return "Random Route";
+	}
 }

@@ -62,4 +62,11 @@ public class HistoricRequestNodeRemoval extends AbstractRemoval {
     	}
         return removedCustomers;
     }
+    
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFormattedClassName() {
+		return "Historic Request (" + (this.randomize?"determ.":"random") + ")";
+	}
 }

@@ -112,4 +112,11 @@ public class SkillMatchingInsertion extends AbstractInsertion {
 	public Solution runBacktracking(Solution initSolution) {
 		return initSolution;
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFormattedClassName() {
+		return "Skill Matching";
+	}
 }

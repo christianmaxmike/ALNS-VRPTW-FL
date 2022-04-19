@@ -76,4 +76,11 @@ public class SkillMismatchRemoval extends AbstractRemoval{
 		}
 		return removedCustomers;
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFormattedClassName() {
+		return "Skill Mismatch (" + (this.randomize?"determ.":"random") + ")";
+	}
 }

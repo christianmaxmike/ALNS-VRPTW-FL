@@ -378,4 +378,11 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
             return  positions;
         }
     }
+    
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFormattedClassName() {
+		return "Cluster Kruskal";
+	}
 }

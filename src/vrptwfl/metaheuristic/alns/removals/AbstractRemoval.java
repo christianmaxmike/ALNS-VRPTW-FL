@@ -46,6 +46,12 @@ public abstract class AbstractRemoval {
      */
     abstract List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) throws ArgumentOutOfBoundsException;
 
+    /**
+     * Returns a formatted string representation of the class name.
+     * @return String representation
+     */
+    public abstract String getFormattedClassName();
+
 
     //
     // FUNCTIONALITY

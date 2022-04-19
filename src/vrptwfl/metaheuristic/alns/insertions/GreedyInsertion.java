@@ -77,4 +77,11 @@ public class GreedyInsertion extends AbstractInsertion {
 	public Solution runBacktracking(Solution initSolution) {
 		return initSolution;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFormattedClassName() {
+		return "Greedy Insertion";
+	}
 }

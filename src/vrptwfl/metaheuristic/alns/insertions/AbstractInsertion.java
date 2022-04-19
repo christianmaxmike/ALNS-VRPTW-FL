@@ -35,11 +35,17 @@ public abstract class AbstractInsertion {
      * Abstract method for retrieving the next possible insertion in the 
      * solution being attached as parameter
      * @param solution: Solution object being inspected
-     * @return double array containg the next possible insertion
+     * @return double array contains the next possible insertion
      */
     abstract double[] getNextInsertion(Solution solution);
     
     public abstract Solution runBacktracking(Solution initSolution);
+    
+    /**
+     * Returns a formatted string representation of the class name.
+     * @return String representation
+     */
+    public abstract String getFormattedClassName();
 
 
     //

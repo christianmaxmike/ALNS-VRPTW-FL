@@ -130,4 +130,11 @@ public class TimeOrientedRemoval extends AbstractRemoval {
         }
         return removedCustomers;
     }
+    
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFormattedClassName() {
+		return "Time Related (" + (this.weightStartTimeInSolution==1?"Ropke":"Frey") + ";" +(this.randomize?"determ.":"random") + ")";
+	}
 }

@@ -226,4 +226,11 @@ public class ClusterKMeansRemoval extends AbstractRemoval {
 			}
 		}		
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFormattedClassName() {
+		return "Cluster k-means (k=" + this.k + ")";
+	}
 }

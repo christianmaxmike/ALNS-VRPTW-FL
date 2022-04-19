@@ -111,6 +111,9 @@ public class ALNSCore {
         if (Config.useTimeFlexibilityRemovalDeterministic) destroyList.add(new TimeFlexibilityRemoval(data, false));
         if (Config.useTimeFlexibilityRemovalRandom) destroyList.add(new TimeFlexibilityRemoval(data, true));
         if (Config.useKMeansRemoval) {for (Integer k: Config.kMeansClusterSettings) destroyList.add(new ClusterKMeansRemoval(data, k));};
+        if (Config.useRouteEliminationLeast) destroyList.add(new RouteLengthRemoval(data, true));
+        if (Config.useRouteEliminationMost) destroyList.add(new RouteLengthRemoval(data, false));
+        
         
         this.destroyOperators = new AbstractRemoval[destroyList.size()];
         this.destroyOperators = destroyList.toArray(this.destroyOperators);
@@ -122,7 +125,7 @@ public class ALNSCore {
         	entry.setProbability(1.0/this.destroyOperators.length);
         	entry.setDraws(0);
         }
-        WriterUtils.initWriterProbabilities(writerRemovals, destroyOperators);
+        WriterUtils.initWriterRemovalProbabilities(writerRemovals, destroyOperators);
     }
 
     /**
@@ -150,7 +153,7 @@ public class ALNSCore {
         	entry.setProbability(1.0/this.repairOperators.length);
         	entry.setDraws(0);
         }
-        WriterUtils.initWriterProbabilities(writerRepairs, repairOperators);
+        WriterUtils.initWriterRepairProbabilities(writerRepairs, repairOperators);
     }
     
     /**

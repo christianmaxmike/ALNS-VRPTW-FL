@@ -151,6 +151,14 @@ public class ShawSimplifiedRemoval extends AbstractRemoval {
         return removedCustomers;
 
     }
+    
+    
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFormattedClassName() {
+		return "Shaw's Proximity (" + (this.randomize?"determ.":"random") + ")";
+	}
 
 /*
     public static void main(String[] args) {

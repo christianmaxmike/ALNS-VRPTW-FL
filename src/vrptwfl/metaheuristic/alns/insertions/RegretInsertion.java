@@ -135,4 +135,11 @@ public class RegretInsertion extends AbstractInsertion {
 	public Solution runBacktracking(Solution initSolution) {
 		return initSolution;
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFormattedClassName() {
+		return "Regret Insertion (k=" + this.k + ")";
+	}
 }

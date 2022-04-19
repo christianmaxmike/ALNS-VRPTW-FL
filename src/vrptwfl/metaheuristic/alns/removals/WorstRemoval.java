@@ -69,4 +69,11 @@ public class WorstRemoval extends AbstractRemoval {
         }
         return removedCustomers;
     }
+    
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFormattedClassName() {
+		return "Worst (" + (this.randomize?"determ.":"random") + ")";
+	}
 }
