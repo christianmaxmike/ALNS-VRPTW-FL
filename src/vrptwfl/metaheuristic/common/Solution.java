@@ -576,10 +576,13 @@ public class Solution {
     	for (int originalPredCustomerId: predIds) {
     		// Get the predecessor id being handled in the current run
     		int predCustomerId = Arrays.stream(this.data.getOriginalCustomerIds()).boxed().collect(Collectors.toList()).indexOf(originalPredCustomerId);
+    		if (predCustomerId == -1) // case whenever predecessor is in another shift
+    			return true;
+    		
     		// check whether the predecessor job in list of infeasible customers
     		int existenceOfPredecessor = this.tempInfeasibleCustomers.indexOf(predCustomerId);
     		// check infeasibility AND if the customer is not assigned to any vehicle 
-    		if (existenceOfPredecessor == -1)
+    		if (existenceOfPredecessor != -1)
     			return false;
     		if (this.customersAssignedToVehicles[predCustomerId] == -1)
     			return false;

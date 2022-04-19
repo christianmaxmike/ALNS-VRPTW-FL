@@ -40,7 +40,7 @@ public class MainALNS {
 	 */
 	private void initFileWriter(String outputFile) {
 		try {
-			this.writer = new FileWriter("./"+outputFile, true);
+			this.writer = new FileWriter("./out/"+outputFile, true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -134,7 +134,7 @@ public class MainALNS {
     private static Data[] loadHospitalInstance(String instanceName) {
     	HospitalInstanceLoader loader = new HospitalInstanceLoader();
         Data[] dataArr;
-        dataArr = loader.loadHospitalInstanceFromJSON("hospital_instance_i060_b1_f6_v01");
+        dataArr = loader.loadHospitalInstanceFromJSON(instanceName);
         return dataArr;
     }
     
@@ -179,7 +179,7 @@ public class MainALNS {
      */
     private void logResultHospital(Data data, Solution solutionALNS, long timeElapsed) {
     	try {
-    		writer.append(this.instanceName + "," + solutionALNS.getTotalCosts() + "," + timeElapsed + "\n");
+    		writer.append(data.getInstanceName() + "," + solutionALNS.getTotalCosts() + "," + timeElapsed + "\n");
     		writer.close();
     	} catch (IOException e) {
     		e.printStackTrace();
@@ -205,25 +205,32 @@ public class MainALNS {
      * @throws ArgumentOutOfBoundsException
      */
     public static void main(String[] args) throws ArgumentOutOfBoundsException {
-        String instanceName = args[0];
-        boolean isSolomonInstance = Boolean.parseBoolean(args[1]);
-        int nCustomers = 25;
-        String outFile = args.length > 2 ? args[2] : "results.txt";
+        // Parse args parameters
+    	String instanceName = args[0];
+        String outFile = args.length > 1 ? args[1] : "results.txt";
+
+        // Define input params
+        boolean isSolomonInstance = !instanceName.contains("hospital_instance"); // Boolean.parseBoolean(args[1]);
+        int nCustomers = 25; // TODO - for solomon instances as args param
+        
+        // Load Data
         Data[] data;
         if (isSolomonInstance)
         	data = loadSolomonInstance(instanceName, nCustomers);
         else
         	data = loadHospitalInstance(instanceName);
-    	final MainALNS algo = new MainALNS(instanceName, outFile, isSolomonInstance);
-    	algo.runALNS(data[1], instanceName);        	
-//        for (Data d: data) {
-//        	final MainALNS algo = new MainALNS(instanceName, outFile, isSolomonInstance);
-//        	algo.runALNS(d, instanceName);        	
-//        }
+        
+    	//final MainALNS algo = new MainALNS(instanceName, outFile, isSolomonInstance);
+    	//algo.runALNS(data[1], instanceName);        	
+        // Run
+    	for (Data d: data) {
+        	final MainALNS algo = new MainALNS(instanceName, outFile, isSolomonInstance);
+        	algo.runALNS(d, instanceName);        	
+        }
         // TODO Alex: Add TimeLimit (?)
     }
     
-    // ### alte TODOs ###
+    // ### old TODOs ###
     //
     // TODO Alex - 0: performance
     // - LRU cache (last recent usage)

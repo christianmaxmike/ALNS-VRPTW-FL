@@ -11,6 +11,7 @@ import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
+import vrptwfl.metaheuristic.utils.WriterUtils;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -19,7 +20,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
@@ -32,7 +32,8 @@ import java.util.TreeSet;
  */
 public class ALNSCore {
 	
-	private FileWriter writer;
+	private FileWriter writerRemovals;
+	private FileWriter writerRepairs;
 
     private Data data;
 
@@ -65,15 +66,17 @@ public class ALNSCore {
      * @throws ArgumentOutOfBoundsException
      */
     public ALNSCore(Data data) throws ArgumentOutOfBoundsException {
+    	try {
+    		this.writerRemovals = new FileWriter("./out/" + data.getInstanceName() + "_removalProbabilities.txt", true);
+    		this.writerRepairs = new FileWriter("./out/" + data.getInstanceName() + "__repairProbabilities.txt", true);
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    	}
+    	
         this.data = data;
         this.initRepairOperators();
         this.initDestroyOperators();    
         this.visitedSolutions = new HashMap<Integer, Solution>();
-		try {
-			this.writer = new FileWriter("./probability.txt", true);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
     }
 
     //
@@ -109,7 +112,6 @@ public class ALNSCore {
         if (Config.useTimeFlexibilityRemovalRandom) destroyList.add(new TimeFlexibilityRemoval(data, true));
         if (Config.useKMeansRemoval) {for (Integer k: Config.kMeansClusterSettings) destroyList.add(new ClusterKMeansRemoval(data, k));};
         
-
         this.destroyOperators = new AbstractRemoval[destroyList.size()];
         this.destroyOperators = destroyList.toArray(this.destroyOperators);
         
@@ -120,6 +122,7 @@ public class ALNSCore {
         	entry.setProbability(1.0/this.destroyOperators.length);
         	entry.setDraws(0);
         }
+        WriterUtils.initWriterProbabilities(writerRemovals, destroyOperators);
     }
 
     /**
@@ -137,8 +140,6 @@ public class ALNSCore {
         if (Config.useNRegret5) repairList.add(new RegretInsertion(5, data));
         if (Config.useNRegret6) repairList.add(new RegretInsertion(6, data));
         
-        if (Config.enableBacktracking) repairList.add(new RegretInsertionBacktracking(2, data));
-
         this.repairOperators = new AbstractInsertion[repairList.size()];
         this.repairOperators = repairList.toArray(this.repairOperators);
         
@@ -149,6 +150,7 @@ public class ALNSCore {
         	entry.setProbability(1.0/this.repairOperators.length);
         	entry.setDraws(0);
         }
+        WriterUtils.initWriterProbabilities(writerRepairs, repairOperators);
     }
     
     /**
@@ -270,13 +272,18 @@ public class ALNSCore {
             if (iteration % Config.penaltyWeightUpdateIteration == 0) {
             	updatePenaltyWeights();
             	resetPenaltyFlags();
-            	System.out.println("Penalty Terms:");
-            	System.out.println("Customers:\t"+Config.penaltyWeightUnservedCustomer);
-            	System.out.println("Pred.Jobs:\t"+Config.penaltyWeightPredecessorJobs);
-            	System.out.println("Time Wind:\t"+Config.penaltyWeightTimeWindow);
-            	System.out.println("Skill lvl:\t"+Config.penaltyWeightSkillLvl);
-            	System.out.println("---");
+            	//TODO: Chris - evtl auch plotten für den draft
+            	// System.out.println("Penalty Terms:");
+            	// System.out.println("Customers:\t"+Config.penaltyWeightUnservedCustomer);
+            	// System.out.println("Pred.Jobs:\t"+Config.penaltyWeightPredecessorJobs);
+            	// System.out.println("Time Wind:\t"+Config.penaltyWeightTimeWindow);
+            	// System.out.println("Skill lvl:\t"+Config.penaltyWeightSkillLvl);
+            	// System.out.println("---");
             }
+            
+            // Tracking of operator probabilities
+            WriterUtils.writeRemovalProbabilities(writerRemovals, destroyOperators, iteration);
+            WriterUtils.writeRepairProbabilities(writerRepairs, repairOperators, iteration);
         }
         return solutionBestGlobal;
     }

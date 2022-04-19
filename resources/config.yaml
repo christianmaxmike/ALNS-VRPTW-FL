@@ -3,7 +3,7 @@ random_seed: 42  # if null, no random seed will be used
 
 
 ### ALNS CONFIGURATION
-alns_iterations: 25_000 # 25_000  # 50_000
+alns_iterations: 50_000 # 25_000  # 50_000
 # Upper bound and lower bound values taken from Ropke C&OR §6.1.1 p. 2417
 lower_bound_nr_of_removals: 30
 lower_bound_factor_nr_of_removals: 0.1
@@ -38,24 +38,24 @@ penalty_weight_update_iteration: 50
 
 ### DEFINE ACTIVE OPERATORS (DESTROY + REPAIR)									# SOLOMON			HOSPITAL
 # removals
-use_cluster_removal_kruskal: false							# default: true		# x					# 
-use_historic_node_pair_removal_deterministic: false 		# default: false	# v					# 
-use_historic_node_pair_removal_random: false				# default: true		# v 				# 
-use_random_removal: false  									# default: true		# v					# 
-use_random_route_removal: false  							# default: true		# v					# 
-use_shaw_simplified_deterministic: false 					# default: false	# x					# 
-use_shaw_simplified_random: false 					 		# default: true		# x					# 
-use_time_oriented_removal_jungwirth_deterministic: false	# default: false	# x					# 
-use_time_oriented_removal_jungwirth_random: false  			# default: true		# x					# 
-use_time_oriented_removal_pisinger_deterministic: false 	# default: false	# x 				# 
-use_time_oriented_removal_pisinger_random: false 			# default: true		# x					# 
-use_worst_removal_deterministic: false	 					# default: false	# v					# v
-use_worst_removal_random: false  							# default: true		# v					# v
-use_historic_request_pair_removal: false  					# default: false	# not implemented	# not implemented
-use_skill_mismatch_removal_deterministic: false
-use_skill_mismatch_removal_random: false
-use_time_flexibility_removal_deterministic: false
-use_time_flexibility_removal_random: false
+use_cluster_removal_kruskal: true							# default: true		# x					# 
+use_historic_node_pair_removal_deterministic: true 		# default: false	# v					# 
+use_historic_node_pair_removal_random: true				# default: true		# v 				# 
+use_random_removal: true  									# default: true		# v					# 
+use_random_route_removal: true  							# default: true		# v					# 
+use_shaw_simplified_deterministic: true 					# default: false	# x					# 
+use_shaw_simplified_random: true 					 		# default: true		# x					# 
+use_time_oriented_removal_jungwirth_deterministic: true	# default: false	# x					# 
+use_time_oriented_removal_jungwirth_random: true  			# default: true		# x					# 
+use_time_oriented_removal_pisinger_deterministic: true 	# default: false	# x 				# 
+use_time_oriented_removal_pisinger_random: true 			# default: true		# x					# 
+use_worst_removal_deterministic: true	 					# default: false	# v					# v
+use_worst_removal_random: true  							# default: true		# v					# v
+use_historic_request_pair_removal: true  					# default: false	# not implemented	# not implemented
+use_skill_mismatch_removal_deterministic: true
+use_skill_mismatch_removal_random: true
+use_time_flexibility_removal_deterministic: true
+use_time_flexibility_removal_random: true
 use_kmeans_removal: true
 # insertions
 use_greedy_insert: true										# default: true		# v
@@ -99,7 +99,7 @@ sigma2: 13
 sigma3: 9
 reactionFactor: 0.1
 minOpProb: 0.01
-updateInterval: 100
+updateInterval: 5
 
 
 ### SIMULATED ANNEALING
