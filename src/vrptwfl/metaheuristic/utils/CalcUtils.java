@@ -59,7 +59,7 @@ public class CalcUtils {
      * @param nNumbers: how many numbers are drawn
      * @param rangeLowerBound: lower bound
      * @param rangeUpperBound: upper bound
-     * @return shuffled random numbers iwthin the predefined range
+     * @return shuffled random numbers within the predefined range
      */
     public static List<Integer> getShuffledUniqueRandomNumbersInRange(int nNumbers, int rangeLowerBound, int rangeUpperBound) {
         // add all numbers in range to list (numbers will be sorted in ascending order)

@@ -175,7 +175,9 @@ public class ClusterKMeansRemoval extends AbstractRemoval {
 				}
 			}
 			int minCustomerIdx = findMinCentroidIdx(distances, clusterId);
-			this.centroidLocIdx[clusterId] = DataUtils.getLocationIndex(minCustomerIdx, solution);
+			// if cluster not empty, set new centroid
+			if (minCustomerIdx != -1)
+				this.centroidLocIdx[clusterId] = DataUtils.getLocationIndex(minCustomerIdx, solution);
 		}
 	}
 	

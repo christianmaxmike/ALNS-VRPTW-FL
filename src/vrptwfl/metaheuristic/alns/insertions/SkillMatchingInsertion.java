@@ -42,7 +42,7 @@ public class SkillMatchingInsertion extends AbstractInsertion {
         nextInsertion[4] = -1;
         
         // Sort unscheduled customers according to the number of possible insertions
-        // w.r.t the skill leves of the therapists/vehicles. 
+        // w.r.t the skill levels of the therapists/vehicles. 
         solution.getNotAssignedCustomers().sort(new Comparator<Integer>() {
 
 			@Override

@@ -135,6 +135,6 @@ public class TimeOrientedRemoval extends AbstractRemoval {
 	 * {@inheritDoc}
 	 */
 	public String getFormattedClassName() {
-		return "Time Related (" + (this.weightStartTimeInSolution==1?"Ropke":"Frey") + ";" +(this.randomize?"determ.":"random") + ")";
+		return "Time Related (" + (this.weightStartTimeInSolution==1?"Pisinger":"Frey") + "|" +(this.randomize?"determ.":"random") + ")";
 	}
 }

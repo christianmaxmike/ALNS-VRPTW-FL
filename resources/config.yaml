@@ -3,7 +3,7 @@ random_seed: 42  # if null, no random seed will be used
 
 
 ### ALNS CONFIGURATION
-alns_iterations: 50_000 # 25_000  # 50_000
+alns_iterations: 25_000  # 50_000
 # Upper bound and lower bound values taken from Ropke C&OR §6.1.1 p. 2417
 lower_bound_nr_of_removals: 30
 lower_bound_factor_nr_of_removals: 0.1
@@ -15,39 +15,39 @@ upper_bound_factor_nr_of_removals: 0.4
 enable_gls: true
 # penalties settings
 exponent_swapping_locations: 1								# exponent for swapping costs: (loc2 - loc1) ^ exp  (default: 1)
-cost_factor_unserved_customer: 5.0  						# cost for unserviced customers is equal to this number times the maximum distance in the graph (default: 5.0)
-cost_timeWindow_violation: 0.5								# TW violation (default: 0.5)
-cost_predJobs_violation: 1.0								# Predecessor jobs violation (default: 10)
+cost_factor_unserved_customer: 3.0  						# cost for unserviced customers is equal to this number times the maximum distance in the graph (default: 5.0)
+cost_timeWindow_violation: 1.0 # 0.5								# TW violation (default: 0.5)
+cost_predJobs_violation: 10.0								# Predecessor jobs violation (default: 10)
 cost_capacity_violation: 1.0								# capacity violation (default: 1.0)
 cost_skillLvl_violation: 2.0								# default: 5.0
 max_timeWindow_violation: 10.0								# default: 10.0
 # penalty weights - values taken from Schiffer et al.,2017, p.14
-penalty_weight_unserved_customer_range: [10.0, 10000.0]   
-penalty_weight_timeWindow_range: [10.0, 10000.0]
-penalty_weight_predecessor_range: [10.0, 10000.0]
-penalty_weight_capacity_range: [10.0, 10000.0]
-penalty_weight_skillLvl_range: [10.0, 10000.0]
-penalty_weight_unserved_customer: 100.0
-penalty_weight_timeWindow: 100.0
-penalty_weight_predecessor: 100.0
-penalty_weight_capacity: 100.0
-penalty_weight_skillLvl: 100.0
+penalty_weight_unserved_customer_range: [1.0, 100.0]   # [10.0, 10000.0]   
+penalty_weight_timeWindow_range: [1.0, 100.0]          # [10.0, 10000.0]
+penalty_weight_predecessor_range: [1.0, 100.0]         # [10.0, 10000.0]
+penalty_weight_capacity_range: [1.0, 100.0]            # [10.0, 10000.0]
+penalty_weight_skillLvl_range: [1.0, 100.0]            # [10.0, 10000.0]
+penalty_weight_unserved_customer: 10.0                 # 100.0
+penalty_weight_timeWindow: 10.0                        # 100.0
+penalty_weight_predecessor: 10.0                       # 100.0
+penalty_weight_capacity: 10.0                          # 100.0
+penalty_weight_skillLvl: 10.0                          # 100.0
 penalty_weight_omega: 1.15
-penalty_weight_update_iteration: 50
+penalty_weight_update_iteration: 25
 
 
 ### DEFINE ACTIVE OPERATORS (DESTROY + REPAIR)									# SOLOMON			HOSPITAL
 # removals
 use_cluster_removal_kruskal: true							# default: true		# x					# 
-use_historic_node_pair_removal_deterministic: true 		# default: false	# v					# 
-use_historic_node_pair_removal_random: true				# default: true		# v 				# 
+use_historic_node_pair_removal_deterministic: true 		    # default: false	# v					# 
+use_historic_node_pair_removal_random: true				    # default: true		# v 				# 
 use_random_removal: true  									# default: true		# v					# 
 use_random_route_removal: true  							# default: true		# v					# 
 use_shaw_simplified_deterministic: true 					# default: false	# x					# 
 use_shaw_simplified_random: true 					 		# default: true		# x					# 
-use_time_oriented_removal_jungwirth_deterministic: true	# default: false	# x					# 
+use_time_oriented_removal_jungwirth_deterministic: true   	# default: false	# x					# 
 use_time_oriented_removal_jungwirth_random: true  			# default: true		# x					# 
-use_time_oriented_removal_pisinger_deterministic: true 	# default: false	# x 				# 
+use_time_oriented_removal_pisinger_deterministic: true 	    # default: false	# x 				# 
 use_time_oriented_removal_pisinger_random: true 			# default: true		# x					# 
 use_worst_removal_deterministic: true	 					# default: false	# v					# v
 use_worst_removal_random: true  							# default: true		# v					# v
@@ -59,11 +59,12 @@ use_time_flexibility_removal_random: true
 use_kmeans_removal: true
 use_route_eliminiation_least: true
 use_route_eliminiation_most: true
+use_zone_removal : true
 # insertions
 use_greedy_insert: true										# default: true		# v
 use_skill_matching_insert: true
 use_nregret_2: true											# default: true		# v
-use_nregret_3: false										# default: true		# v
+use_nregret_3: true										# default: true		# v
 use_nregret_4: false										# default: false	# v
 use_nregret_5: false										# default: false	# v
 use_nregret_6: false										# default: false	# v
@@ -82,11 +83,11 @@ worst_removal_exponent: 3
 skill_mismatch_removal_exponent: 3
 time_flexibility_removal_exponent: 3
 request_graph_solutions_size: 100
-kmeansNClusters: [3, 6]
+kmeansNClusters: [2, 3, 6]
 
 
 ### BACKTRACKING SETTINGS (for initial solution)
-enable_backtracking: true
+enable_backtracking: false
 backtrackTrials : 4			 								# how many restarts
 backtrackJump: 5
 backtrackJumpToLevel: 5
@@ -101,7 +102,7 @@ sigma2: 13
 sigma3: 9
 reactionFactor: 0.1
 minOpProb: 0.01
-updateInterval: 5
+updateInterval: 100
 
 
 ### SIMULATED ANNEALING
@@ -118,7 +119,7 @@ bigM_regret: 100_000      			# must be greater than the largest possible regret
 
 
 ### SOLOMON LOADER SETTINGS
-numberOfLocationsPerCustomer: 2 	# set number of locations per customer (for solomon instances)
+numberOfLocationsPerCustomer: 1 	# set number of locations per customer (for solomon instances)
 
 
 ### HOSPITAL LOADER SETTINGS

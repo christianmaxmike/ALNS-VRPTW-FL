@@ -84,6 +84,7 @@ public class Config {
     public static boolean useTimeFlexibilityRemovalDeterministic;
     public static boolean useRouteEliminationLeast;
     public static boolean useRouteEliminationMost;
+    public static boolean useZoneRemoval;
     // insertions
     public static boolean useGreedyInsert;
     public static boolean useSkillMatchingInsert;
@@ -199,6 +200,7 @@ public class Config {
         useKMeansRemoval = (boolean) obj.get("use_kmeans_removal");
         useRouteEliminationLeast = (boolean) obj.get("use_route_eliminiation_least");
         useRouteEliminationMost = (boolean) obj.get("use_route_eliminiation_most");
+        useZoneRemoval = (boolean) obj.get("use_zone_removal");
         // insertions
         useGreedyInsert = (boolean) obj.get("use_greedy_insert");
         useSkillMatchingInsert = (boolean) obj.get("use_skill_matching_insert");

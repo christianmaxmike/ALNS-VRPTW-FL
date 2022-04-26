@@ -58,6 +58,7 @@ public class SolomonInstanceGenerator {
         List<Integer> preferredLocations = new ArrayList<>();
         HashMap<Integer, ArrayList<Integer>> predJobs = new HashMap<Integer, ArrayList<Integer>>();
         HashMap<Integer, ArrayList<Integer>> customerToLocations = new HashMap<Integer, ArrayList<Integer>>();
+        HashMap<Integer, ArrayList<Integer>> locationsToCustomers = new HashMap<Integer, ArrayList<Integer>>();
         HashMap<java.awt.geom.Point2D, Integer> coordsToId = new HashMap<java.awt.geom.Point2D, Integer>();
 
         int locationId = 0;
@@ -74,6 +75,12 @@ public class SolomonInstanceGenerator {
             if (customerToLocations.get(lineCustomer.get(0)) == null)
             	customerToLocations.put(lineCustomer.get(0), new ArrayList<Integer>());
             customerToLocations.get(lineCustomer.get(0)).add(coordsToId.get(c));
+            
+            // Add customer to location
+            if (locationsToCustomers.get(coordsToId.get(c)) == null)
+            	locationsToCustomers.put(coordsToId.get(c), new ArrayList<Integer>());
+            if (!locationsToCustomers.get(coordsToId.get(c)).contains(lineCustomer.get(0)))
+            	locationsToCustomers.get(coordsToId.get(c)).add(lineCustomer.get(0));
             
             // Add customer's information
             demands.add(lineCustomer.get(3));
@@ -109,6 +116,7 @@ public class SolomonInstanceGenerator {
                 DataUtils.convertListToArray(customerIds),
                 DataUtils.convertListToArray(locationCapacity),
                 customerToLocations,
+                locationsToCustomers,
                 coordsToId,
                 DataUtils.convertListToArray(demands),
                 DataUtils.convertListToArray(earliestStartTimes),

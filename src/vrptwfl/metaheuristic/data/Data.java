@@ -44,6 +44,7 @@ public class Data {
     
     // Key: CustomerID - Values: LocationIds
     private HashMap<Integer, ArrayList<Integer>> customerToLocations;
+    private HashMap<Integer, ArrayList<Integer>> locationsToCustomers;
 
 	/**
 	 * Constructor for data object.
@@ -72,6 +73,7 @@ public class Data {
     public Data(String instanceName, int nCustomers, int nVehicles, int vehicleCapacity, int[] customers,
                 int[] locationCapacity, 
                 HashMap<Integer, ArrayList<Integer>> customerToLocations, 
+                HashMap<Integer, ArrayList<Integer>> locationsToCustomers,
                 HashMap<java.awt.geom.Point2D, Integer> location2Id,
                 int[] demands, int[] earliestStartTimes, int[] latestStartTimes, int[] serviceDurations,
                 int[] requiredSkillLvl, int[] vehiclesSkillLvl, HashMap<Integer, ArrayList<Integer>> predJobs,
@@ -331,12 +333,22 @@ public class Data {
     
     /**
      * Get the locations where customers can be processed. 
-     * Customer's id is used as key for the retrieved HasMap. 
-     * The individual lists contain the location ids.
+     * Customer's id is used as key for the retrieved HashMap. 
+     * The individual lists contain the location identifierss.
      * @return customer's assignment to locations
      */
     public HashMap<Integer, ArrayList<Integer>> getCustomersToLocations () {
     	return this.customerToLocations;
+    }
+    
+    /**
+     * Get the customers being assigned to their possible locations.
+     * The location identifiers are used as keys for the retrieved HashMap.
+     * The individual lists contain the customer identifiers.
+     * @return mapping from location to customers
+     */
+    public HashMap<Integer, ArrayList<Integer>> getLocationsToCustomers() {
+    	return this.locationsToCustomers;
     }
     
     /**
@@ -348,8 +360,8 @@ public class Data {
     }
     
     /**
-     * Retrieve original customer ids
-     * @return: original customer ids
+     * Retrieve original customer identifiers
+     * @return: original customer identifiers
      */
     public int[] getOriginalCustomerIds() {
     	return this.originalCustomerIds;
@@ -478,6 +490,14 @@ public class Data {
      */
     public void setCustomerToLocation(HashMap<Integer, ArrayList<Integer>> customerToLocations) {    	
     	this.customerToLocations = customerToLocations; 
+    }
+    
+    /**
+     * Sets HashMap mapping locations to customers being possible scheduled for the respective location.
+     * @param locationsToCustomers: mapping locations to customers
+     */
+    public void setLocationsToCustomers(HashMap<Integer, ArrayList<Integer>> locationsToCustomers) {
+    	this.locationsToCustomers = locationsToCustomers;
     }
     
     /**

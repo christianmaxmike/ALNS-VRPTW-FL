@@ -113,6 +113,7 @@ public class ALNSCore {
         if (Config.useKMeansRemoval) {for (Integer k: Config.kMeansClusterSettings) destroyList.add(new ClusterKMeansRemoval(data, k));};
         if (Config.useRouteEliminationLeast) destroyList.add(new RouteLengthRemoval(data, true));
         if (Config.useRouteEliminationMost) destroyList.add(new RouteLengthRemoval(data, false));
+        if (Config.useZoneRemoval) destroyList.add(new ZoneRemoval(data));
         
         
         this.destroyOperators = new AbstractRemoval[destroyList.size()];
@@ -269,6 +270,7 @@ public class ALNSCore {
             // does it need to be a new violation? 
             // if a violation couldn't be resolved, does it count as a new 
             // or known violation) 
+            // Alex - iff any violation occurred (no comparison to former violation)
             if (solutionTemp == solutionCurrent) // new solution has been accepted
             	checkForPenalties(solutionTemp);
             
@@ -285,8 +287,10 @@ public class ALNSCore {
             }
             
             // Tracking of operator probabilities
-            WriterUtils.writeRemovalProbabilities(writerRemovals, destroyOperators, iteration);
-            WriterUtils.writeRepairProbabilities(writerRepairs, repairOperators, iteration);
+        	if (iteration % Config.updateInterval == 0) {
+        		WriterUtils.writeRemovalProbabilities(writerRemovals, destroyOperators, iteration);
+        		WriterUtils.writeRepairProbabilities(writerRepairs, repairOperators, iteration);        		
+        	}
         }
         return solutionBestGlobal;
     }
@@ -550,10 +554,9 @@ public class ALNSCore {
      * @param currentIteration: the current iteration number
      */
     private void updateWeightofOperators(int currentIteration) {
-    	if (this.currentSigma < 0) {
+    	if (this.currentSigma < 0) 
     		return;
-    	}    	    	
-    	// TODO Chris - track and plot distributions
+
     	{
         	this.destroyOperators[this.currentDestroyOpIdx].incrementDraws();
         	this.destroyOperators[this.currentDestroyOpIdx].addToPI(this.currentSigma);

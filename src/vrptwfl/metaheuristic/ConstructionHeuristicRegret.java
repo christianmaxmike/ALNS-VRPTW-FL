@@ -37,7 +37,6 @@ public class ConstructionHeuristicRegret {
     public Solution constructSolution(int k) throws ArgumentOutOfBoundsException {
     	Solution emptySolution = Solution.getEmptySolution(data);
     	emptySolution.setIsConstruction(true);
-    	// SkillMatchingInsertion inserter = new SkillMatchingInsertion(data);
         if (!Config.enableBacktracking) {
         	RegretInsertion inserter = new RegretInsertion(k, data);
         	return inserter.solve(emptySolution);        	

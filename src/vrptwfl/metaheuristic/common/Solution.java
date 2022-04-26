@@ -439,9 +439,11 @@ public class Solution {
     		if (this.customersAssignedToVehicles[customerID] == -1)
     			continue;
     		// Check if vehicles skill level satisfies the customer's required skill level
-    		if (this.data.getRequiredSkillLvl()[customerID] > this.vehicles.get(this.customersAssignedToVehicles[customerID]).getSkillLvl())
+    		if (this.data.getRequiredSkillLvl()[customerID] > this.vehicles.get(this.customersAssignedToVehicles[customerID]).getSkillLvl()) {
+    			double delta = Math.round(this.data.getRequiredSkillLvl()[customerID] - this.vehicles.get(this.customersAssignedToVehicles[customerID]).getSkillLvl());
     			// Aggregate penalty costs 
-    			this.penaltySkillViolation += Config.costSkillLvlViolation;
+    			this.penaltySkillViolation += (delta * Config.costSkillLvlViolation);
+    		}
     	}
     }
     
@@ -500,10 +502,17 @@ public class Solution {
     		// check for TW violation
     		// i) the current scheduling is earlier compared to the given earliest starting point for the customer
     		// ii) the current scheduling is later compared to the given latest ending points for the customer
-    		if (this.data.getEarliestStartTimes()[customerID] > vehicleOfInterest.getStartOfServices().get(idxInRoute) 
-    				|| this.data.getLatestStartTimes()[customerID] + this.data.getServiceDurations()[customerID] < vehicleOfInterest.getEndOfServices().get(idxInRoute))
+    		double delta = 0.0;
+    		if (this.data.getEarliestStartTimes()[customerID] > vehicleOfInterest.getStartOfServices().get(idxInRoute)) {
+    			delta = Math.round(Math.abs(this.data.getEarliestStartTimes()[customerID] - vehicleOfInterest.getStartOfServices().get(idxInRoute)));
     			// Aggregate penalty for time window violations
-    			this.penaltyTimeWindowViolation += Config.costTimeWindowViolation;
+    			this.penaltyTimeWindowViolation += (delta * Config.costTimeWindowViolation);    			
+    		}
+    		if (this.data.getLatestStartTimes()[customerID] + this.data.getServiceDurations()[customerID] < vehicleOfInterest.getEndOfServices().get(idxInRoute)) {
+    			delta = Math.round(Math.abs(vehicleOfInterest.getEndOfServices().get(idxInRoute) - (this.data.getLatestStartTimes()[customerID] + this.data.getServiceDurations()[customerID])));
+    			// Aggregate penalty for time window violations
+    			this.penaltyTimeWindowViolation += (delta * Config.costTimeWindowViolation);
+    		}
     	}
     }
 
@@ -571,24 +580,31 @@ public class Solution {
      * @return false if one predecessor job is not scheduled, otherwise true
      */
     public boolean checkSchedulingOfPredecessors (int customerId) {
+    	boolean flag = true;
     	// Get predecessor job of attached customer
     	ArrayList<Integer> predIds = this.data.getPredCustomers().get(this.data.getOriginalCustomerIds()[customerId]);
+    	
+    	// Case: check scheduling of predecessors
     	for (int originalPredCustomerId: predIds) {
     		// Get the predecessor id being handled in the current run
     		int predCustomerId = Arrays.stream(this.data.getOriginalCustomerIds()).boxed().collect(Collectors.toList()).indexOf(originalPredCustomerId);
     		if (predCustomerId == -1) // case whenever predecessor is in another shift
-    			return true;
+    			continue;
     		
     		// check whether the predecessor job in list of infeasible customers
-    		int existenceOfPredecessor = this.tempInfeasibleCustomers.indexOf(predCustomerId);
+    		//int existenceOfPredecessor = this.tempInfeasibleCustomers.indexOf(predCustomerId);
     		// check infeasibility AND if the customer is not assigned to any vehicle 
-    		if (existenceOfPredecessor != -1)
-    			return false;
-    		if (this.customersAssignedToVehicles[predCustomerId] == -1)
-    			return false;
+    		//if (existenceOfPredecessor != -1 & this.customersAssignedToVehicles[predCustomerId] == -1)
+    		//	flag = true;
+//    		if (this.customersAssignedToVehicles[predCustomerId] == -1)
+//    			return false;
+    		
+    		int predecessorInNotScheduledYet = this.notAssignedCustomers.indexOf(predCustomerId);
+    		if (predecessorInNotScheduledYet != -1)
+    			flag = false;
     	}
     	// All predecessor jobs are scheduled -> Return true
-    	return true;
+    	return flag;
     }
     
     /**

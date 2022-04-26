@@ -98,6 +98,7 @@ public class HospitalInstanceLoader {
 			double[][] realJobs = this.generateRealJobs(importedRealJobs);
 			HashMap<Integer, ArrayList<Integer>> predJobs = this.generatePredJobs(importedRealJobs);
 			HashMap<Integer, ArrayList<Integer>> job2Location = getJobToLocation(importedRealJobs);
+			HashMap<Integer, ArrayList<Integer>> location2Job = getLocationToJob(importedRealJobs);
 
 			// generate locations from rooms
 			ArrayList<Integer> locationCapacity = this.getLocationCapacities(rooms);
@@ -109,6 +110,7 @@ public class HospitalInstanceLoader {
 				d.setMaxDistanceInGraph(this.getMaxDistanceInGraph(distances));
 				d.setLocationCapacity(locationCapacity);
 				d.setCustomerToLocation(job2Location);
+				d.setLocationsToCustomers(location2Job);
 			}
 
 			if (Config.solveAsTwoProblems) {
@@ -345,6 +347,27 @@ public class HospitalInstanceLoader {
 		}
 		customerToLocations.put(0, new ArrayList<Integer>(Arrays.asList(0)));
 		return customerToLocations;
+	}
+	
+	/**
+	 * Retrieve a mapping from locations to the possible customers/patients/job-identifiers.
+	 * Note: index 0 is reserved for the depots
+	 * @param importedRealJobs: imported job information
+	 * @return HashMap mapping from locations to customers identifiers
+	 */
+	private HashMap<Integer, ArrayList<Integer>> getLocationToJob (ImportedJob[] importedRealJobs) {
+		HashMap<Integer, ArrayList<Integer>> locationsToCustomers = new HashMap<Integer, ArrayList<Integer>>();
+		for (int i = 0; i < importedRealJobs.length; i++) {
+			ImportedJob im = importedRealJobs[i];
+			for (int locEntry = 0 ; locEntry<im.getLocationIds().length; locEntry++) {
+				if (locationsToCustomers.get(im.getLocationIds()[locEntry]) == null)
+					locationsToCustomers.put(im.getLocationIds()[locEntry], new ArrayList<Integer>());
+				if (!locationsToCustomers.get(im.getLocationIds()[locEntry]).contains(im.getId() + 1))
+					locationsToCustomers.get(im.getLocationIds()[locEntry]).add(im.getId() + 1);
+			}
+		}
+		locationsToCustomers.put(0, new ArrayList<Integer>());
+		return locationsToCustomers;
 	}
 	
 	/**

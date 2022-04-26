@@ -211,7 +211,7 @@ public class MainALNS {
 
         // Define input params
         boolean isSolomonInstance = !instanceName.contains("hospital_instance"); // Boolean.parseBoolean(args[1]);
-        int nCustomers = 25; // TODO - for solomon instances as args param
+        int nCustomers = 100; // TODO - for solomon instances as args param
         
         // Load Data
         Data[] data;
@@ -220,13 +220,13 @@ public class MainALNS {
         else
         	data = loadHospitalInstance(instanceName);
         
-    	//final MainALNS algo = new MainALNS(instanceName, outFile, isSolomonInstance);
-    	//algo.runALNS(data[1], instanceName);        	
+    	final MainALNS algo = new MainALNS(instanceName, outFile, isSolomonInstance);
+    	algo.runALNS(data[1], instanceName);        	
         // Run
-    	for (Data d: data) {
-        	final MainALNS algo = new MainALNS(instanceName, outFile, isSolomonInstance);
-        	algo.runALNS(d, instanceName);        	
-        }
+//    	for (Data d: data) {
+//        	final MainALNS algo = new MainALNS(instanceName, outFile, isSolomonInstance);
+//        	algo.runALNS(d, instanceName);        	
+//        }
         // TODO Alex: Add TimeLimit (?)
     }
 
