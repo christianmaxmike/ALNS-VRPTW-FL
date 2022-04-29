@@ -11,6 +11,7 @@ import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
+import vrptwfl.metaheuristic.utils.DataUtils;
 import vrptwfl.metaheuristic.utils.WriterUtils;
 
 import java.io.FileWriter;
@@ -32,33 +33,47 @@ import java.util.TreeSet;
  */
 public class ALNSCore {
 	
+	// In/Out 
 	private FileWriter writerRemovals;
 	private FileWriter writerRepairs;
 
+	// Data
     private Data data;
 
+    // Repair/Destroy Operators
     private AbstractInsertion[] repairOperators;
     private AbstractRemoval[] destroyOperators;
     private int currentDestroyOpIdx;
     private int currentRepairOpIdx;
+    
+    // Simulated Annealing
     private int currentSigma; 
+    private boolean acceptedNewSolution;
     private double temperature;
     private double temperatureEnd;
+    
+    // Penalty update - Schiffer
     private boolean flagPenaltyUnservedCustomer;
     private boolean flagPenaltyTimeWindow;
     private boolean flagPenaltyPredecessorJob;
     private boolean flagPenaltyCapacity;
     private boolean flagPenaltySkillLvl;
     
+    // Penalty update - GLS
+    private int lastGLSUpdate;
+    
+    // HashMap about visited solutions
     private HashMap<Integer, Solution> visitedSolutions;
     
-    // useNeighborGraphRemoval - this graph contains information about the best solution in which the edge (i,j) was used
+    // useNeighborGraphRemoval 
+    // - this graph contains information about the best solution in which the edge (i,j) was used
     private double[][] neighborGraph;
     
     // RequestRemoval
     private TreeSet<Solution> solutionSet;
     private double[][] requestGraph;
 
+    
     /**
      * Constructor for the ALNSCore class. 
      * It initializes the repair and destroy operators as defined in the configuration file.
@@ -66,6 +81,7 @@ public class ALNSCore {
      * @throws ArgumentOutOfBoundsException
      */
     public ALNSCore(Data data) throws ArgumentOutOfBoundsException {
+    	// Initialize Writers
     	try {
     		this.writerRemovals = new FileWriter("./out/" + data.getInstanceName() + "_removalProbabilities.txt", true);
     		this.writerRepairs = new FileWriter("./out/" + data.getInstanceName() + "__repairProbabilities.txt", true);
@@ -73,10 +89,17 @@ public class ALNSCore {
     		e.printStackTrace();
     	}
     	
+    	// Initialize class variables
         this.data = data;
-        this.initRepairOperators();
-        this.initDestroyOperators();    
         this.visitedSolutions = new HashMap<Integer, Solution>();
+
+        // Initialize Operators
+        this.initRepairOperators();
+        this.initDestroyOperators();
+        
+        // Initialized GLS arrays
+        if (Config.enableGLS)
+        	data.initGLSSettings();
     }
 
     //
@@ -114,7 +137,6 @@ public class ALNSCore {
         if (Config.useRouteEliminationLeast) destroyList.add(new RouteLengthRemoval(data, true));
         if (Config.useRouteEliminationMost) destroyList.add(new RouteLengthRemoval(data, false));
         if (Config.useZoneRemoval) destroyList.add(new ZoneRemoval(data));
-        
         
         this.destroyOperators = new AbstractRemoval[destroyList.size()];
         this.destroyOperators = destroyList.toArray(this.destroyOperators);
@@ -175,9 +197,7 @@ public class ALNSCore {
     	this.solutionSet = new TreeSet<Solution>(new Comparator<Solution>() {
 			@Override
 			public int compare(Solution o1, Solution o2) {
-				if (o1.getTotalCosts() < o2.getTotalCosts()) return -1;
-				else if (o1.getTotalCosts() > o2.getTotalCosts()) return +1;
-				else return 0;
+				return o1.getTotalCosts() < o2.getTotalCosts() ? -1 : 1;
 			}
 		});
     	this.requestGraph = new double[this.data.getnCustomers() + 1][this.data.getnCustomers() + 1];
@@ -221,18 +241,16 @@ public class ALNSCore {
 
         // Start ALNS
         for (int iteration = 1; iteration <= Config.alnsIterations; iteration++) {
-            Solution solutionTemp = solutionCurrent.copyDeep();
+            acceptedNewSolution = false;
+        	Solution solutionTemp = solutionCurrent.copyDeep();
             // TODO Alex: random auswaehlen aus Operatoren (geht das irgendwie mit Lambdas besser ?)
 
-            // destroy operation
-            // AbstractRemoval destroyOp = getDestroyOperatorAtRandom();
-            AbstractRemoval destroyOp = drawDestroyOperator();
+            // draw destroy operation
+            AbstractRemoval destroyOp = Config.drawOpUniformly? getDestroyOperatorAtRandom() : drawDestroyOperator();
             destroyOp.destroy(solutionTemp);
 
-            // repair operation
-            // returns one repair operator specified in repairOperators
-            // AbstractInsertion repairOp = getRepairOperatorAtRandom();
-            AbstractInsertion repairOp = drawInsertionOperator();
+            // draw repair operation
+            AbstractInsertion repairOp = Config.drawOpUniformly? getRepairOperatorAtRandom() : drawInsertionOperator();
             repairOp.solve(solutionTemp);
 
             // update neighbor graph if new solution was found (TODO Alex - check if the solution is really a new one (hashtable?)
@@ -257,33 +275,37 @@ public class ALNSCore {
                 System.out.println();
                 System.out.println("Cost curr " + solutionCurrent.getTotalCosts());
                 System.out.println("Cost glob " + solutionBestGlobal.getTotalCosts());
-            }
-            
-            // END OF ITERATION
+            }  
+      
             // Call update operations after each iter.
             this.updateWeightofOperators(iteration);
             this.updateTemperature();
             
-            // TODO - Chris - its not clear defined in Schiffer et al. what is meant 
+            // CHECK SCHIFFER UPDATES
+            // NOTE - it's not clear defined in Schiffer et al. what is meant 
             // by checking if a penalty occurred in the last x iterations 
-            // (just on accepted solutions? on every solution? 
-            // does it need to be a new violation? 
-            // if a violation couldn't be resolved, does it count as a new 
-            // or known violation) 
-            // Alex - iff any violation occurred (no comparison to former violation)
-            if (solutionTemp == solutionCurrent) // new solution has been accepted
-            	checkForPenalties(solutionTemp);
+            // (just on accepted solutions? on every solution? Does it need to be a new violation? 
+            // if a violation couldn't be resolved, does it count as a new or known violation) 
+            if (Config.enableSchiffer) {
+            	if (acceptedNewSolution)
+            		checkForPenalties(solutionTemp);
+            	if (iteration % Config.penaltyWeightUpdateIteration == 0) {
+            		updatePenaltyWeights();
+            		resetPenaltyFlags();
+            	}            	
+            }
             
-            if (iteration % Config.penaltyWeightUpdateIteration == 0) {
-            	updatePenaltyWeights();
-            	resetPenaltyFlags();
-            	//TODO: Chris - evtl auch plotten für den draft
-            	// System.out.println("Penalty Terms:");
-            	// System.out.println("Customers:\t"+Config.penaltyWeightUnservedCustomer);
-            	// System.out.println("Pred.Jobs:\t"+Config.penaltyWeightPredecessorJobs);
-            	// System.out.println("Time Wind:\t"+Config.penaltyWeightTimeWindow);
-            	// System.out.println("Skill lvl:\t"+Config.penaltyWeightSkillLvl);
-            	// System.out.println("---");
+            // CHECK GLS Updates
+            if (Config.enableGLS) {
+            	lastGLSUpdate ++;
+            	if (acceptedNewSolution)
+            		// first check for new solution, then if iteration number is fullfilled (an iteration w/ an accepted solution does 
+            		// not necessarily fulfill the modulo operation, hence the counter to the last update lastGLSUpdate is introduced)
+            		if (lastGLSUpdate>=Config.glsIterUntilPenaltyUpdate || iteration % Config.glsIterUntilPenaltyUpdate == 0) {
+            			data.glsUpdatePenaltyWeights(solutionTemp);
+            			data.resetGLSCounterViolations();
+            			lastGLSUpdate = 0 ;            			
+            		}
             }
             
             // Tracking of operator probabilities
@@ -291,6 +313,8 @@ public class ALNSCore {
         		WriterUtils.writeRemovalProbabilities(writerRemovals, destroyOperators, iteration);
         		WriterUtils.writeRepairProbabilities(writerRepairs, repairOperators, iteration);        		
         	}
+        	
+            // END OF ITERATION
         }
         return solutionBestGlobal;
     }
@@ -436,10 +460,11 @@ public class ALNSCore {
      */
     private Solution checkImprovement(Solution solutionTemp, Solution solutionCurrent, Solution solutionBestGlobal) {
         // CASE 1 : check if improvement of global best
-        if (solutionTemp.isFeasible() || Config.enableGLS) {
+        if (solutionTemp.isFeasible() || (Config.enableGLS||Config.enableSchiffer)) {
             if (solutionBestGlobal.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon) {
             	this.currentSigma = Config.sigma1;
                 solutionBestGlobal.setSolution(solutionTemp);
+                this.acceptedNewSolution = true;
                 return solutionTemp;
             }
         }
@@ -450,6 +475,7 @@ public class ALNSCore {
         	// CASE 2: temp objective fnc better than current solution 
             if (this.tempSolutionIsAcceptedByCosts(solutionTemp, solutionCurrent)) {
             	this.currentSigma = Config.sigma2;
+            	this.acceptedNewSolution = true;
                 return solutionTemp;
             }
             
@@ -457,6 +483,7 @@ public class ALNSCore {
         	double val = Math.exp(-(solutionTemp.getTotalCosts()-solutionCurrent.getTotalCosts()) / this.temperature);
     		if(Math.random() < val){
                 this.currentSigma = Config.sigma3;
+                this.acceptedNewSolution = true;
                 return solutionTemp;
         	}
             
@@ -557,6 +584,7 @@ public class ALNSCore {
     	if (this.currentSigma < 0) 
     		return;
 
+    	// update destroy Operator
     	{
         	this.destroyOperators[this.currentDestroyOpIdx].incrementDraws();
         	this.destroyOperators[this.currentDestroyOpIdx].addToPI(this.currentSigma);
@@ -569,7 +597,7 @@ public class ALNSCore {
             	this.updateProbabilitiesDestroyOps(this.getSumWeightsDestroyOps());    	
         	}
     	}
-    			
+ 
     	// update insertion Operator
     	{
         	this.repairOperators[this.currentRepairOpIdx].incrementDraws();
@@ -612,9 +640,8 @@ public class ALNSCore {
      * @see vrptwfl.metaheuristic.Config
      */
     private void updateTemperature() {
-    	if (this.temperature > this.temperatureEnd) {
+    	if (this.temperature > this.temperatureEnd)
     		this.temperature *= Config.coolingRate;
-    	}
     }
     
     
@@ -627,9 +654,8 @@ public class ALNSCore {
      */
     private double getSumWeightsRepairOps() {
     	double sum = 0.0;
-    	for (AbstractInsertion entry : this.repairOperators) {
+    	for (AbstractInsertion entry : this.repairOperators) 
     		sum += entry.getWeight();
-    	}
     	return sum;
     }
     
@@ -639,9 +665,8 @@ public class ALNSCore {
      */
     private double getSumWeightsDestroyOps() {
     	double sum = 0.0;
-    	for (AbstractRemoval entry : this.destroyOperators) {
+    	for (AbstractRemoval entry : this.destroyOperators)
     		sum += entry.getWeight();
-    	}
     	return sum;
     }
     
@@ -666,7 +691,7 @@ public class ALNSCore {
     public double[][] getRequestGraph() {
     	return requestGraph;
     }
-
+    
     
     //
     // DEPRECATED FUNCTIONS - START

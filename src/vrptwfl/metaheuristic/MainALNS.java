@@ -220,13 +220,13 @@ public class MainALNS {
         else
         	data = loadHospitalInstance(instanceName);
         
-    	final MainALNS algo = new MainALNS(instanceName, outFile, isSolomonInstance);
-    	algo.runALNS(data[1], instanceName);        	
+    	//final MainALNS algo = new MainALNS(instanceName, outFile, isSolomonInstance);
+    	//algo.runALNS(data[1], instanceName);        	
         // Run
-//    	for (Data d: data) {
-//        	final MainALNS algo = new MainALNS(instanceName, outFile, isSolomonInstance);
-//        	algo.runALNS(d, instanceName);        	
-//        }
+    	for (Data d: data) {
+        	final MainALNS algo = new MainALNS(instanceName, outFile, isSolomonInstance);
+        	algo.runALNS(d, instanceName);        	
+        }
         // TODO Alex: Add TimeLimit (?)
     }
 

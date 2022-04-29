@@ -38,6 +38,11 @@ public class Config {
 
     // --- GLS SETTINGS ---
     public static boolean enableGLS;
+    public static int glsNFeaturesForPenaltyUpdate;
+    public static int glsIterUntilPenaltyUpdate;
+    public static double glsPenaltyInitValue;
+    public static double glsPenaltyIncrease;
+    public static double glsPenaltyReduction;
     // Penalty Costs
     public static int exponentSwappingLocations;
     public static double penaltyUnservedCustomer;	// set in MainALNS -> setInstanceSpecificParameters
@@ -48,6 +53,7 @@ public class Config {
     public static double costSkillLvlViolation;
     public static double maxTimeWindowViolation;
     // Penalty Weights
+    public static boolean enableSchiffer;
     public static double[] penaltyWeightUnservedCustomerRange;
     public static double[] penaltyWeightTimeWindowRange;
     public static double[] penaltyWeightPredecessorJobsRange;
@@ -124,6 +130,7 @@ public class Config {
     public static int sigma3;
     public static double reactionFactor;
     public static double minOpProb;
+    public static boolean drawOpUniformly;
     public static int updateInterval;
     
     // --- SIMULATED ANNEALING ---
@@ -246,6 +253,7 @@ public class Config {
         sigma3 = (int) obj.get("sigma3");
         reactionFactor = (double) obj.get("reactionFactor");
         minOpProb = (double) obj.get("minOpProb");
+        drawOpUniformly = (boolean) obj.get("drawOpUniformly");
         updateInterval = (int) obj.get("updateInterval");
         
         // --- SIMULATED ANNEALING ---
@@ -256,6 +264,11 @@ public class Config {
         
         // --- GLS ----
         enableGLS = (boolean) obj.get("enable_gls");
+        glsNFeaturesForPenaltyUpdate = (int) obj.get("gls_nFeaturesForPenaltyUpdate");
+        glsIterUntilPenaltyUpdate = (int) obj.get("gls_iterUntilPenaltyUpdate");
+        glsPenaltyInitValue = (double) obj.get("gls_penaltyInitValue");
+        glsPenaltyIncrease = (double) obj.get("gls_penaltyIncrease");
+        glsPenaltyReduction = (double) obj.get("gls_penaltyReduction");
         // penalties
         exponentSwappingLocations = (int) obj.get("exponent_swapping_locations");
         costUnservedCustomerViolation = (double) obj.get("cost_factor_unserved_customer");
@@ -264,6 +277,9 @@ public class Config {
         costCapacityViolation = (double) obj.get("cost_capacity_violation");
         costSkillLvlViolation = (double) obj.get("cost_skillLvl_violation");
         maxTimeWindowViolation = (double) obj.get("max_timeWindow_violation");
+        
+        // --- PENALTY UPDATE SCHIFFER ----
+        enableSchiffer = (boolean) obj.get("enable_schiffer"); 
         // penalty weights
         penaltyWeightUnservedCustomerRange = DataUtils.convertDoubleListToArr((ArrayList<Double>) obj.get("penalty_weight_unserved_customer_range"));
         penaltyWeightTimeWindowRange = DataUtils.convertDoubleListToArr((ArrayList<Double>) obj.get("penalty_weight_timeWindow_range"));

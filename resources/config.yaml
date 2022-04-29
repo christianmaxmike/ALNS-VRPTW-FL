@@ -3,7 +3,7 @@ random_seed: 42  # if null, no random seed will be used
 
 
 ### ALNS CONFIGURATION
-alns_iterations: 25_000  # 50_000
+alns_iterations: 25_000
 # Upper bound and lower bound values taken from Ropke C&OR §6.1.1 p. 2417
 lower_bound_nr_of_removals: 30
 lower_bound_factor_nr_of_removals: 0.1
@@ -11,17 +11,26 @@ upper_bound_nr_of_removals: 60
 upper_bound_factor_nr_of_removals: 0.4
 
 
-### GLS SETTINGS
+### PENALTY UPDATE - SETTINGS
 enable_gls: true
-# penalties settings
+enable_schiffer: false
+# general penalty settings
 exponent_swapping_locations: 1								# exponent for swapping costs: (loc2 - loc1) ^ exp  (default: 1)
 cost_factor_unserved_customer: 3.0  						# cost for unserviced customers is equal to this number times the maximum distance in the graph (default: 5.0)
-cost_timeWindow_violation: 1.0 # 0.5								# TW violation (default: 0.5)
+cost_timeWindow_violation: 1.0 #0.5								# TW violation (default: 0.5)
 cost_predJobs_violation: 10.0								# Predecessor jobs violation (default: 10)
 cost_capacity_violation: 1.0								# capacity violation (default: 1.0)
 cost_skillLvl_violation: 2.0								# default: 5.0
 max_timeWindow_violation: 10.0								# default: 10.0
-# penalty weights - values taken from Schiffer et al.,2017, p.14
+# gls
+gls_iterUntilPenaltyUpdate: 25
+gls_nFeaturesForPenaltyUpdate: 5
+gls_penaltyInitValue: 0.5
+gls_penaltyIncrease: 0.25
+gls_penaltyReduction: 0.0125
+# schiffer - penalty weights - values taken from Schiffer et al.,2017, p.14
+penalty_weight_update_iteration: 25
+penalty_weight_omega: 1.15
 penalty_weight_unserved_customer_range: [1.0, 100.0]   # [10.0, 10000.0]   
 penalty_weight_timeWindow_range: [1.0, 100.0]          # [10.0, 10000.0]
 penalty_weight_predecessor_range: [1.0, 100.0]         # [10.0, 10000.0]
@@ -32,8 +41,6 @@ penalty_weight_timeWindow: 10.0                        # 100.0
 penalty_weight_predecessor: 10.0                       # 100.0
 penalty_weight_capacity: 10.0                          # 100.0
 penalty_weight_skillLvl: 10.0                          # 100.0
-penalty_weight_omega: 1.15
-penalty_weight_update_iteration: 25
 
 
 ### DEFINE ACTIVE OPERATORS (DESTROY + REPAIR)									# SOLOMON			HOSPITAL
@@ -87,16 +94,17 @@ kmeansNClusters: [2, 3, 6]
 
 
 ### BACKTRACKING SETTINGS (for initial solution)
-enable_backtracking: false
+enable_backtracking: true
 backtrackTrials : 4			 								# how many restarts
 backtrackJump: 5
 backtrackJumpToLevel: 5
 backtrackJumpToLevelProbabilities: [1.0, 0.6, 0.3, 0.2, 0.1]
-backtrackBySteps: false  									# backtracking by steps (=false) or by levels (=true) 
+backtrackBySteps: true  									# backtracking by steps (=false) or by levels (=true) 
 maxBacktrackJumps: 10_000
 
 
 ### UPDATE VALUES FOR DESTROY/REPAIR OPS - SIGMAS
+drawOpUniformly: false
 sigma1: 33
 sigma2: 13
 sigma3: 9

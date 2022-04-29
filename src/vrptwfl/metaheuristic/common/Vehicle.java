@@ -94,7 +94,7 @@ public class Vehicle {
 
         // XXX : GLS - SKILL Violation
         // SKILL CHECK - insufficient skill level
-        if (!Config.enableGLS || solution.isConstruction()) {
+        if (!(Config.enableGLS && Config.enableSchiffer) || solution.isConstruction()) {
         	if (this.skillLvl < data.getRequiredSkillLvl()[customer])
         		return possibleInsertions;        	
         }
@@ -107,7 +107,7 @@ public class Vehicle {
         double earliestStartCustomer = data.getEarliestStartTimes()[customer];
         double latestStartCustomer = data.getLatestStartTimes()[customer];
         
-        if (Config.enableGLS & !solution.isConstruction()) {
+        if ((Config.enableGLS||Config.enableSchiffer) & !solution.isConstruction()) {
         	earliestStartCustomer = Math.max(earliestStartCustomer -Config.maxTimeWindowViolation, 0);
         	latestStartCustomer = Math.min(latestStartCustomer + Config.maxTimeWindowViolation,  solution.getData().getEndOfPlanningHorizon());
         }

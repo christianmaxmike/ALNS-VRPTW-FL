@@ -1,12 +1,16 @@
 package vrptwfl.metaheuristic.data;
 
 import vrptwfl.metaheuristic.Config;
+import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.utils.DataUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
@@ -45,6 +49,11 @@ public class Data {
     // Key: CustomerID - Values: LocationIds
     private HashMap<Integer, ArrayList<Integer>> customerToLocations;
     private HashMap<Integer, ArrayList<Integer>> locationsToCustomers;
+    
+    // GLS
+    private double[][] glsCounterViolations;
+    private double[][] glsPenalties;
+
 
 	/**
 	 * Constructor for data object.
@@ -102,7 +111,7 @@ public class Data {
 
         // Creates the distance matrix w.r.t the locations
         this.createDistanceMatrix(location2Id);
-        // Creates mx of swapping costs
+        // Creates matrix of swapping costs
         this.createSwappingCosts();
         // Calculates average start times
         this.calculateAverageStartTimes();
@@ -134,7 +143,6 @@ public class Data {
     	int n = location2Id.size();
     	int m = location2Id.size();
     	this.distanceMatrix = new double[n][m];
-    	// this.locationCoordinates = new double[n][2];
         this.maxDistanceInGraph = 0.;
         
         Map<Object, Object> sortedMap = location2Id.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
@@ -146,9 +154,6 @@ public class Data {
         												(java.awt.geom.Point2D) sortedMap.get(j));
         		this.distanceMatrix[i][j] = distance;
         		this.distanceMatrix[j][i] = distance;
-        		
-        		// this.locationCoordinates[i][0] = ((java.awt.geom.Point2D) sortedMap.get(i)).getX();
-        		// this.locationCoordinates[i][1] = ((java.awt.geom.Point2D) sortedMap.get(i)).getY();
         		
         		if (distance > this.maxDistanceInGraph + Config.epsilon) 
         			this.maxDistanceInGraph = distance;
@@ -187,7 +192,79 @@ public class Data {
         return vehicles;
     }
     
+    /**
+     * Initialize counter and penalty array used for the guided local search (GLS)
+     */
+    public void initGLSSettings() {
+    	this.glsCounterViolations = new double[DataUtils.PenaltyIdx.values().length][this.getnCustomers() + 1];
+    	this.glsPenalties = new double[DataUtils.PenaltyIdx.values().length][this.getnCustomers() + 1];
+    	for (double[] row: this.glsPenalties)
+    		Arrays.fill(row, Config.glsPenaltyInitValue);
+    }
+    
+    /**
+     * Reset the violation counters used for guided local search (GLS)
+     */
+    public void resetGLSCounterViolations () {
+    	this.glsCounterViolations = new double[DataUtils.PenaltyIdx.values().length][this.getnCustomers() + 1];    	
+    }
 
+    /**
+     * Update penalties used for the guided local search (GLS). 
+     * Violations yielding the highest utilities are update.
+     * A utility is calculated by (counter * violationCost) / (1 + penalty).
+     * The penalty of the highest utility (customer-dependent) are increment by
+     * a constant value defined in the configuration file (Config.glsPenaltyIncrease).
+     * @param s: solution object carrying information about the observed violations
+     */
+    public void glsUpdatePenaltyWeights(Solution s) {
+    	TreeSet<double[]> utilitiesSet =  new TreeSet<double[]>(new Comparator<double[]>() {
+			@Override
+			public int compare(double[] o1, double[] o2) {
+				return o1[0] > o2[0] ? -1 : 1;
+			}
+		});
+    	
+    	// Decrement penalty values by constant reduction value (set by Config.glsPenaltyReduction)
+    	for (int i = 0 ; i<this.glsPenalties.length; i++) {
+    		for (int j = 0; j<this.glsPenalties[i].length; j++)
+    			this.glsPenalties[i][j] = Math.max(Config.glsPenaltyInitValue, this.glsPenalties[i][j] - Config.glsPenaltyReduction);
+    	}
+    	
+    	// Iterate observed penalties in attached solution
+    	for (int[] entry: s.getListOfPenalties()) {
+    		// Increment counter of occurrence of penalty (entry[0]: penalty identifer (DataUtils.PenaltyIdx); entry[1]: customer id)
+    		this.glsCounterViolations[entry[0]][entry[1]] ++;
+    		
+    		// Get counter & penalty values
+    		double counter = this.glsCounterViolations[entry[0]][entry[1]];
+    		double penalty = this.glsPenalties[entry[0]][entry[1]];
+    		
+    		// Get cost of violation
+    		double violationCost = -1;
+    		DataUtils.PenaltyIdx whichPenalty = DataUtils.PenaltyIdx.values()[entry[0]];
+    		switch(whichPenalty) {
+	    		case TWViolation: violationCost = Config.costTimeWindowViolation; break;
+	    		case Unscheduled: violationCost = Config.costUnservedCustomerViolation; break;
+	    		case Predecessor: violationCost = Config.costPredJobsViolation; break;
+	    		case Capacity: violationCost = Config.costCapacityViolation; break;
+	    		case SkillLvl: violationCost = Config.costSkillLvlViolation; break;
+	    		default: violationCost = -1;
+    		}
+    		
+    		// Calculate utility and add to set of utilities (sorted by utility values in descending order)
+    		double utility = (counter * violationCost) / (1 + penalty);
+    		utilitiesSet.add(new double[] {utility, entry[0], entry[1]});
+    	}
+
+    	// update penalty values for n features (set by Config.glsNFeturesForPenaltyUpdate
+    	for (int i=0; i<Config.glsNFeaturesForPenaltyUpdate; i++) {
+    		double[] utilityEntry = utilitiesSet.pollFirst();
+    		if (utilityEntry == null) break;
+    		this.glsPenalties[(int) utilityEntry[1]][(int) utilityEntry[2]] += (Config.glsPenaltyIncrease + Config.glsPenaltyReduction);
+    	}
+    }
+    
     //
     // CUSTOM GET FNCS
     //    
@@ -389,6 +466,22 @@ public class Data {
      */
     public double[][] getSwappingCosts() {
     	return this.swappingCosts;
+    }
+    
+    /**
+     * Retrieve the violations counter used in the guided local search (GLS) heuristic
+     * @return counter of violation occurrences
+     */
+    public double[][] getGLSCounterViolations () {
+    	return this.glsCounterViolations;
+    }
+    
+    /**
+     * Retrieve the penalty values used in the guided local search (GLS) heuristic.
+     * @return penalties (GLS)
+     */
+    public double[][] getGLSPenalties () {
+    	return this.glsPenalties;
     }
 
     

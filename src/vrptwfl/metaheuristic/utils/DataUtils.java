@@ -105,4 +105,26 @@ public class DataUtils {
         }
         return b;
     }
+    
+    
+
+    public enum PenaltyIdx {
+    	Unscheduled(0),
+    	TWViolation(1), 
+    	Predecessor(2),
+    	Capacity(3),
+    	SkillLvl(4);
+    	
+        private final int id;
+
+        private PenaltyIdx(int id) {
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
+        }
+    }
+
+    
 }
