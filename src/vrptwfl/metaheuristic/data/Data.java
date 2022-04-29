@@ -208,6 +208,13 @@ public class Data {
     public void resetGLSCounterViolations () {
     	this.glsCounterViolations = new double[DataUtils.PenaltyIdx.values().length][this.getnCustomers() + 1];    	
     }
+    
+    public void updateGLSCounter (Solution s) {
+    	// Iterate observed penalties in attached solution
+    	for (int[] entry: s.getListOfPenalties())
+    		// Increment counter of occurrence of penalty (entry[0]: penalty identifer (DataUtils.PenaltyIdx); entry[1]: customer id)
+    		this.glsCounterViolations[entry[0]][entry[1]] ++;
+    }
 
     /**
      * Update penalties used for the guided local search (GLS). 
@@ -233,9 +240,6 @@ public class Data {
     	
     	// Iterate observed penalties in attached solution
     	for (int[] entry: s.getListOfPenalties()) {
-    		// Increment counter of occurrence of penalty (entry[0]: penalty identifer (DataUtils.PenaltyIdx); entry[1]: customer id)
-    		this.glsCounterViolations[entry[0]][entry[1]] ++;
-    		
     		// Get counter & penalty values
     		double counter = this.glsCounterViolations[entry[0]][entry[1]];
     		double penalty = this.glsPenalties[entry[0]][entry[1]];

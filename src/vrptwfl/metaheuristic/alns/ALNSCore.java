@@ -299,6 +299,7 @@ public class ALNSCore {
             if (Config.enableGLS) {
             	lastGLSUpdate ++;
             	if (acceptedNewSolution)
+            		data.updateGLSCounter(solutionTemp);
             		// first check for new solution, then if iteration number is fullfilled (an iteration w/ an accepted solution does 
             		// not necessarily fulfill the modulo operation, hence the counter to the last update lastGLSUpdate is introduced)
             		if (lastGLSUpdate>=Config.glsIterUntilPenaltyUpdate || iteration % Config.glsIterUntilPenaltyUpdate == 0) {
