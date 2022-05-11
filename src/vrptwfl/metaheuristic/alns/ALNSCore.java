@@ -4,7 +4,6 @@ import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.alns.insertions.AbstractInsertion;
 import vrptwfl.metaheuristic.alns.insertions.GreedyInsertion;
 import vrptwfl.metaheuristic.alns.insertions.RegretInsertion;
-import vrptwfl.metaheuristic.alns.insertions.RegretInsertionBacktracking;
 import vrptwfl.metaheuristic.alns.insertions.SkillMatchingInsertion;
 import vrptwfl.metaheuristic.alns.removals.*;
 import vrptwfl.metaheuristic.common.Solution;
@@ -36,6 +35,7 @@ public class ALNSCore {
 	// In/Out 
 	private FileWriter writerRemovals;
 	private FileWriter writerRepairs;
+	private FileWriter writerPenalties;
 
 	// Data
     private Data data;
@@ -85,6 +85,7 @@ public class ALNSCore {
     	try {
     		this.writerRemovals = new FileWriter("./out/" + data.getInstanceName() + "_removalProbabilities.txt", true);
     		this.writerRepairs = new FileWriter("./out/" + data.getInstanceName() + "__repairProbabilities.txt", true);
+    		this.writerPenalties = new FileWriter("./out/" + data.getInstanceName() + "__penaltiesCount.txt");
     	} catch (IOException e) {
     		e.printStackTrace();
     	}
@@ -98,7 +99,7 @@ public class ALNSCore {
         this.initDestroyOperators();
         
         // Initialized GLS arrays
-        if (Config.enableGLS)
+        if (Config.enableGLS || Config.enableGLSFeature)
         	data.initGLSSettings();
     }
 
@@ -266,6 +267,9 @@ public class ALNSCore {
                 System.out.println("Cost curr " + solutionCurrent.getTotalCosts());
                 System.out.println("Cost glob " + solutionBestGlobal.getTotalCosts());
             }
+            
+            if (Config.enableGLS||Config.enableSchiffer||Config.enableGLSFeature)
+            	solutionCurrent.calculateTotalCosts();
 
             // check for improvement of the current solution
             solutionCurrent = this.checkImprovement(solutionTemp, solutionCurrent, solutionBestGlobal);
@@ -296,17 +300,30 @@ public class ALNSCore {
             }
             
             // CHECK GLS Updates
-            if (Config.enableGLS) {
+            if (Config.enableGLS || Config.enableGLSFeature) {
             	lastGLSUpdate ++;
-            	if (acceptedNewSolution)
+            	if (acceptedNewSolution) {
             		data.updateGLSCounter(solutionTemp);
-            		// first check for new solution, then if iteration number is fullfilled (an iteration w/ an accepted solution does 
-            		// not necessarily fulfill the modulo operation, hence the counter to the last update lastGLSUpdate is introduced)
-            		if (lastGLSUpdate>=Config.glsIterUntilPenaltyUpdate || iteration % Config.glsIterUntilPenaltyUpdate == 0) {
-            			data.glsUpdatePenaltyWeights(solutionTemp);
-            			data.resetGLSCounterViolations();
-            			lastGLSUpdate = 0 ;            			
-            		}
+            		data.addToGLSSolutionHistory(solutionTemp);
+            	}
+            		
+        		// first check for new solution, then if iteration number is fulfilled (an iteration w/ an accepted solution does 
+        		// not necessarily fulfill the modulo operation, hence the counter to the last update lastGLSUpdate is introduced)
+        		// if (lastGLSUpdate>=Config.glsIterUntilPenaltyUpdate || iteration % Config.glsIterUntilPenaltyUpdate == 0) {
+        		if (iteration % Config.glsIterUntilPenaltyUpdate == 0) {
+        			/*System.out.println("--- Penalty Summary ---");
+        			for (int i = 0; i< data.getSumGLSCounterViolations().length; i++) {
+        				double entry = data.getSumGLSCounterViolations()[i];
+        				System.out.println(DataUtils.PenaltyIdx.values()[i] + ":" + entry);
+        			}
+        			System.out.println("---");*/
+        			if (Config.enableGLS)
+						data.glsUpdatePenaltyWeights();
+        			else
+        				data.glsFeatureUpdatePenaltyWeights();
+        			data.resetGLSSettings();
+        			lastGLSUpdate = 0 ;            			
+        		}
             }
             
             // Tracking of operator probabilities
@@ -314,7 +331,6 @@ public class ALNSCore {
         		WriterUtils.writeRemovalProbabilities(writerRemovals, destroyOperators, iteration);
         		WriterUtils.writeRepairProbabilities(writerRepairs, repairOperators, iteration);        		
         	}
-        	
             // END OF ITERATION
         }
         return solutionBestGlobal;
@@ -461,7 +477,7 @@ public class ALNSCore {
      */
     private Solution checkImprovement(Solution solutionTemp, Solution solutionCurrent, Solution solutionBestGlobal) {
         // CASE 1 : check if improvement of global best
-        if (solutionTemp.isFeasible() || (Config.enableGLS||Config.enableSchiffer)) {
+        if (solutionTemp.isFeasible() || (Config.enableGLS||Config.enableSchiffer||Config.enableGLSFeature)) {
             if (solutionBestGlobal.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon) {
             	this.currentSigma = Config.sigma1;
                 solutionBestGlobal.setSolution(solutionTemp);
@@ -473,14 +489,14 @@ public class ALNSCore {
         // CASE 2&3: solution has not been visited before
         if (!visitedSolutions.containsKey(solutionTemp.hashCode_tmp()) ) {
             // check if temporary solution become new current solution
-        	// CASE 2: temp objective fnc better than current solution 
+        	// CASE 2: temporary objective function better than current solution 
             if (this.tempSolutionIsAcceptedByCosts(solutionTemp, solutionCurrent)) {
             	this.currentSigma = Config.sigma2;
             	this.acceptedNewSolution = true;
                 return solutionTemp;
             }
             
-            // CASE 3: simulated annealing - temp solution no improvement but still accepted 
+            // CASE 3: simulated annealing - temporary solution shows no improvement but still accepted 
         	double val = Math.exp(-(solutionTemp.getTotalCosts()-solutionCurrent.getTotalCosts()) / this.temperature);
     		if(Math.random() < val){
                 this.currentSigma = Config.sigma3;

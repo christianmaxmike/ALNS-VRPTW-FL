@@ -39,7 +39,7 @@ public class HistoricNodePairRemoval extends AbstractRemoval {
         List<Integer> removedCustomers = new ArrayList<>();
 
         while (nRemovals > 0) {
-            ArrayList<double[]> possibleRemovals = solution.getPossibleRemovalsSortedByNeighborGraph(alns.getNeighborGraph());
+            ArrayList<double[]> possibleRemovals = solution.getPossibleRemovalsSortedByNeighborGraph(alns.getNeighborGraph(), solution);
 
             int idx = 0;
             if (this.randomize) {

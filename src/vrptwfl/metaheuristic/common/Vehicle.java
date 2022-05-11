@@ -94,7 +94,7 @@ public class Vehicle {
 
         // XXX : GLS - SKILL Violation
         // SKILL CHECK - insufficient skill level
-        if (!(Config.enableGLS && Config.enableSchiffer) || solution.isConstruction()) {
+        if (!(Config.enableGLS || Config.enableSchiffer || Config.enableGLSFeature ) || solution.isConstruction()) {
         	if (this.skillLvl < data.getRequiredSkillLvl()[customer])
         		return possibleInsertions;        	
         }
@@ -130,16 +130,24 @@ public class Vehicle {
             if (customersPossibleLTW.size() == 0)  // no match
             	continue;
             else  // add matches
-            	for (int newEntry = 0 ; newEntry<customersPossibleLTW.size(); newEntry++)
+            	for (int newEntry = 0 ; newEntry<customersPossibleLTW.size(); newEntry++) {
             		// customer, vehicleId, posInRoute, starTime, costs, location, capacity, entryIdxInLoc
-            		possibleInsertions.add(new double[] {customer, 
-            											 this.id, 
-            											 i+1, 
-            											 customersPossibleLTW.get(newEntry)[2], 
-            											 customersPossibleLTW.get(newEntry)[3], 
-            											 customersPossibleLTW.get(newEntry)[0], 
-            											 customersPossibleLTW.get(newEntry)[1], 
-            											 customersPossibleLTW.get(newEntry)[4]});
+            		double[] newInsertion = new double[] {customer, 
+            				this.id, 
+            				i+1, 
+            				customersPossibleLTW.get(newEntry)[2], 
+            				customersPossibleLTW.get(newEntry)[3], 
+            				customersPossibleLTW.get(newEntry)[0], 
+            				customersPossibleLTW.get(newEntry)[1], 
+            				customersPossibleLTW.get(newEntry)[4]};
+            		
+            		if (Config.enableGLS || Config.enableSchiffer || Config.enableGLSFeature) {
+            			//double penaltyCosts = solution.getCustomersCostsForViolations(customer);
+            			double penaltyCosts = solution.getViolationCostsForInsertion(newInsertion);
+            			newInsertion[4] += penaltyCosts;
+            		}
+            		possibleInsertions.add(newInsertion);
+            	}
         }
         return possibleInsertions;
     }
@@ -180,8 +188,14 @@ public class Vehicle {
             // Calculate costs
             double travelTimeReduction = distToCustomer + distFromCustomer - distWithoutCustomer;
             
+            double costs = travelTimeReduction;
+            if (Config.enableGLS || Config.enableSchiffer || Config.enableGLSFeature) {
+    			double penaltyCosts = solution.getCustomersCostsForViolations(customer);
+    			costs += penaltyCosts;
+    		}
+            	
             // Add to possible removals
-            possibleRemovals.add(new double[] {customer, this.id, i, travelTimeReduction});
+            possibleRemovals.add(new double[] {customer, this.id, i, costs});
             i++;
         } while (i < this.customers.size() - 1);
         return possibleRemovals;
@@ -193,7 +207,7 @@ public class Vehicle {
      * @param neighborGraph: neighbor graph
      * @return list of all possible removals
      */
-    public ArrayList<double[]> getPossibleRemovals(double[][] neighborGraph) {
+    public ArrayList<double[]> getPossibleRemovals(double[][] neighborGraph, Solution solution) {
         ArrayList<double[]> possibleRemovals = new ArrayList<>();
 
         if (!this.isUsed) 
@@ -212,7 +226,13 @@ public class Vehicle {
             succ = this.customers.get(i+1);
 
             double score = neighborGraph[pred][customer] + neighborGraph[customer][succ];
-            possibleRemovals.add(new double[] {customer, this.id, i, score});
+            
+            double costs = score;
+            if (Config.enableGLS || Config.enableSchiffer || Config.enableGLSFeature) {
+    			double penaltyCosts = solution.getCustomersCostsForViolations(customer);
+    			costs += penaltyCosts;
+    		}
+            possibleRemovals.add(new double[] {customer, this.id, i, costs});
             i++;
 
         } while (i < this.customers.size() - 1);
@@ -226,7 +246,7 @@ public class Vehicle {
      * @param requestGraph: request graph
      * @return list of all possible removals
      */
-    public ArrayList<double[]> getPossibleRequestRemovals(double[][] requestGraph) {
+    public ArrayList<double[]> getPossibleRequestRemovals(double[][] requestGraph, Solution solution) {
     	ArrayList<double[]> possibleRemovals = new ArrayList<>();
     	
     	// if car is not used -> quit
@@ -244,7 +264,14 @@ public class Vehicle {
     			// aggregate values within the request graph for customerI
     			scoreI += requestGraph[customerI][customerJ];
     		}
-    		possibleRemovals.add(new double[] {customerI, this.id, i, scoreI});
+    		
+            double costs = scoreI;
+            if (Config.enableGLS || Config.enableSchiffer || Config.enableGLSFeature) {
+    			double penaltyCosts = solution.getCustomersCostsForViolations(customerI);
+    			costs += penaltyCosts;
+    		}
+            	
+    		possibleRemovals.add(new double[] {customerI, this.id, i, costs});
     	}
     	
     	return possibleRemovals;
@@ -327,7 +354,7 @@ public class Vehicle {
         // Calculate cost reduction
         double reductionTravelCosts = distToCustomer + distFromCustomer - solution.getData().getDistanceBetweenLocations(locPred, locSucc);
         
-        // Deallocat customer's information from the current solution object
+        // Deallocate customer's information from the current solution object
         solution.freeCustomerAffiliationToLocation(customer);
         solution.freeCustomerAffiliationToCapacity(customer);
         solution.freeCustomerAffiliationToVehicle(customer);

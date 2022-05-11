@@ -79,7 +79,7 @@ public abstract class AbstractRemoval {
      *              operation couldn't be executed
      */
     public final void destroy(Solution solution) throws ArgumentOutOfBoundsException {
-        // get number of removals based on parameters defined in config file
+        // get number of removals based on parameters defined in configuration file
         int nRemovals = getNRemovals(solution);
 
         List<Integer> removedCustomers = this.operatorSpecificDestroy(solution, nRemovals);

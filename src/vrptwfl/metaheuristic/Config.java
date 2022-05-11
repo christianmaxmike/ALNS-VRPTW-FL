@@ -37,12 +37,31 @@ public class Config {
     public static int upperBoundRemovalsMax;
 
     // --- GLS SETTINGS ---
+    // GLS Instance-based
     public static boolean enableGLS;
+    public static double glsLambdaUnscheduled;
+    public static double glsLambdaTimeWindow;
+    public static double glsLambdaPredJobs;
+    public static double glsLambdaCapacity;
+    public static double glsLambdaSkill;
     public static int glsNFeaturesForPenaltyUpdate;
     public static int glsIterUntilPenaltyUpdate;
     public static double glsPenaltyInitValue;
     public static double glsPenaltyIncrease;
     public static double glsPenaltyReduction;
+    // GLS Feature-based
+    public static boolean enableGLSFeature;
+    public static double glsFeatureOmega;
+    public static double[] glsFeatureRangeUnserved;
+    public static double[] glsFeatureRangeTimeWindow;
+    public static double[] glsFeatureRangePredJobs;
+    public static double[] glsFeatureRangeCapacity;
+    public static double[] glsFeatureRangeSkill;
+    public static double glsFeatureUnserved;
+    public static double glsFeatureTimeWindow;
+    public static double glsFeaturePredJobs;
+    public static double glsFeatureCapacity;
+    public static double glsFeatureSkill;
     // Penalty Costs
     public static int exponentSwappingLocations;
     public static double penaltyUnservedCustomer;	// set in MainALNS -> setInstanceSpecificParameters
@@ -52,7 +71,7 @@ public class Config {
     public static double costCapacityViolation;
     public static double costSkillLvlViolation;
     public static double maxTimeWindowViolation;
-    // Penalty Weights
+    // Penalty Weights - Schiffer
     public static boolean enableSchiffer;
     public static double[] penaltyWeightUnservedCustomerRange;
     public static double[] penaltyWeightTimeWindowRange;
@@ -264,6 +283,12 @@ public class Config {
         
         // --- GLS ----
         enableGLS = (boolean) obj.get("enable_gls");
+        
+        glsLambdaUnscheduled = (double) obj.get("gls_lambda_unscheduled");
+        glsLambdaTimeWindow = (double) obj.get("gls_lambda_timeWindow");
+        glsLambdaPredJobs = (double) obj.get("gls_lambda_predJobs");
+        glsLambdaCapacity = (double) obj.get("gls_lambda_capacity");
+        glsLambdaSkill = (double) obj.get("gls_lambda_skill");
         glsNFeaturesForPenaltyUpdate = (int) obj.get("gls_nFeaturesForPenaltyUpdate");
         glsIterUntilPenaltyUpdate = (int) obj.get("gls_iterUntilPenaltyUpdate");
         glsPenaltyInitValue = (double) obj.get("gls_penaltyInitValue");
@@ -277,6 +302,20 @@ public class Config {
         costCapacityViolation = (double) obj.get("cost_capacity_violation");
         costSkillLvlViolation = (double) obj.get("cost_skillLvl_violation");
         maxTimeWindowViolation = (double) obj.get("max_timeWindow_violation");
+        
+        // GLS Feature-based
+        enableGLSFeature = (boolean) obj.get("enable_glsFeature");
+        glsFeatureOmega = (double) obj.get("gls_feature_omega");
+        glsFeatureRangeUnserved = DataUtils.convertDoubleListToArr((ArrayList<Double>) obj.get("gls_feature_range_unserved"));
+        glsFeatureRangeTimeWindow = DataUtils.convertDoubleListToArr((ArrayList<Double>) obj.get("gls_feature_range_timeWindow"));
+        glsFeatureRangePredJobs = DataUtils.convertDoubleListToArr((ArrayList<Double>) obj.get("gls_feature_range_predJobs"));
+        glsFeatureRangeCapacity = DataUtils.convertDoubleListToArr((ArrayList<Double>) obj.get("gls_feature_range_capacity"));
+        glsFeatureRangeSkill = DataUtils.convertDoubleListToArr((ArrayList<Double>) obj.get("gls_feature_range_skill"));
+        glsFeatureUnserved = (double) obj.get("gls_feature_weight_unserved");
+        glsFeatureTimeWindow = (double) obj.get("gls_feature_weight_timeWindow");
+        glsFeaturePredJobs = (double) obj.get("gls_feature_weight_predJobs");
+        glsFeatureCapacity = (double) obj.get("gls_feature_weight_capacity");
+        glsFeatureSkill = (double) obj.get("gls_feature_weight_skill");
         
         // --- PENALTY UPDATE SCHIFFER ----
         enableSchiffer = (boolean) obj.get("enable_schiffer"); 

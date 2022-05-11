@@ -44,7 +44,7 @@ public class HistoricRequestNodeRemoval extends AbstractRemoval {
     	List<Integer> removedCustomers = new ArrayList<>();
     	while (nRemovals > 0) {
     		// get possible removals according to the request graph
-    		ArrayList<double[]> possibleRemovals = solution.getPossibleRemovalsSortedByRequestGraph(alns.getRequestGraph());
+    		ArrayList<double[]> possibleRemovals = solution.getPossibleRemovalsSortedByRequestGraph(alns.getRequestGraph(), solution);
     		
     		// randomize
     		int idx = 0;

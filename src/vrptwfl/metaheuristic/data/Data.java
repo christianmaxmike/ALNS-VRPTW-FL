@@ -53,7 +53,8 @@ public class Data {
     // GLS
     private double[][] glsCounterViolations;
     private double[][] glsPenalties;
-
+    private double[] sumGLSCounterViolations;
+    private ArrayList<Solution> glsSolutionHistory;
 
 	/**
 	 * Constructor for data object.
@@ -197,23 +198,128 @@ public class Data {
      */
     public void initGLSSettings() {
     	this.glsCounterViolations = new double[DataUtils.PenaltyIdx.values().length][this.getnCustomers() + 1];
+    	this.sumGLSCounterViolations = new double[DataUtils.PenaltyIdx.values().length];
+    	this.glsSolutionHistory = new ArrayList<Solution>();
+    	
     	this.glsPenalties = new double[DataUtils.PenaltyIdx.values().length][this.getnCustomers() + 1];
     	for (double[] row: this.glsPenalties)
     		Arrays.fill(row, Config.glsPenaltyInitValue);
+    	
     }
     
     /**
      * Reset the violation counters used for guided local search (GLS)
      */
-    public void resetGLSCounterViolations () {
+    public void resetGLSSettings () {
     	this.glsCounterViolations = new double[DataUtils.PenaltyIdx.values().length][this.getnCustomers() + 1];    	
+    	this.sumGLSCounterViolations = new double[DataUtils.PenaltyIdx.values().length];
+    	this.glsSolutionHistory.clear();
     }
     
     public void updateGLSCounter (Solution s) {
     	// Iterate observed penalties in attached solution
-    	for (int[] entry: s.getListOfPenalties())
-    		// Increment counter of occurrence of penalty (entry[0]: penalty identifer (DataUtils.PenaltyIdx); entry[1]: customer id)
+    	for (int[] entry: s.getListOfPenalties()) {
+    		// Increment counter of occurrence of penalty (entry[0]: penalty identifier (DataUtils.PenaltyIdx); entry[1]: customer id)
     		this.glsCounterViolations[entry[0]][entry[1]] ++;
+    		this.sumGLSCounterViolations[entry[0]] ++;
+    	}    		
+    }
+    
+    public void addToGLSSolutionHistory(Solution s) {
+    	this.glsSolutionHistory.add(s);
+    }
+    
+    public TreeSet<double[]> glsInitUtilitySet() {
+    	TreeSet<double[]> utilitiesSet =  new TreeSet<double[]>(new Comparator<double[]>() {
+			@Override
+			public int compare(double[] o1, double[] o2) {
+				return o1[0] > o2[0] ? -1 : 1;
+			}
+		});
+    	return utilitiesSet;
+    }
+    
+    private void calcUtilitySet (TreeSet<double[]> utilitiesSet) {
+    	for (Solution s : this.glsSolutionHistory) {
+    		// Iterate observed penalties in attached solution
+    		for (int[] entry: s.getListOfPenalties()) {
+    			// Get counter & penalty values
+    			double counter = this.glsCounterViolations[entry[0]][entry[1]];
+    			double penalty = this.glsPenalties[entry[0]][entry[1]];
+    			
+    			// Get cost of violation
+    			double violationCost = -1;
+    			DataUtils.PenaltyIdx whichPenalty = DataUtils.PenaltyIdx.values()[entry[0]];
+    			switch(whichPenalty) {
+    			case TWViolation: violationCost = Config.costTimeWindowViolation; break;
+    			case Unscheduled: violationCost = Config.costUnservedCustomerViolation; break;
+    			case Predecessor: violationCost = Config.costPredJobsViolation; break;
+    			case Capacity: violationCost = Config.costCapacityViolation; break;
+    			case SkillLvl: violationCost = Config.costSkillLvlViolation; break;
+    			default: violationCost = -1;
+    			}
+    			
+    			// Calculate utility and add to set of utilities (sorted by utility values in descending order)
+    			double utility = (counter * violationCost) / (1 + penalty);
+    			utilitiesSet.add(new double[] {utility, entry[0], entry[1]});
+    		}
+    	}
+    }
+    
+    public void glsFeatureUpdatePenaltyWeights() {
+    	TreeSet<double[]> utilitiesSet = glsInitUtilitySet();
+    	this.calcUtilitySet(utilitiesSet);
+    	
+    	boolean[] penaltyFlags = new boolean[DataUtils.PenaltyIdx.values().length];
+    	for (int i=0; i<utilitiesSet.size(); i++) {
+    		double[] utilityEntry = utilitiesSet.pollFirst();
+    		if (utilityEntry == null) break;
+    		
+    		int penaltyIdx = (int) utilityEntry[1];
+			double counter = sumGLSCounterViolations[penaltyIdx];
+			DataUtils.PenaltyIdx whichPenalty = DataUtils.PenaltyIdx.values()[penaltyIdx];
+			switch(whichPenalty) {
+				case Unscheduled: 
+					if (!penaltyFlags[penaltyIdx]) 
+						Config.glsFeatureUnserved = Math.min(Config.glsFeatureRangeUnserved[1], Config.glsFeatureUnserved * (counter * Config.glsFeatureOmega));
+				case TWViolation: 
+					if (!penaltyFlags[penaltyIdx]) 
+						Config.glsFeatureTimeWindow = Math.min(Config.glsFeatureRangeTimeWindow[1], Config.glsFeatureTimeWindow * (counter * Config.glsFeatureOmega));
+				case Predecessor: 
+					if (!penaltyFlags[penaltyIdx]) 
+						Config.glsFeaturePredJobs = Math.min(Config.glsFeatureRangePredJobs[1], Config.glsFeaturePredJobs * (counter * Config.glsFeatureOmega));					
+				case Capacity:
+					if (!penaltyFlags[penaltyIdx]) 
+						Config.glsFeatureCapacity = Math.min(Config.glsFeatureRangeCapacity[1], Config.glsFeatureCapacity * (counter * Config.glsFeatureOmega));				
+				case SkillLvl: 
+					if (!penaltyFlags[penaltyIdx])
+						Config.glsFeatureSkill = Math.min(Config.glsFeatureRangeSkill[1], Config.glsFeatureSkill * (counter * Config.glsFeatureOmega));
+			}   		
+			penaltyFlags[penaltyIdx] = true; 
+    	}
+    	
+    	for (DataUtils.PenaltyIdx penaltyIdx : DataUtils.PenaltyIdx.values()) {
+			// double counter = sumGLSCounterViolations[penaltyIdx.getId()];
+    		
+    		// TODO: Check for " .../ ((1+counter) * Config.glsFeatureOmega) "; 
+			switch(penaltyIdx) {
+			case Unscheduled: 
+				if (!penaltyFlags[penaltyIdx.getId()]) 
+					Config.glsFeatureUnserved = Math.max(Config.glsFeatureRangeUnserved[0], Config.glsFeatureUnserved / (Config.glsFeatureOmega));
+			case TWViolation: 
+				if (!penaltyFlags[penaltyIdx.getId()]) 
+					Config.glsFeatureTimeWindow = Math.max(Config.glsFeatureRangeTimeWindow[0], Config.glsFeatureTimeWindow / (Config.glsFeatureOmega));
+			case Predecessor: 
+				if (!penaltyFlags[penaltyIdx.getId()]) 
+					Config.glsFeaturePredJobs = Math.max(Config.glsFeatureRangePredJobs[0], Config.glsFeaturePredJobs / (Config.glsFeatureOmega));					
+			case Capacity:
+				if (!penaltyFlags[penaltyIdx.getId()]) 
+					Config.glsFeatureCapacity = Math.max(Config.glsFeatureRangeCapacity[0], Config.glsFeatureCapacity / (Config.glsFeatureOmega));				
+			case SkillLvl: 
+				if (!penaltyFlags[penaltyIdx.getId()])
+					Config.glsFeatureSkill = Math.max(Config.glsFeatureRangeSkill[0], Config.glsFeatureSkill / (Config.glsFeatureOmega));
+			}
+    	}
     }
 
     /**
@@ -224,44 +330,22 @@ public class Data {
      * a constant value defined in the configuration file (Config.glsPenaltyIncrease).
      * @param s: solution object carrying information about the observed violations
      */
-    public void glsUpdatePenaltyWeights(Solution s) {
-    	TreeSet<double[]> utilitiesSet =  new TreeSet<double[]>(new Comparator<double[]>() {
-			@Override
-			public int compare(double[] o1, double[] o2) {
-				return o1[0] > o2[0] ? -1 : 1;
-			}
-		});
+    public void glsUpdatePenaltyWeights() {
+    	TreeSet<double[]> utilitiesSet = glsInitUtilitySet();
     	
     	// Decrement penalty values by constant reduction value (set by Config.glsPenaltyReduction)
     	for (int i = 0 ; i<this.glsPenalties.length; i++) {
-    		for (int j = 0; j<this.glsPenalties[i].length; j++)
-    			this.glsPenalties[i][j] = Math.max(Config.glsPenaltyInitValue, this.glsPenalties[i][j] - Config.glsPenaltyReduction);
+    		for (int j = 0; j<this.glsPenalties[i].length; j++) {
+    			// TODO: checken, Auswirkung von init value
+    			// this.glsPenalties[i][j] = Math.max(Config.glsPenaltyInitValue, this.glsPenalties[i][j] - Config.glsPenaltyReduction);
+    			this.glsPenalties[i][j] = Math.max(0, this.glsPenalties[i][j] - Config.glsPenaltyReduction);
+    		}
     	}
     	
-    	// Iterate observed penalties in attached solution
-    	for (int[] entry: s.getListOfPenalties()) {
-    		// Get counter & penalty values
-    		double counter = this.glsCounterViolations[entry[0]][entry[1]];
-    		double penalty = this.glsPenalties[entry[0]][entry[1]];
-    		
-    		// Get cost of violation
-    		double violationCost = -1;
-    		DataUtils.PenaltyIdx whichPenalty = DataUtils.PenaltyIdx.values()[entry[0]];
-    		switch(whichPenalty) {
-	    		case TWViolation: violationCost = Config.costTimeWindowViolation; break;
-	    		case Unscheduled: violationCost = Config.costUnservedCustomerViolation; break;
-	    		case Predecessor: violationCost = Config.costPredJobsViolation; break;
-	    		case Capacity: violationCost = Config.costCapacityViolation; break;
-	    		case SkillLvl: violationCost = Config.costSkillLvlViolation; break;
-	    		default: violationCost = -1;
-    		}
-    		
-    		// Calculate utility and add to set of utilities (sorted by utility values in descending order)
-    		double utility = (counter * violationCost) / (1 + penalty);
-    		utilitiesSet.add(new double[] {utility, entry[0], entry[1]});
-    	}
-
-    	// update penalty values for n features (set by Config.glsNFeturesForPenaltyUpdate
+    	// Calculate utility set
+    	this.calcUtilitySet(utilitiesSet);
+    	
+    	// Update penalty values for n features (set by Config.glsNFeturesForPenaltyUpdate
     	for (int i=0; i<Config.glsNFeaturesForPenaltyUpdate; i++) {
     		double[] utilityEntry = utilitiesSet.pollFirst();
     		if (utilityEntry == null) break;
@@ -406,7 +490,7 @@ public class Data {
     
     /**
      * Retrieve array storing the customers required skill level.
-     * @return required skill leve for all customers (i-th position = required skill level of i-th customer)
+     * @return required skill level for all customers (i-th position = required skill level of i-th customer)
      */
     public int[] getRequiredSkillLvl() {
     	return requiredSkillLvl;
@@ -478,6 +562,14 @@ public class Data {
      */
     public double[][] getGLSCounterViolations () {
     	return this.glsCounterViolations;
+    }
+    
+    /**
+     * Retrieve aggregated counter for violations
+     * @return counter of violations (over all customers)
+     */
+    public double[] getSumGLSCounterViolations() {
+    	return this.sumGLSCounterViolations;
     }
     
     /**
