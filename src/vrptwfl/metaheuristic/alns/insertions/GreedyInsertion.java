@@ -32,7 +32,7 @@ public class GreedyInsertion extends AbstractInsertion {
     @Override
     public double[] getNextInsertion(Solution solution) {
         // initialize values
-        double minCostIncrease = Config.bigMRegret;
+        double minCostIncrease = Config.getInstance().bigMRegret;
         
         // [customerId, vehicleId, positionInRoute, startTime, additionalCosts]
         double[] nextInsertion = new double[7]; 
@@ -60,7 +60,7 @@ public class GreedyInsertion extends AbstractInsertion {
                 double[] possibleInsertion = possibleInsertionsForCustomer.get(0);
 
                 // compare cost increase to currently best (lowest) cost increase
-                if (possibleInsertion[4] + Config.epsilon < minCostIncrease) {
+                if (possibleInsertion[4] + Config.getInstance().epsilon < minCostIncrease) {
                 	minCostIncrease = possibleInsertion[4];  // update new min cost
                     nextInsertion = possibleInsertion;
                 }

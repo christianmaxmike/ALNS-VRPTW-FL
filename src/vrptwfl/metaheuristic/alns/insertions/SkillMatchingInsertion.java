@@ -67,7 +67,7 @@ public class SkillMatchingInsertion extends AbstractInsertion {
 		ListIterator<Integer> iter = solution.getNotAssignedCustomers().listIterator();
         
 		// initialize values
-        double minCostIncrease = Config.bigMRegret;
+        double minCostIncrease = Config.getInstance().bigMRegret;
 		
         // the current inspected Skill lvl; if customers have the same skill discrepancy
         // the best insertion is searched among all of them
@@ -95,7 +95,7 @@ public class SkillMatchingInsertion extends AbstractInsertion {
                 double[] possibleInsertion = possibleInsertionsForCustomer.get(0);
                 
              // compare cost increase to currently best (lowest) cost increase
-                if (possibleInsertion[4] + Config.epsilon < minCostIncrease) {
+                if (possibleInsertion[4] + Config.getInstance().epsilon < minCostIncrease) {
                 	minCostIncrease = possibleInsertion[4];  // update new min cost
                     nextInsertion = possibleInsertion;
                 }

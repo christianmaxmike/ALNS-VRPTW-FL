@@ -93,10 +93,11 @@ public class Data {
         this.nVehicles = nVehicles;
         this.vehicleCapacity = vehicleCapacity;
         this.customers = customers;
-        this.originalCustomerIds = new int[customers.length+1];
+        this.originalCustomerIds = new int[customers.length +1];
         System.arraycopy(this.customers, 0, this.originalCustomerIds, 1, this.originalCustomerIds.length-1);
         this.locationCapacity = locationCapacity;
         this.customerToLocations = customerToLocations;
+        this.locationsToCustomers = locationsToCustomers;
         this.demands = demands;
         this.earliestStartTimes = earliestStartTimes;
         this.latestStartTimes = latestStartTimes;
@@ -156,7 +157,7 @@ public class Data {
         		this.distanceMatrix[i][j] = distance;
         		this.distanceMatrix[j][i] = distance;
         		
-        		if (distance > this.maxDistanceInGraph + Config.epsilon) 
+        		if (distance > this.maxDistanceInGraph + Config.getInstance().epsilon) 
         			this.maxDistanceInGraph = distance;
         	}
         }
@@ -172,7 +173,7 @@ public class Data {
     	for (int n = 0; n < swappingCosts.length; n++) {
     		for (int m = n+1; m < swappingCosts[n].length; m++) {
     			double dist = this.distanceMatrix[n][m];
-    			double swapCost = Math.pow(dist, Config.exponentSwappingLocations);
+    			double swapCost = Math.pow(dist, Config.getInstance().exponentSwappingLocations);
     			this.swappingCosts[n][m] = swapCost;
     			this.swappingCosts[m][n] = swapCost;
     		}
@@ -203,7 +204,7 @@ public class Data {
     	
     	this.glsPenalties = new double[DataUtils.PenaltyIdx.values().length][this.getnCustomers() + 1];
     	for (double[] row: this.glsPenalties)
-    		Arrays.fill(row, Config.glsPenaltyInitValue);
+    		Arrays.fill(row, Config.getInstance().glsPenaltyInitValue);
     	
     }
     
@@ -251,11 +252,11 @@ public class Data {
     			double violationCost = -1;
     			DataUtils.PenaltyIdx whichPenalty = DataUtils.PenaltyIdx.values()[entry[0]];
     			switch(whichPenalty) {
-    			case TWViolation: violationCost = Config.costTimeWindowViolation; break;
-    			case Unscheduled: violationCost = Config.costUnservedCustomerViolation; break;
-    			case Predecessor: violationCost = Config.costPredJobsViolation; break;
-    			case Capacity: violationCost = Config.costCapacityViolation; break;
-    			case SkillLvl: violationCost = Config.costSkillLvlViolation; break;
+    			case TWViolation: violationCost = Config.getInstance().costTimeWindowViolation; break;
+    			case Unscheduled: violationCost = Config.getInstance().costUnservedCustomerViolation; break;
+    			case Predecessor: violationCost = Config.getInstance().costPredJobsViolation; break;
+    			case Capacity: violationCost = Config.getInstance().costCapacityViolation; break;
+    			case SkillLvl: violationCost = Config.getInstance().costSkillLvlViolation; break;
     			default: violationCost = -1;
     			}
     			
@@ -281,19 +282,19 @@ public class Data {
 			switch(whichPenalty) {
 				case Unscheduled: 
 					if (!penaltyFlags[penaltyIdx]) 
-						Config.glsFeatureUnserved = Math.min(Config.glsFeatureRangeUnserved[1], Config.glsFeatureUnserved * (counter * Config.glsFeatureOmega));
+						Config.getInstance().glsFeatureUnserved = Math.min(Config.getInstance().glsFeatureRangeUnserved[1], Config.getInstance().glsFeatureUnserved * (counter * Config.getInstance().glsFeatureOmega));
 				case TWViolation: 
 					if (!penaltyFlags[penaltyIdx]) 
-						Config.glsFeatureTimeWindow = Math.min(Config.glsFeatureRangeTimeWindow[1], Config.glsFeatureTimeWindow * (counter * Config.glsFeatureOmega));
+						Config.getInstance().glsFeatureTimeWindow = Math.min(Config.getInstance().glsFeatureRangeTimeWindow[1], Config.getInstance().glsFeatureTimeWindow * (counter * Config.getInstance().glsFeatureOmega));
 				case Predecessor: 
 					if (!penaltyFlags[penaltyIdx]) 
-						Config.glsFeaturePredJobs = Math.min(Config.glsFeatureRangePredJobs[1], Config.glsFeaturePredJobs * (counter * Config.glsFeatureOmega));					
+						Config.getInstance().glsFeaturePredJobs = Math.min(Config.getInstance().glsFeatureRangePredJobs[1], Config.getInstance().glsFeaturePredJobs * (counter * Config.getInstance().glsFeatureOmega));					
 				case Capacity:
 					if (!penaltyFlags[penaltyIdx]) 
-						Config.glsFeatureCapacity = Math.min(Config.glsFeatureRangeCapacity[1], Config.glsFeatureCapacity * (counter * Config.glsFeatureOmega));				
+						Config.getInstance().glsFeatureCapacity = Math.min(Config.getInstance().glsFeatureRangeCapacity[1], Config.getInstance().glsFeatureCapacity * (counter * Config.getInstance().glsFeatureOmega));				
 				case SkillLvl: 
 					if (!penaltyFlags[penaltyIdx])
-						Config.glsFeatureSkill = Math.min(Config.glsFeatureRangeSkill[1], Config.glsFeatureSkill * (counter * Config.glsFeatureOmega));
+						Config.getInstance().glsFeatureSkill = Math.min(Config.getInstance().glsFeatureRangeSkill[1], Config.getInstance().glsFeatureSkill * (counter * Config.getInstance().glsFeatureOmega));
 			}   		
 			penaltyFlags[penaltyIdx] = true; 
     	}
@@ -301,23 +302,23 @@ public class Data {
     	for (DataUtils.PenaltyIdx penaltyIdx : DataUtils.PenaltyIdx.values()) {
 			// double counter = sumGLSCounterViolations[penaltyIdx.getId()];
     		
-    		// TODO: Check for " .../ ((1+counter) * Config.glsFeatureOmega) "; 
+    		// TODO: Check for " .../ ((1+counter) * Config.getInstance().glsFeatureOmega) "; 
 			switch(penaltyIdx) {
 			case Unscheduled: 
 				if (!penaltyFlags[penaltyIdx.getId()]) 
-					Config.glsFeatureUnserved = Math.max(Config.glsFeatureRangeUnserved[0], Config.glsFeatureUnserved / (Config.glsFeatureOmega));
+					Config.getInstance().glsFeatureUnserved = Math.max(Config.getInstance().glsFeatureRangeUnserved[0], Config.getInstance().glsFeatureUnserved / (Config.getInstance().glsFeatureOmega));
 			case TWViolation: 
 				if (!penaltyFlags[penaltyIdx.getId()]) 
-					Config.glsFeatureTimeWindow = Math.max(Config.glsFeatureRangeTimeWindow[0], Config.glsFeatureTimeWindow / (Config.glsFeatureOmega));
+					Config.getInstance().glsFeatureTimeWindow = Math.max(Config.getInstance().glsFeatureRangeTimeWindow[0], Config.getInstance().glsFeatureTimeWindow / (Config.getInstance().glsFeatureOmega));
 			case Predecessor: 
 				if (!penaltyFlags[penaltyIdx.getId()]) 
-					Config.glsFeaturePredJobs = Math.max(Config.glsFeatureRangePredJobs[0], Config.glsFeaturePredJobs / (Config.glsFeatureOmega));					
+					Config.getInstance().glsFeaturePredJobs = Math.max(Config.getInstance().glsFeatureRangePredJobs[0], Config.getInstance().glsFeaturePredJobs / (Config.getInstance().glsFeatureOmega));					
 			case Capacity:
 				if (!penaltyFlags[penaltyIdx.getId()]) 
-					Config.glsFeatureCapacity = Math.max(Config.glsFeatureRangeCapacity[0], Config.glsFeatureCapacity / (Config.glsFeatureOmega));				
+					Config.getInstance().glsFeatureCapacity = Math.max(Config.getInstance().glsFeatureRangeCapacity[0], Config.getInstance().glsFeatureCapacity / (Config.getInstance().glsFeatureOmega));				
 			case SkillLvl: 
 				if (!penaltyFlags[penaltyIdx.getId()])
-					Config.glsFeatureSkill = Math.max(Config.glsFeatureRangeSkill[0], Config.glsFeatureSkill / (Config.glsFeatureOmega));
+					Config.getInstance().glsFeatureSkill = Math.max(Config.getInstance().glsFeatureRangeSkill[0], Config.getInstance().glsFeatureSkill / (Config.getInstance().glsFeatureOmega));
 			}
     	}
     }
@@ -327,29 +328,29 @@ public class Data {
      * Violations yielding the highest utilities are update.
      * A utility is calculated by (counter * violationCost) / (1 + penalty).
      * The penalty of the highest utility (customer-dependent) are increment by
-     * a constant value defined in the configuration file (Config.glsPenaltyIncrease).
+     * a constant value defined in the configuration file (Config.getInstance().glsPenaltyIncrease).
      * @param s: solution object carrying information about the observed violations
      */
     public void glsUpdatePenaltyWeights() {
     	TreeSet<double[]> utilitiesSet = glsInitUtilitySet();
     	
-    	// Decrement penalty values by constant reduction value (set by Config.glsPenaltyReduction)
+    	// Decrement penalty values by constant reduction value (set by Config.getInstance().glsPenaltyReduction)
     	for (int i = 0 ; i<this.glsPenalties.length; i++) {
     		for (int j = 0; j<this.glsPenalties[i].length; j++) {
     			// TODO: checken, Auswirkung von init value
-    			// this.glsPenalties[i][j] = Math.max(Config.glsPenaltyInitValue, this.glsPenalties[i][j] - Config.glsPenaltyReduction);
-    			this.glsPenalties[i][j] = Math.max(0, this.glsPenalties[i][j] - Config.glsPenaltyReduction);
+    			// this.glsPenalties[i][j] = Math.max(Config.getInstance().glsPenaltyInitValue, this.glsPenalties[i][j] - Config.getInstance().glsPenaltyReduction);
+    			this.glsPenalties[i][j] = Math.max(0, this.glsPenalties[i][j] - Config.getInstance().glsPenaltyReduction);
     		}
     	}
     	
     	// Calculate utility set
     	this.calcUtilitySet(utilitiesSet);
     	
-    	// Update penalty values for n features (set by Config.glsNFeturesForPenaltyUpdate
-    	for (int i=0; i<Config.glsNFeaturesForPenaltyUpdate; i++) {
+    	// Update penalty values for n features (set by Config.getInstance().glsNFeturesForPenaltyUpdate
+    	for (int i=0; i<Config.getInstance().glsNFeaturesForPenaltyUpdate; i++) {
     		double[] utilityEntry = utilitiesSet.pollFirst();
     		if (utilityEntry == null) break;
-    		this.glsPenalties[(int) utilityEntry[1]][(int) utilityEntry[2]] += (Config.glsPenaltyIncrease + Config.glsPenaltyReduction);
+    		this.glsPenalties[(int) utilityEntry[1]][(int) utilityEntry[2]] += (Config.getInstance().glsPenaltyIncrease + Config.getInstance().glsPenaltyReduction);
     	}
     }
     
@@ -374,7 +375,7 @@ public class Data {
      */
     private double getDistanceValue(java.awt.geom.Point2D p1, java.awt.geom.Point2D p2) {
     	double distance = p1.distance(p2);
-        distance = Math.round(distance * Config.roundingPrecisionFactor)/Config.roundingPrecisionFactor;
+        distance = Math.round(distance * Config.getInstance().roundingPrecisionFactor)/Config.getInstance().roundingPrecisionFactor;
         return distance;    	
     }
     

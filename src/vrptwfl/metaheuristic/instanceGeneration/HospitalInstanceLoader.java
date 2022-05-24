@@ -15,7 +15,7 @@ import vrptwfl.metaheuristic.Config;
 /**
  * Class for loading hospital instances. 
  * 
- * @author Christian M.M. Frey
+ * @author Christian M.M. Frey, Alexander Jungwirth
  *
  */
 public class HospitalInstanceLoader {
@@ -26,17 +26,17 @@ public class HospitalInstanceLoader {
 	 * all of the sub-procedures to load a hospital instance and create 
 	 * data objects such that it can be processed by the ALNS framework.
 	 * @param instanceName: name of instance being processed
-	 * @return array of data objects (if Config.solveAsTwoProblems is true, idx:0 data object for the morning shift and idx:1 for the evening shift)
+	 * @return array of data objects (if Config.getInstance().solveAsTwoProblems is true, idx:0 data object for the morning shift and idx:1 for the evening shift)
 	 */
 	// Data is array because we have two data sets for morning and evening if problem is solved as two problems.
 	public Data[] loadHospitalInstanceFromJSON(String instanceName) {
 		
 		// planning interval
-		this.planningInterval = Config.planningIntervals; // default 5 min
-		int vehicleCapacity = Config.maxCapacityVehicles; // big enough to never be critical
+		this.planningInterval = Config.getInstance().planningIntervals; // default 5 min
+		int vehicleCapacity = Config.getInstance().maxCapacityVehicles; // big enough to never be critical
 
 		Data[] data;
-		if (Config.solveAsTwoProblems) {
+		if (Config.getInstance().solveAsTwoProblems) {
 			data = new Data[2];
 			data[0] = new Data(instanceName + "_m"); // m: morning shift
 			data[1] = new Data(instanceName + "_e"); // e: evening shift
@@ -56,11 +56,11 @@ public class HospitalInstanceLoader {
 			ImportedTherapist[] therapists =  instance.getTherapists(); 
 			
 			// if split regular shift is activated 
-			if(Config.splitRegularShift) 
+			if(Config.getInstance().splitRegularShift) 
 				therapists = this.splitRegularShifts(therapists);
 			
 			// generate working patterns and vehicles
-			if (Config.solveAsTwoProblems) {
+			if (Config.getInstance().solveAsTwoProblems) {
 				// note the therapists below are already split because splitRegularShifts is always true if solveAsTwoProblems
 				ImportedTherapist[][] aux = this.getTherapistsForMorningAndEveningShift(therapists);
 				ImportedTherapist[] morningTherapists = aux[0];
@@ -113,7 +113,7 @@ public class HospitalInstanceLoader {
 				d.setLocationsToCustomers(location2Job);
 			}
 
-			if (Config.solveAsTwoProblems) {
+			if (Config.getInstance().solveAsTwoProblems) {
 				ArrayList<double[][]> morningEveningJobs = this.getJobsForMorningAndEveningShift(realJobs);
 				HashMap<Integer, ArrayList<Integer>> morningPredJobs = this.getPredJobsShift(predJobs, morningEveningJobs.get(0));
 				HashMap<Integer, ArrayList<Integer>> eveningPredJobs = this.getPredJobsShift(predJobs, morningEveningJobs.get(1));
@@ -190,7 +190,7 @@ public class HospitalInstanceLoader {
 		int nEveningJobs = 0;
 		int endOfPlanningHorizon = -1;
 		for (int i = 0 ; i<realJobs[0].length; i++) {
-			if (realJobs[1][i] > startEveningShift - Config.epsilon)
+			if (realJobs[1][i] > startEveningShift - Config.getInstance().epsilon)
 				nEveningJobs++;
 			if ( (realJobs[1][i] + realJobs[2][i]) > endOfPlanningHorizon)
 				endOfPlanningHorizon = (int) (realJobs[1][i] + realJobs[2][i]);
@@ -230,7 +230,7 @@ public class HospitalInstanceLoader {
 			int jobPreferredLocationId = (int) realJobs[5][i];
 			int customerId = (int) realJobs[6][i];
 			
-			if (jobEarliestStart + jobDuration < endMorningShift + Config.epsilon) {
+			if (jobEarliestStart + jobDuration < endMorningShift + Config.getInstance().epsilon) {
 				morningJobInformation[0][morningIdx] = jobEarliestStart;
 				morningJobInformation[1][morningIdx] = jobLatestStart;
 				morningJobInformation[2][morningIdx] = jobDuration;
@@ -241,7 +241,7 @@ public class HospitalInstanceLoader {
 				morningIdx ++;
 			}
 			
-			if (jobLatestStart > startEveningShift - Config.epsilon) {
+			if (jobLatestStart > startEveningShift - Config.getInstance().epsilon) {
 				eveningJobInformation[0][eveningIdx] = jobEarliestStart;
 				eveningJobInformation[1][eveningIdx] = jobLatestStart;
 				eveningJobInformation[2][eveningIdx] = jobDuration;

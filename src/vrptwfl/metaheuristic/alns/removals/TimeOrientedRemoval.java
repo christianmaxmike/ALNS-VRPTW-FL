@@ -33,7 +33,7 @@ public class TimeOrientedRemoval extends AbstractRemoval {
     public TimeOrientedRemoval(Data data, boolean randomize, double weightStartTimeInSolution) throws ArgumentOutOfBoundsException {
         super(data);
         this.randomize = randomize;
-        if (weightStartTimeInSolution < - Config.epsilon || weightStartTimeInSolution > 1 + Config.epsilon) 
+        if (weightStartTimeInSolution < - Config.getInstance().epsilon || weightStartTimeInSolution > 1 + Config.getInstance().epsilon) 
         	throw new ArgumentOutOfBoundsException("Weight parameter (alpha_1) for time-oriented destroy must be in interval [0,1]. Given was: " + weightStartTimeInSolution + ".");
         this.weightStartTimeInSolution = weightStartTimeInSolution; // alpha_2 - Wert im draft
     }
@@ -45,7 +45,7 @@ public class TimeOrientedRemoval extends AbstractRemoval {
     @Override
     List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) throws ArgumentOutOfBoundsException {
 
-        if (nRemovals > Config.timeOrientedNrOfClosest) throw new ArgumentOutOfBoundsException("nRemovals (q=" + nRemovals + ") must be less than or equal to timeOrientedNrOfClosest (B=" + Config.timeOrientedNrOfClosest + ").");
+        if (nRemovals > Config.getInstance().timeOrientedNrOfClosest) throw new ArgumentOutOfBoundsException("nRemovals (q=" + nRemovals + ") must be less than or equal to timeOrientedNrOfClosest (B=" + Config.getInstance().timeOrientedNrOfClosest + ").");
 
         List<Integer> removedCustomers = new ArrayList<>();
 
@@ -105,7 +105,7 @@ public class TimeOrientedRemoval extends AbstractRemoval {
         // sort according to distance (smallest distance first)
         closest.sort(Comparator.comparing(v->v[2]));
         // remove customers which are not close
-        closest = closest.subList(0,  Math.min(closest.size(), Config.timeOrientedNrOfClosest));
+        closest = closest.subList(0,  Math.min(closest.size(), Config.getInstance().timeOrientedNrOfClosest));
 
         // 3) --- sort according to time difference (smallest difference first)
         closest.sort(Comparator.comparing(v->v[3]));
@@ -115,8 +115,8 @@ public class TimeOrientedRemoval extends AbstractRemoval {
 
             int idx = 0;
             if (this.randomize) {
-                double rand = Config.randomGenerator.nextDouble();
-                idx = (int) Math.floor(Math.pow(rand, Config.timeOrientedRemovalExponent) * closest.size());
+                double rand = Config.getInstance().randomGenerator.nextDouble();
+                idx = (int) Math.floor(Math.pow(rand, Config.getInstance().timeOrientedRemovalExponent) * closest.size());
             }
             double[] removal = closest.get(idx);
 

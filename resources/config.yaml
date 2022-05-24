@@ -12,9 +12,9 @@ upper_bound_factor_nr_of_removals: 0.4
 
 
 ### PENALTY UPDATE - SETTINGS
-enable_gls: false
+enable_gls: true
 enable_schiffer: false
-enable_glsFeature: true
+enable_glsFeature: false
 # lambda values
 gls_lambda_unscheduled: 15.0
 gls_lambda_timeWindow: 0.5
@@ -24,23 +24,23 @@ gls_lambda_skill: 1.0
 # general penalty settings
 exponent_swapping_locations: 1								# exponent for swapping costs: (loc2 - loc1) ^ exp  (default: 1)
 cost_factor_unserved_customer: 3.0  						# cost for unserviced customers is equal to this number times the maximum distance in the graph (default: 5.0)
-cost_timeWindow_violation: 1.0 #0.5							# TW violation (default: 0.5)
-cost_predJobs_violation: 10.0								# Predecessor jobs violation (default: 10)
+cost_timeWindow_violation: 1.0 # 0.5							# TW violation (default: 0.5)
+cost_predJobs_violation: 5.0 # 10.0							# Predecessor jobs violation (default: 10)
 cost_capacity_violation: 1.0								# capacity violation (default: 1.0)
 cost_skillLvl_violation: 2.0								# default: 5.0
 max_timeWindow_violation: 10.0								# default: 10.0
 # gls feature-based
 gls_feature_omega: 1.15
-gls_feature_range_unserved: [10.0, 100.0]
-gls_feature_range_timeWindow: [10.0, 100.0]
-gls_feature_range_predJobs: [10.0, 100.0]
-gls_feature_range_capacity: [10.0, 100.0]
-gls_feature_range_skill: [10.0, 100.0]
-gls_feature_weight_unserved: 50.0
-gls_feature_weight_timeWindow: 50.0
-gls_feature_weight_predJobs: 50.0
-gls_feature_weight_capacity: 50.0
-gls_feature_weight_skill: 50.0
+gls_feature_range_unserved: [1.0, 100.0]
+gls_feature_range_timeWindow: [1.0, 100.0]
+gls_feature_range_predJobs: [1.0, 100.0]
+gls_feature_range_capacity: [1.0, 100.0]
+gls_feature_range_skill: [1.0, 100.0]
+gls_feature_weight_unserved: 10.0
+gls_feature_weight_timeWindow: 10.0
+gls_feature_weight_predJobs: 10.0
+gls_feature_weight_capacity: 10.0
+gls_feature_weight_skill: 10.0
 # gls instance-based
 gls_iterUntilPenaltyUpdate: 25
 gls_nFeaturesForPenaltyUpdate: 5
@@ -99,10 +99,10 @@ regret_sum_over_all_n_regret: true  						# default in Ropke C&OR §5.2.2 p. 241
 
 
 ### PARAMS FOR DESTROY OPERATORS
-neighbor_graph_removal_exponent: 6
-request_graph_removal_exponent: 6
-shaw_removal_exponent: 6
-time_oriented_removal_exponent: 6  							# in Pisinger & Ropke C&OR §5.1.5 p. 2414: identical to shaw_removal_exponent
+neighbor_graph_removal_exponent: 3 #6
+request_graph_removal_exponent: 3  #6
+shaw_removal_exponent: 3           #6
+time_oriented_removal_exponent: 3  	#6						# in Pisinger & Ropke C&OR §5.1.5 p. 2414: identical to shaw_removal_exponent
 time_oriented_nr_of_closest: 100  							# maximum number of closest customers to consider when applying time oriented removal
 time_oriented_jungwirth_weight_start_time_in_solution: .75  # alpha_1 in Jungwirth et al. 2021
 worst_removal_exponent: 3
@@ -133,7 +133,7 @@ updateInterval: 100
 
 
 ### SIMULATED ANNEALING
-coolingRate: 0.99937    			# Ropke und Pisinger 2016 - 0.9998 EJOR, p.761
+coolingRate: 0.99937    			# Ropke und Pisinger 2016 - EJOR, p.761
 minTempPercent: 0.01      			# percentage the temperature is cooled down, 
 startTempControlParam: 0.05 		# start temperature control parameter  (delta in old code), Ropke und Pisinger 2016 - 0.9998 EJOR, p.761
 bigOmega: 0.5						# percentage a solution being 1+w higher than current solution is accepted

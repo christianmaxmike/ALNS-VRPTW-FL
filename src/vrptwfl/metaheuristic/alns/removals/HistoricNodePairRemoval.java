@@ -43,8 +43,8 @@ public class HistoricNodePairRemoval extends AbstractRemoval {
 
             int idx = 0;
             if (this.randomize) {
-                double rand = Config.randomGenerator.nextDouble();
-                idx = (int) Math.floor(Math.pow(rand, Config.historicNodePairRemovalExponent) * possibleRemovals.size());
+                double rand = Config.getInstance().randomGenerator.nextDouble();
+                idx = (int) Math.floor(Math.pow(rand, Config.getInstance().historicNodePairRemovalExponent) * possibleRemovals.size());
             }
 
             double[] removal = possibleRemovals.get(idx);

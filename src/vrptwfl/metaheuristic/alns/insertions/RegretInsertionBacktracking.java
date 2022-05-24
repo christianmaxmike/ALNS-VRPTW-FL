@@ -36,13 +36,13 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
         if (k <= 1) 
         	throw new ArgumentOutOfBoundsException("regret parameter k must be greater than one. Value passed was " + k + ".");
         this.k = k;
-        this.backtrackJump = Config.backtrackJump;
+        this.backtrackJump = Config.getInstance().backtrackJump;
         this.noBackTrackJumps = 0;
     }
     
     public Solution runBacktracking(Solution solution) {
     	// Try backtracking for x trials
-    	for (int trial = 0; trial<Config.backtrackTrials; trial++) {
+    	for (int trial = 0; trial<Config.getInstance().backtrackTrials; trial++) {
     		this.noBackTrackJumps = 0;
     		System.out.println("Backtracking Trial:" + trial);
     		
@@ -58,7 +58,7 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
     		Solution currSolution = initSolution;
     		
     		// loop while there are unscheduled customers
-    		while (!currSolution.getNotAssignedCustomers().isEmpty() && this.noBackTrackJumps < Config.maxBacktrackJumps) {
+    		while (!currSolution.getNotAssignedCustomers().isEmpty() && this.noBackTrackJumps < Config.getInstance().maxBacktrackJumps) {
     			
     			// receive the next possible insertions in the current node in the backtracking-tree
     			// if in a backtrack-node a tuple (customerID, vehicleId,...) has already been tried, it 
@@ -133,7 +133,7 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
         double[] nextInsertion = new double[8]; 
         // positionInRoute is defined as the position at which the customer will be inserted
         nextInsertion[0] = -1;
-        nextInsertion[4] = -1; //Config.bigMRegret;
+        nextInsertion[4] = -1; //Config.getInstance().bigMRegret;
 
         ListIterator<Integer> iter = solution.getNotAssignedCustomers().listIterator();
 
@@ -172,9 +172,9 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
                 regret = this.calculateRegret(this.k, possibleInsertionsForCustomer);
 
                 // if regret is higher than currently highest regret, update maxRegret and update nextInsertion
-                if (regret > maxRegret - Config.epsilon) {  // check if regret >= maxRegret
+                if (regret > maxRegret - Config.getInstance().epsilon) {  // check if regret >= maxRegret
                     // either (regret > maxRegret) or (regret == maxRegret but lower insertion cost (tie-breaker))
-                    if ((regret > maxRegret + Config.epsilon) || (nextInsertion[4] < possibleInsertionsForCustomer.get(0)[4] + Config.epsilon)) {
+                    if ((regret > maxRegret + Config.getInstance().epsilon) || (nextInsertion[4] < possibleInsertionsForCustomer.get(0)[4] + Config.getInstance().epsilon)) {
                         maxRegret = regret;
                         nextInsertion = possibleInsertionsForCustomer.get(0);
                     }
@@ -210,10 +210,10 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
                 regret += possibleInsertionsForCustomer.get(i - 1)[4] - possibleInsertionsForCustomer.get(0)[4];
             else
                 // if list has entries, but not k (i.e. not enough to calculate k-regret)
-                regret += (i - possibleInsertionsForCustomer.size())*Config.bigMRegret - possibleInsertionsForCustomer.get(0)[4];
+                regret += (i - possibleInsertionsForCustomer.size())*Config.getInstance().bigMRegret - possibleInsertionsForCustomer.get(0)[4];
             
             // if only the regret between n-th and best should be considered, break loop
-            if (!Config.regretSumOverAllNRegret) 
+            if (!Config.getInstance().regretSumOverAllNRegret) 
                 break;
         }
         return regret;
@@ -227,19 +227,19 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
      */
     private int getJumpIdx(int depth) {
     	int jumpToSolIdx = 0;
-    	if (Config.backtrackBySteps)
+    	if (Config.getInstance().backtrackBySteps)
     		jumpToSolIdx = Math.max( (depth) - this.backtrackJump, 0);
     	else {
-    		int startIdx = Math.min(Config.backtrackJumpToLevelProbabilities.length-1, depth-1);
+    		int startIdx = Math.min(Config.getInstance().backtrackJumpToLevelProbabilities.length-1, depth-1);
     		for (int j = startIdx; j>=0; j--) {
-    			double rand = Config.randomGenerator.nextDouble();
-    			if (rand < Config.backtrackJumpToLevelProbabilities[j]) {
+    			double rand = Config.getInstance().randomGenerator.nextDouble();
+    			if (rand < Config.getInstance().backtrackJumpToLevelProbabilities[j]) {
     				jumpToSolIdx = j;
     				break;
     			}
     		}
     		// logic of jumping to a fixed level (=no probabilities)
-    		// jumpToSolIdx = Math.min( depth, Config.backtrackJumpToLevel);
+    		// jumpToSolIdx = Math.min( depth, Config.getInstance().backtrackJumpToLevel);
     	}
     	return jumpToSolIdx;
     }

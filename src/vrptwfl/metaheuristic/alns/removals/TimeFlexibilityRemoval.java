@@ -57,8 +57,8 @@ public class TimeFlexibilityRemoval extends AbstractRemoval {
 			
 			int idx = 0;
 			if (this.randomize) {
-				double rand = Config.randomGenerator.nextDouble();
-				idx = (int) Math.floor(Math.pow(rand, Config.timeFlexibilityRemovalExponent) * copyList.size());
+				double rand = Config.getInstance().randomGenerator.nextDouble();
+				idx = (int) Math.floor(Math.pow(rand, Config.getInstance().timeFlexibilityRemovalExponent) * copyList.size());
 			}
 			
 			int removeCustomer = copyList.get(idx);

@@ -62,7 +62,7 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
         // still more removals needed (nRemovals not yet reached) and there is vehicles left from which customers can be removed
         while (nRemovals > 0 && !solution.getUsedVehicles().isEmpty()) {
             // randomly select customer already removed
-            int idxC = Config.randomGenerator.nextInt(removedCustomers.size());
+            int idxC = Config.getInstance().randomGenerator.nextInt(removedCustomers.size());
             Integer referenceCustomer = removedCustomers.get(idxC);
             // int firstCustomerPreferencedLocation = customerLocationReferences[referenceCustomer];
             // int referenceCustomerLocationIdx = DataUtils.getLocationIndex(referenceCustomer, solution);
@@ -344,7 +344,7 @@ public class ClusterKruskalRemoval extends AbstractRemoval {
 
             ArrayList<Integer> positions = new ArrayList<>();
             // randomly choose either cluster 0 or 1
-            int targetId = (Config.randomGenerator.nextBoolean()) ? 0 : 1;
+            int targetId = (Config.getInstance().randomGenerator.nextBoolean()) ? 0 : 1;
 
 
             int[] clusterIds = new int[parent.length];

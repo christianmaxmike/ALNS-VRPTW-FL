@@ -18,169 +18,182 @@ import java.util.Random;
  * @author Christian M.M. Frey, Alexander Jungwirth
  */
 public class Config {
+	
+	public boolean randomizeConfig;
 
     // --- GENERAL ---
-    public static Random randomGenerator;
+    public Random randomGenerator;
 
     // --- CALCULATIONS ---
-    public static double epsilon;
-    public static int bigMRegret;
-    public static double roundingPrecisionFactor;
+    public double epsilon;
+    public int bigMRegret;
+    public double roundingPrecisionFactor;
 
     // --- ALNS ---
-    public static int alnsIterations;
-    public static int lowerBoundRemovals;
-    public static double lowerBoundRemovalsFactor;
-    public static int lowerBoundRemovalsMax;
-    public static int upperBoundRemovals;
-    public static double upperBoundRemovalsFactor;
-    public static int upperBoundRemovalsMax;
+    public int alnsIterations;
+    public int lowerBoundRemovals;
+    public double lowerBoundRemovalsFactor;
+    public int lowerBoundRemovalsMax;
+    public int upperBoundRemovals;
+    public double upperBoundRemovalsFactor;
+    public int upperBoundRemovalsMax;
 
     // --- GLS SETTINGS ---
     // GLS Instance-based
-    public static boolean enableGLS;
-    public static double glsLambdaUnscheduled;
-    public static double glsLambdaTimeWindow;
-    public static double glsLambdaPredJobs;
-    public static double glsLambdaCapacity;
-    public static double glsLambdaSkill;
-    public static int glsNFeaturesForPenaltyUpdate;
-    public static int glsIterUntilPenaltyUpdate;
-    public static double glsPenaltyInitValue;
-    public static double glsPenaltyIncrease;
-    public static double glsPenaltyReduction;
+    public boolean enableGLS;
+    public double glsLambdaUnscheduled;
+    public double glsLambdaTimeWindow;
+    public double glsLambdaPredJobs;
+    public double glsLambdaCapacity;
+    public double glsLambdaSkill;
+    public int glsNFeaturesForPenaltyUpdate;
+    public int glsIterUntilPenaltyUpdate;
+    public double glsPenaltyInitValue;
+    public double glsPenaltyIncrease;
+    public double glsPenaltyReduction;
     // GLS Feature-based
-    public static boolean enableGLSFeature;
-    public static double glsFeatureOmega;
-    public static double[] glsFeatureRangeUnserved;
-    public static double[] glsFeatureRangeTimeWindow;
-    public static double[] glsFeatureRangePredJobs;
-    public static double[] glsFeatureRangeCapacity;
-    public static double[] glsFeatureRangeSkill;
-    public static double glsFeatureUnserved;
-    public static double glsFeatureTimeWindow;
-    public static double glsFeaturePredJobs;
-    public static double glsFeatureCapacity;
-    public static double glsFeatureSkill;
+    public boolean enableGLSFeature;
+    public double glsFeatureOmega;
+    public double[] glsFeatureRangeUnserved;
+    public double[] glsFeatureRangeTimeWindow;
+    public double[] glsFeatureRangePredJobs;
+    public double[] glsFeatureRangeCapacity;
+    public double[] glsFeatureRangeSkill;
+    public double glsFeatureUnserved;
+    public double glsFeatureTimeWindow;
+    public double glsFeaturePredJobs;
+    public double glsFeatureCapacity;
+    public double glsFeatureSkill;
     // Penalty Costs
-    public static int exponentSwappingLocations;
-    public static double penaltyUnservedCustomer;	// set in MainALNS -> setInstanceSpecificParameters
-    public static double costUnservedCustomerViolation;
-    public static double costTimeWindowViolation;
-    public static double costPredJobsViolation;
-    public static double costCapacityViolation;
-    public static double costSkillLvlViolation;
-    public static double maxTimeWindowViolation;
+    public int exponentSwappingLocations;
+    public double penaltyUnservedCustomer;	// set in MainALNS -> setInstanceSpecificParameters
+    public double costUnservedCustomerViolation;
+    public double costTimeWindowViolation;
+    public double costPredJobsViolation;
+    public double costCapacityViolation;
+    public double costSkillLvlViolation;
+    public double maxTimeWindowViolation;
     // Penalty Weights - Schiffer
-    public static boolean enableSchiffer;
-    public static double[] penaltyWeightUnservedCustomerRange;
-    public static double[] penaltyWeightTimeWindowRange;
-    public static double[] penaltyWeightPredecessorJobsRange;
-    public static double[] penaltyWeightCapacityRange;
-    public static double[] penaltyWeightSkillLvlRange;
-    public static double penaltyWeightUnservedCustomer;
-    public static double penaltyWeightTimeWindow;
-    public static double penaltyWeightPredecessorJobs;
-    public static double penaltyWeightCapacity;
-    public static double penaltyWeightSkillLvl;
-    public static double penaltyWeightOmega;
-    public static int penaltyWeightUpdateIteration;
+    public boolean enableSchiffer;
+    public double[] penaltyWeightUnservedCustomerRange;
+    public double[] penaltyWeightTimeWindowRange;
+    public double[] penaltyWeightPredecessorJobsRange;
+    public double[] penaltyWeightCapacityRange;
+    public double[] penaltyWeightSkillLvlRange;
+    public double penaltyWeightUnservedCustomer;
+    public double penaltyWeightTimeWindow;
+    public double penaltyWeightPredecessorJobs;
+    public double penaltyWeightCapacity;
+    public double penaltyWeightSkillLvl;
+    public double penaltyWeightOmega;
+    public int penaltyWeightUpdateIteration;
 
     // --- ALNS OEPRATORS TO USE ---
     // removals
-    public static boolean useClusterRemovalKruskal;
-    public static boolean useKMeansRemoval;
-    public static boolean useHistoricNodePairRemovalDeterministic;
-    public static boolean useHistoricNodePairRemovalRandom;
-    public static boolean useHistoricRequestPairRemoval;
-    public static boolean useRandomRemoval;
-    public static boolean useRandomRouteRemoval;
-    public static boolean useShawSimplifiedRemovalDeterministic;
-    public static boolean useShawSimplifiedRemovalRandom;
-    public static boolean useTimeOrientedRemovalJungwirthDeterministic;
-    public static boolean useTimeOrientedRemovalJungwirthRandom;
-    public static boolean useTimeOrientedRemovalPisingerDeterministic;
-    public static boolean useTimeOrientedRemovalPisingerRandom;
-    public static boolean useWorstRemovalDeterministic;
-    public static boolean useWorstRemovalRandom;
-    public static boolean useSkillMismatchRemovalRandom;
-    public static boolean useSkillMismatchRemovalDeterministic;
-    public static boolean useTimeFlexibilityRemovalRandom;
-    public static boolean useTimeFlexibilityRemovalDeterministic;
-    public static boolean useRouteEliminationLeast;
-    public static boolean useRouteEliminationMost;
-    public static boolean useZoneRemoval;
+    public boolean useClusterRemovalKruskal;
+    public boolean useKMeansRemoval;
+    public boolean useHistoricNodePairRemovalDeterministic;
+    public boolean useHistoricNodePairRemovalRandom;
+    public boolean useHistoricRequestPairRemoval;
+    public boolean useRandomRemoval;
+    public boolean useRandomRouteRemoval;
+    public boolean useShawSimplifiedRemovalDeterministic;
+    public boolean useShawSimplifiedRemovalRandom;
+    public boolean useTimeOrientedRemovalJungwirthDeterministic;
+    public boolean useTimeOrientedRemovalJungwirthRandom;
+    public boolean useTimeOrientedRemovalPisingerDeterministic;
+    public boolean useTimeOrientedRemovalPisingerRandom;
+    public boolean useWorstRemovalDeterministic;
+    public boolean useWorstRemovalRandom;
+    public boolean useSkillMismatchRemovalRandom;
+    public boolean useSkillMismatchRemovalDeterministic;
+    public boolean useTimeFlexibilityRemovalRandom;
+    public boolean useTimeFlexibilityRemovalDeterministic;
+    public boolean useRouteEliminationLeast;
+    public boolean useRouteEliminationMost;
+    public boolean useZoneRemoval;
     // insertions
-    public static boolean useGreedyInsert;
-    public static boolean useSkillMatchingInsert;
-    public static boolean useNRegret2;
-    public static boolean useNRegret3;
-    public static boolean useNRegret4;
-    public static boolean useNRegret5;
-    public static boolean useNRegret6;
-    public static boolean regretConsiderAllPossibleInsertionPerRoute;
-    public static boolean regretSumOverAllNRegret;
+    public boolean useGreedyInsert;
+    public boolean useSkillMatchingInsert;
+    public boolean useNRegret2;
+    public boolean useNRegret3;
+    public boolean useNRegret4;
+    public boolean useNRegret5;
+    public boolean useNRegret6;
+    public boolean regretConsiderAllPossibleInsertionPerRoute;
+    public boolean regretSumOverAllNRegret;
 
     // --- ALNS OPERATOR PARAMETERS ---
-    public static int historicNodePairRemovalExponent;
-    public static int historicRequestRemovalExponent;
-    public static int shawRemovalExponent;
-    public static int timeOrientedRemovalExponent;
-    public static int timeOrientedNrOfClosest;
-    public static double timeOrientedJungwirthWeightStartTimeIinSolution;
-    public static int worstRemovalExponent;
-    public static int skillMismatchRemovalExponent;
-    public static int timeFlexibilityRemovalExponent;
-    public static int requestGraphSolutionsSize;
-    public static int[] kMeansClusterSettings;
+    public int historicNodePairRemovalExponent;
+    public int historicRequestRemovalExponent;
+    public int shawRemovalExponent;
+    public int timeOrientedRemovalExponent;
+    public int timeOrientedNrOfClosest;
+    public double timeOrientedJungwirthWeightStartTimeIinSolution;
+    public int worstRemovalExponent;
+    public int skillMismatchRemovalExponent;
+    public int timeFlexibilityRemovalExponent;
+    public int requestGraphSolutionsSize;
+    public int[] kMeansClusterSettings;
     
     // --- BACKTRACKING SETTINGS ---
-    public static boolean enableBacktracking;
-    public static int backtrackTrials;
-    public static int backtrackJump;
-    public static int backtrackJumpToLevel;
-    public static double[] backtrackJumpToLevelProbabilities;
-    public static boolean backtrackBySteps;
-    public static int maxBacktrackJumps;
+    public boolean enableBacktracking;
+    public int backtrackTrials;
+    public int backtrackJump;
+    public int backtrackJumpToLevel;
+    public double[] backtrackJumpToLevelProbabilities;
+    public boolean backtrackBySteps;
+    public int maxBacktrackJumps;
 
     // --- UPDATE VALUES FOR DESTROY/REPAIR OPS ---
-    public static int sigma1;
-    public static int sigma2;
-    public static int sigma3;
-    public static double reactionFactor;
-    public static double minOpProb;
-    public static boolean drawOpUniformly;
-    public static int updateInterval;
+    public int sigma1;
+    public int sigma2;
+    public int sigma3;
+    public double reactionFactor;
+    public double minOpProb;
+    public boolean drawOpUniformly;
+    public int updateInterval;
     
     // --- SIMULATED ANNEALING ---
-    public static double coolingRate;
-    public static double minTempPercent;
-    public static double startTempControlParam;
-    public static double bigOmega;
+    public double coolingRate;
+    public double minTempPercent;
+    public double startTempControlParam;
+    public double bigOmega;
     
     // --- LOCATION DEPENDENT VARIABLES (for solomon instances) ---
-    public static int numberOfLocationsPerCustomer;
+    public int numberOfLocationsPerCustomer;
         
     // --- HOSPITAL INSTANCES ---
-    public static int planningIntervals;
-    public static int maxCapacityVehicles;
-    public static boolean solveAsTwoProblems;
-    public static boolean splitRegularShift;
-    public static boolean printHospitalLoaderInfo;
+    public int planningIntervals;
+    public int maxCapacityVehicles;
+    public boolean solveAsTwoProblems;
+    public boolean splitRegularShift;
+    public boolean printHospitalLoaderInfo;
+    
+    // --- additional values (used for I/O) ---
+    public double avgOptimalityGapValue = Double.MAX_VALUE;
+    public double optimalityGapValue = Double.MAX_VALUE;
     
 
-    //NOTE Chris - if boring - make singleton pattern (getInstance())
-    private static Config conf = new Config();
+    //NOTE maybe as singleton pattern (getInstance())
+    private static Config instance;
+    //public Config conf = new Config();
 
+    public static Config getInstance() {
+    	if (instance == null) {
+    		instance = new Config();
+    	}
+    	return instance;
+    }
     // private to prevent anyone else from instantiating
     private Config() {
         loadConfig();
     }
-
+    
     /**
      * Loads the configuration settings from the config.yaml file.
      */
-    public void loadConfig() {
+    private void loadConfig() {
         InputStream inputStream = null;
         try {
             inputStream = new FileInputStream(new File("resources/config.yaml"));
@@ -343,5 +356,37 @@ public class Config {
         solveAsTwoProblems = (boolean) obj.get("solveAsTwoProblems");
         splitRegularShift = (boolean) obj.get("splitRegularShift");
         printHospitalLoaderInfo = (boolean) obj.get("printHospitalLoaderInfo");
+    }
+    
+    public void randomizeConfig () {
+    	getInstance().reactionFactor = randomizeDoubleValue(0.22, getInstance().reactionFactor);
+    	getInstance().sigma1 = (int) (randomizeDoubleValue(40.0, getInstance().sigma1));
+    	getInstance().sigma2 = (int) (randomizeDoubleValue(20.0, getInstance().sigma2));
+    	getInstance().sigma3 = (int) (randomizeDoubleValue(15.0, getInstance().sigma3));
+    	
+    	getInstance().coolingRate = randomizeDoubleValue(0.9998, getInstance().coolingRate);
+    	
+    	getInstance().costUnservedCustomerViolation = randomizeDoubleValue(5, getInstance().costUnservedCustomerViolation);
+    	getInstance().costTimeWindowViolation = randomizeDoubleValue(2, getInstance().costTimeWindowViolation);
+    	getInstance().costPredJobsViolation = randomizeDoubleValue(10, getInstance().costPredJobsViolation);
+    	getInstance().costSkillLvlViolation = randomizeDoubleValue(5, getInstance().costSkillLvlViolation);
+    	getInstance().costCapacityViolation = randomizeDoubleValue(5, getInstance().costCapacityViolation);
+    	
+    	getInstance().glsPenaltyInitValue = randomizeDoubleValue(1, getInstance().glsPenaltyInitValue);
+    	getInstance().glsPenaltyIncrease = randomizeDoubleValue(0.5, getInstance().glsPenaltyIncrease);
+    	getInstance().glsPenaltyReduction = randomizeDoubleValue(0.25, getInstance().glsPenaltyReduction);
+    	
+    	getInstance().exponentSwappingLocations = (int) randomizeDoubleValue(2, getInstance().exponentSwappingLocations);
+    	getInstance().historicNodePairRemovalExponent = (int) randomizeDoubleValue(6, getInstance().historicNodePairRemovalExponent);
+    	getInstance().historicRequestRemovalExponent = (int) randomizeDoubleValue(6, getInstance().historicRequestRemovalExponent);
+    	getInstance().shawRemovalExponent = (int) randomizeDoubleValue(6, getInstance().shawRemovalExponent);
+    	getInstance().skillMismatchRemovalExponent = (int) randomizeDoubleValue(6, getInstance().skillMismatchRemovalExponent);
+    	getInstance().timeFlexibilityRemovalExponent = (int) randomizeDoubleValue(6, getInstance().timeFlexibilityRemovalExponent);
+    	getInstance().timeOrientedRemovalExponent = (int) randomizeDoubleValue(6, getInstance().timeFlexibilityRemovalExponent);
+    	getInstance().worstRemovalExponent = (int) randomizeDoubleValue(6, getInstance().worstRemovalExponent);
+    }
+    
+    private double randomizeDoubleValue (double upperBound, double startValue) {
+    	return randomGenerator.nextDouble() * (upperBound - startValue) + startValue;
     }
 }

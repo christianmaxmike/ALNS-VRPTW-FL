@@ -8,6 +8,7 @@ import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
 import vrptwfl.metaheuristic.instanceGeneration.HospitalInstanceLoader;
 import vrptwfl.metaheuristic.instanceGeneration.SolomonInstanceGenerator;
 import vrptwfl.metaheuristic.utils.CalcUtils;
+import vrptwfl.metaheuristic.utils.WriterUtils;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -20,7 +21,7 @@ import java.util.Arrays;
  */
 public class MainALNS {
 	
-	private FileWriter writer;
+	// private FileWriter writer;
 	private boolean isSolomonInstance;
 	private String instanceName;
 	
@@ -28,22 +29,9 @@ public class MainALNS {
 	 * Constructor of the MainALNS class. 
 	 * A FileWriter object is initialized for results logging
 	 */
-	public MainALNS(String instanceName, String outputFile, boolean isSolomonInstance) {
+	public MainALNS(String instanceName, boolean isSolomonInstance) {
 		this.instanceName = instanceName;
 		this.isSolomonInstance = isSolomonInstance;
-		initFileWriter(outputFile);
-	}
-	
-	/**
-	 * Initialize a file writer for logging of results. 
-	 * @param outputFile name of output file
-	 */
-	private void initFileWriter(String outputFile) {
-		try {
-			this.writer = new FileWriter("./out/"+outputFile, true);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	/**
@@ -57,9 +45,14 @@ public class MainALNS {
 	 * @param nCustomers: number of customers
 	 * @throws ArgumentOutOfBoundsException
 	 */
-    public void runALNS(Data data, String instanceName) throws ArgumentOutOfBoundsException {
+    public void runALNS(Data data, String instanceName, String outFile, String outDir) throws ArgumentOutOfBoundsException {
+    	// --- INIT WRITERS ---
+    	WriterUtils.initWriters(data, outDir, outFile, data.getInstanceName());
+    	if (Config.getInstance().enableGLS || Config.getInstance().enableSchiffer || Config.getInstance().enableGLSFeature) 
+    		WriterUtils.initPenaltyCounts();
+    	
         // --- INIT STEPS ---
-    	this.setInstanceSpecificParameters(data.getnCustomers(), data.getMaxDistanceInGraph());
+    	setInstanceSpecificParameters(data.getnCustomers(), data.getMaxDistanceInGraph());
 
         // --- INITIAL SOLUTION ---
         ConstructionHeuristicRegret construction = new ConstructionHeuristicRegret(data);
@@ -93,19 +86,19 @@ public class MainALNS {
      * @param nCustomers: number of customers
      * @param maxDistance: maximal distance in the input locations
      */
-    private void setInstanceSpecificParameters(int nCustomers, double maxDistance) {
+    private static void setInstanceSpecificParameters(int nCustomers, double maxDistance) {
         // Set lower bound for removals
-    	int lb1 = Config.lowerBoundRemovalsMax;
-        int lb2 = (int) Math.round(nCustomers * Config.lowerBoundRemovalsFactor);
-        Config.lowerBoundRemovals = Math.min(lb1,  lb2);
+    	int lb1 = Config.getInstance().lowerBoundRemovalsMax;
+        int lb2 = (int) Math.round(nCustomers * Config.getInstance().lowerBoundRemovalsFactor);
+        Config.getInstance().lowerBoundRemovals = Math.min(lb1,  lb2);
 
         // Set upper bound for removals
-        int ub1 = Config.upperBoundRemovalsMax;
-        int ub2 = (int) Math.round(nCustomers * Config.upperBoundRemovalsFactor);
-        Config.upperBoundRemovals = Math.min(ub1,  ub2);
+        int ub1 = Config.getInstance().upperBoundRemovalsMax;
+        int ub2 = (int) Math.round(nCustomers * Config.getInstance().upperBoundRemovalsFactor);
+        Config.getInstance().upperBoundRemovals = Math.min(ub1,  ub2);
 
         // set penalty (costs) for unserved customers
-        Config.penaltyUnservedCustomer = maxDistance * Config.costUnservedCustomerViolation;
+        Config.getInstance().penaltyUnservedCustomer = maxDistance * Config.getInstance().costUnservedCustomerViolation;
     }
     
     /**
@@ -157,17 +150,14 @@ public class MainALNS {
         double gap = -1;
         if (i!=-1) {
         	optimalObjFuncVal = OptimalSolutions.optimalObjFuncValue.get(this.instanceName)[i];
-        	gap = CalcUtils.calculateGap(optimalObjFuncVal, solutionALNS.getTotalCosts());        	
+        	gap = CalcUtils.calculateGap(optimalObjFuncVal, solutionALNS.getTotalCosts());   
+        	Config.getInstance().optimalityGapValue = gap;
         	System.out.println("Optimality Gap: " + gap);
         }        
         
         // Write result
-        try {
-			writer.append(instanceName + "," + solutionALNS.getTotalCosts() + "," + timeElapsed + "," + gap + "\n");
-	        writer.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+        WriterUtils.writeSolomonResults(solutionALNS, instanceName, timeElapsed, gap);
+        WriterUtils.writeFinalTour(WriterUtils.writerFinalTour, solutionALNS.getStringRepresentionSolution());
     }
     
     /**
@@ -178,12 +168,8 @@ public class MainALNS {
      * @param timeElapsed elapsed time being logged
      */
     private void logResultHospital(Data data, Solution solutionALNS, long timeElapsed) {
-    	try {
-    		writer.append(data.getInstanceName() + "," + solutionALNS.getTotalCosts() + "," + timeElapsed + "\n");
-    		writer.close();
-    	} catch (IOException e) {
-    		e.printStackTrace();
-    	}
+    	WriterUtils.writerHospitalResults(data, solutionALNS, timeElapsed);
+    	WriterUtils.writeFinalTour(WriterUtils.writerFinalTour, solutionALNS.getStringRepresentionSolution());
     }
     
     /**
@@ -206,12 +192,31 @@ public class MainALNS {
      */
     public static void main(String[] args) throws ArgumentOutOfBoundsException {
         // Parse args parameters
-    	String instanceName = args[0];
-        String outFile = args.length > 1 ? args[1] : "results.txt";
-
+    	int mode = Integer.valueOf(args[0]);
+    	String outDir = args[1];
+    	        
+        if (mode == 0) {
+        	String instanceName = args[2];
+        	int nCustomers = Integer.valueOf(args[3]);
+        	String outFile = args.length > 4 ? args[4] : "results.txt";
+        	runSingleInstance(instanceName, outFile, outDir, nCustomers);        	
+        }
+        else if (mode == 1) {
+        	int nCustomers = Integer.valueOf(args[2]);
+        	int numConfigs = Integer.valueOf(args[3]);
+        	int numRunsPerConfig = Integer.valueOf(args[4]);
+        	String outFile = args.length > 5 ? args[5] : "results.txt";
+        	tuningParam(numConfigs, numRunsPerConfig, nCustomers, outDir, outFile);        	
+        }
+        else
+        	System.out.println("Unknonw mode - 1:run single instance; 2:run parameter tuning");
+        	System.exit(0);
+    }
+    
+    private static void runSingleInstance(String instanceName, String outFile, String outDir, int nCustomers) throws ArgumentOutOfBoundsException {
         // Define input params
         boolean isSolomonInstance = !instanceName.contains("hospital_instance"); // Boolean.parseBoolean(args[1]);
-        int nCustomers = 100; // TODO - for solomon instances as args param
+        // int nCustomers = 100; // TODO - for solomon instances as args param
         
         // Load Data
         Data[] data;
@@ -220,14 +225,95 @@ public class MainALNS {
         else
         	data = loadHospitalInstance(instanceName);
         
-    	//final MainALNS algo = new MainALNS(instanceName, outFile, isSolomonInstance);
-    	//algo.runALNS(data[1], instanceName);        	
         // Run
     	for (Data d: data) {
-        	final MainALNS algo = new MainALNS(instanceName, outFile, isSolomonInstance);
-        	algo.runALNS(d, instanceName);        	
+        	final MainALNS algo = new MainALNS(instanceName, isSolomonInstance);
+        	algo.runALNS(d, instanceName, outFile, outDir);        	
         }
+    	
+		WriterUtils.writeConfig(WriterUtils.writerConfig, Config.getInstance());
         // TODO Alex: Add TimeLimit (?)
+    	
+    }
+    
+    private static void tuningParam(int maxConfigs, int maxRuns, int nCustomers, String outDir, String outFile) throws ArgumentOutOfBoundsException {
+    	String bestRun = "";
+    	double bestAvgGap = Double.MAX_VALUE;
+    	
+		int i = -1;
+		if (nCustomers == 25) i = 0;
+		else if (nCustomers == 50) i = 1;
+		else if (nCustomers == 100) i = 2;
+		else ; // no optimal value stored 
+
+    	String[] instanceNamesRandom = {
+    			"R104", "R108", "R111", "R112", "C105", "C106", "C107", "RC104", "RC106", "RC108" 
+    			/*"R101", "R102", "R103", "R104", "R105", "R106", "R107", "R108", "R109", "R110", "R111", "R112"*/
+    		};
+        
+    	for (int config_idx = 0; config_idx < maxConfigs; config_idx++) {
+    		Config.getInstance().randomizeConfig();
+    		double avg_optimalityGap = 0.0;
+    		for (String instanceName : instanceNamesRandom) {
+    			// Load Data
+    			Data[] dataArr;
+    			dataArr = loadSolomonInstance(instanceName, nCustomers);
+    			Data data = dataArr[0];
+
+    			for (int run = 0; run < maxRuns; run ++) {
+    		    	// --- INIT WRITERS ---
+    		    	WriterUtils.initWriters(data, outDir, outFile, instanceName);
+    		    	if (Config.getInstance().enableGLS || Config.getInstance().enableSchiffer || Config.getInstance().enableGLSFeature) 
+    		    		WriterUtils.initPenaltyCounts();
+    		    	
+    				// --- INIT STEPS ---
+    				setInstanceSpecificParameters(data.getnCustomers(), data.getMaxDistanceInGraph());
+    				
+    				// --- INITIAL SOLUTION ---
+    				ConstructionHeuristicRegret construction = new ConstructionHeuristicRegret(data);
+    		        long startTimeConstruction = System.currentTimeMillis();
+    				Solution solutionConstr = construction.constructSolution(2);
+    				// Print initial solution
+    				// printToConsole("Init solution", solutionConstr);
+    				
+    				// --- ALNS SOLUTION ---
+    				ALNSCore alns = new ALNSCore(data);
+    				Solution solutionALNS = alns.runALNS(solutionConstr);
+    		        long timeElapsed = (System.currentTimeMillis() - startTimeConstruction);
+    		        // Print ALNS(+GLS) solution
+    		        // printToConsole("ALNS solution", solutionALNS);
+    		        System.out.println("Time for construction " + timeElapsed + " ms.");
+    				    				
+    				// Calculate optimality gap
+    				if (i!=-1) {
+    					double optimalObjFuncVal = OptimalSolutions.optimalObjFuncValue.get(instanceName)[i];
+    					double gap = CalcUtils.calculateGap(optimalObjFuncVal, solutionALNS.getTotalCosts());
+    					avg_optimalityGap += gap;
+    					Config.getInstance().optimalityGapValue = gap; 
+    		    		WriterUtils.writeConfig(WriterUtils.writerConfig, Config.getInstance());
+    		    	}
+    			}
+    		}
+    		avg_optimalityGap /= (maxRuns * instanceNamesRandom.length);
+    		
+    		System.out.println("Average optimality gap: " + avg_optimalityGap);
+    		if (avg_optimalityGap < bestAvgGap) {
+    			System.out.println("New best avg.opt.gap. Improved by:"+ (bestAvgGap - avg_optimalityGap));
+    			bestAvgGap = avg_optimalityGap;
+    			bestRun = WriterUtils.outDir;
+    			Config.getInstance().avgOptimalityGapValue = avg_optimalityGap;
+	    		FileWriter writer;
+				try {
+					writer = new FileWriter("./" + outDir + "/best_config.json");
+					WriterUtils.writeConfig(writer, Config.getInstance());
+					System.out.println("New best config written.");
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+    	}
+    	// System.out.println("Best run observed for:" + bestRun);
+    	System.out.println("Avg gap:" + bestAvgGap);
     }
 
     

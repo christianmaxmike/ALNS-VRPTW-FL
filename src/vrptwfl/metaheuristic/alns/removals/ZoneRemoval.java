@@ -94,6 +94,11 @@ public class ZoneRemoval extends AbstractRemoval {
             		if (!Arrays.stream(solution.getData().getOriginalCustomerIds()).boxed().collect(Collectors.toList()).contains(originalCustomerId)) continue;
             		// check if customer is the first customer being already removed
             		if (schedulingIdx == firstCustomer) continue;
+            		
+            		// TODO Chris - is 0th customer existent
+            		if (schedulingIdx == 0)
+            			continue;
+            		
             		// check if customer is scheduled in the current solution object
             		if (!solution.getNotAssignedCustomers().contains(schedulingIdx)) {
             			// add customer to removed customers

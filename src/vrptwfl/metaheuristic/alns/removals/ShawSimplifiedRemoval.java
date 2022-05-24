@@ -102,8 +102,8 @@ public class ShawSimplifiedRemoval extends AbstractRemoval {
             // select next customer to be removed
             int idxJ = 0;
             if (this.randomize) {
-                double rand = Config.randomGenerator.nextDouble();
-                idxJ = (int) Math.floor(Math.pow(rand, Config.shawRemovalExponent) * closest.size());
+                double rand = Config.getInstance().randomGenerator.nextDouble();
+                idxJ = (int) Math.floor(Math.pow(rand, Config.getInstance().shawRemovalExponent) * closest.size());
             }
             double[] removal = closest.get(idxJ);
             removedCustomers.add((int) removal[0]);
@@ -135,8 +135,8 @@ public class ShawSimplifiedRemoval extends AbstractRemoval {
 //            nRemovals--;
 //            int idx = 0;
 //            if (this.randomize) {
-//                double rand = Config.randomGenerator.nextDouble();
-//                idx = (int) Math.floor(Math.pow(rand, Config.shawRemovalExponent) * closest.size());
+//                double rand = Config.getInstance().randomGenerator.nextDouble();
+//                idx = (int) Math.floor(Math.pow(rand, Config.getInstance().shawRemovalExponent) * closest.size());
 //            }
 //            double[] removal = closest.get(idx);
 //            removedCustomers.add((int) removal[0]);

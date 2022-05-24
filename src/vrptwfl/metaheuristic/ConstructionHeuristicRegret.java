@@ -5,6 +5,7 @@ import vrptwfl.metaheuristic.alns.insertions.RegretInsertionBacktracking;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
+import vrptwfl.metaheuristic.Config;
 
 /**
  * Class implements the construction heuristic combining k-regret with
@@ -37,7 +38,7 @@ public class ConstructionHeuristicRegret {
     public Solution constructSolution(int k) throws ArgumentOutOfBoundsException {
     	Solution emptySolution = Solution.getEmptySolution(data);
     	emptySolution.setIsConstruction(true);
-        if (!Config.enableBacktracking) {
+        if (!Config.getInstance().enableBacktracking) {
         	RegretInsertion inserter = new RegretInsertion(k, data);
         	return inserter.solve(emptySolution);        	
         }

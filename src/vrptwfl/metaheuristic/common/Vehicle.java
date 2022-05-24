@@ -94,7 +94,7 @@ public class Vehicle {
 
         // XXX : GLS - SKILL Violation
         // SKILL CHECK - insufficient skill level
-        if (!(Config.enableGLS || Config.enableSchiffer || Config.enableGLSFeature ) || solution.isConstruction()) {
+        if (!(Config.getInstance().enableGLS || Config.getInstance().enableSchiffer || Config.getInstance().enableGLSFeature ) || solution.isConstruction()) {
         	if (this.skillLvl < data.getRequiredSkillLvl()[customer])
         		return possibleInsertions;        	
         }
@@ -107,9 +107,9 @@ public class Vehicle {
         double earliestStartCustomer = data.getEarliestStartTimes()[customer];
         double latestStartCustomer = data.getLatestStartTimes()[customer];
         
-        if ((Config.enableGLS||Config.enableSchiffer) & !solution.isConstruction()) {
-        	earliestStartCustomer = Math.max(earliestStartCustomer -Config.maxTimeWindowViolation, 0);
-        	latestStartCustomer = Math.min(latestStartCustomer + Config.maxTimeWindowViolation,  solution.getData().getEndOfPlanningHorizon());
+        if ((Config.getInstance().enableGLS||Config.getInstance().enableSchiffer || Config.getInstance().enableGLSFeature) & !solution.isConstruction()) {
+        	earliestStartCustomer = Math.max(earliestStartCustomer -Config.getInstance().maxTimeWindowViolation, 0);
+        	latestStartCustomer = Math.min(latestStartCustomer + Config.getInstance().maxTimeWindowViolation,  solution.getData().getEndOfPlanningHorizon());
         }
 
         for (int i = 0; i < this.customers.size() - 1; i++ ) {
@@ -139,13 +139,16 @@ public class Vehicle {
             				customersPossibleLTW.get(newEntry)[3], 
             				customersPossibleLTW.get(newEntry)[0], 
             				customersPossibleLTW.get(newEntry)[1], 
-            				customersPossibleLTW.get(newEntry)[4]};
-            		
-            		if (Config.enableGLS || Config.enableSchiffer || Config.enableGLSFeature) {
+            				customersPossibleLTW.get(newEntry)[4],
+            				0.0};
+
+            		if (Config.getInstance().enableGLS || Config.getInstance().enableSchiffer || Config.getInstance().enableGLSFeature) {
             			//double penaltyCosts = solution.getCustomersCostsForViolations(customer);
             			double penaltyCosts = solution.getViolationCostsForInsertion(newInsertion);
-            			newInsertion[4] += penaltyCosts;
+            			// System.out.println(penaltyCosts);
+            			newInsertion[8] += penaltyCosts;
             		}
+
             		possibleInsertions.add(newInsertion);
             	}
         }
@@ -189,7 +192,7 @@ public class Vehicle {
             double travelTimeReduction = distToCustomer + distFromCustomer - distWithoutCustomer;
             
             double costs = travelTimeReduction;
-            if (Config.enableGLS || Config.enableSchiffer || Config.enableGLSFeature) {
+            if (Config.getInstance().enableGLS || Config.getInstance().enableSchiffer || Config.getInstance().enableGLSFeature) {
     			double penaltyCosts = solution.getCustomersCostsForViolations(customer);
     			costs += penaltyCosts;
     		}
@@ -227,12 +230,12 @@ public class Vehicle {
 
             double score = neighborGraph[pred][customer] + neighborGraph[customer][succ];
             
-            double costs = score;
-            if (Config.enableGLS || Config.enableSchiffer || Config.enableGLSFeature) {
-    			double penaltyCosts = solution.getCustomersCostsForViolations(customer);
-    			costs += penaltyCosts;
+            double penaltyCosts = 0.0;
+            if (Config.getInstance().enableGLS || Config.getInstance().enableSchiffer || Config.getInstance().enableGLSFeature) {
+    			penaltyCosts = solution.getCustomersCostsForViolations(customer);
+    			// costs += penaltyCosts;
     		}
-            possibleRemovals.add(new double[] {customer, this.id, i, costs});
+            possibleRemovals.add(new double[] {customer, this.id, i, score, penaltyCosts});
             i++;
 
         } while (i < this.customers.size() - 1);
@@ -266,7 +269,7 @@ public class Vehicle {
     		}
     		
             double costs = scoreI;
-            if (Config.enableGLS || Config.enableSchiffer || Config.enableGLSFeature) {
+            if (Config.getInstance().enableGLS || Config.getInstance().enableSchiffer || Config.getInstance().enableGLSFeature) {
     			double penaltyCosts = solution.getCustomersCostsForViolations(customerI);
     			costs += penaltyCosts;
     		}
@@ -598,13 +601,14 @@ public class Vehicle {
      * Prints the current tour
      */
     public void printTour(Solution sol) {
+    	StringBuilder builder = new StringBuilder("");
     	DecimalFormat df = new DecimalFormat("0.0");
     	// TODO Alex -logger debug
-        System.out.println("Tour of vehicle " + this.id + " (n=" +  this.nCustomersInTour +  ") (TourCosts:" + df.format(this.tourLength) + "):"); 
+    	System.out.println("Tour of vehicle " + this.id + " (n=" +  this.nCustomersInTour +  ") (TourCosts:" + df.format(this.tourLength) + "):"); 
         System.out.print(this.customers.get(0) + " --(" + sol.getData().getDistanceBetweenLocations(0, sol.getData().getCustomersToLocations().get(sol.getData().getOriginalCustomerIds()[this.customers.get(1)]).get(sol.getCustomerAffiliationToLocations()[this.customers.get(1)])) + ")-> ");
         for (int i = 1; i < this.customers.size() - 1; i++) {
-        	int originalCustomerId = sol.getData().getOriginalCustomerIds()[this.customers.get(i)];
-            System.out.print(this.customers.get(i) + 
+        	int originalCustomerId = sol.getData().getOriginalCustomerIds()[this.customers.get(i)]; 
+        	System.out.print(this.customers.get(i) + 
             		"(" +originalCustomerId + "|" + 
             		DataUtils.getLocationIndex(this.customers.get(i), sol) + "|" + 
             		sol.getCustomerAffiliationToCapacity()[this.customers.get(i)] + "|" + 
@@ -622,7 +626,39 @@ public class Vehicle {
         }
         System.out.println(this.customers.get(this.customers.size() - 1) + "");
     }
-    
+
+    /**
+     * Prints the current tour
+     */
+    public String getStringReprTour(Solution sol) {
+    	StringBuilder builder = new StringBuilder("");
+    	DecimalFormat df = new DecimalFormat("0.0");
+    	builder.append("Tour of vehicle " + this.id + " (n=" +  this.nCustomersInTour +  ") (TourCosts:" + df.format(this.tourLength) + "):\n");
+        builder.append(this.customers.get(0) + " --(" + sol.getData().getDistanceBetweenLocations(0, sol.getData().getCustomersToLocations().get(sol.getData().getOriginalCustomerIds()[this.customers.get(1)]).get(sol.getCustomerAffiliationToLocations()[this.customers.get(1)])) + ")-> ");
+        for (int i = 1; i < this.customers.size() - 1; i++) {
+        	int originalCustomerId = sol.getData().getOriginalCustomerIds()[this.customers.get(i)];
+            builder.append(this.customers.get(i) + 
+            		"(" +originalCustomerId + "|" + 
+            		DataUtils.getLocationIndex(this.customers.get(i), sol) + "|" + 
+            		sol.getCustomerAffiliationToCapacity()[this.customers.get(i)] + "|" + 
+            		sol.getData().getServiceDurations()[this.customers.get(i)] + "|" + 
+            		this.startOfServices.get(i) + "-" + 
+            		this.endOfServices.get(i) +  ")" + " --");            
+            int locPred = sol.getData().getCustomersToLocations().get(sol.getData().getOriginalCustomerIds()[this.customers.get(i)]).get(sol.getCustomerAffiliationToLocations()[this.customers.get(i)]);
+            int locSucc = sol.getData().getCustomersToLocations().get(sol.getData().getOriginalCustomerIds()[this.customers.get(i+1)]).get(sol.getCustomerAffiliationToLocations()[this.customers.get(i+1)]);
+
+            if (i==this.customers.size()-2)
+            	builder.append("(" + sol.getData().getDistanceBetweenLocations(locPred, 0) + ")-> ");
+            else
+            	builder.append("(" + sol.getData().getDistanceBetweenLocations(locPred, locSucc) + ")-> ");
+        }
+        builder.append(this.customers.get(this.customers.size() - 1) + "\n");
+
+        String repr = builder.toString();
+        System.out.println(repr);
+        return repr;
+    }
+
     
     //
     // DEPRECATED
@@ -716,10 +752,10 @@ public class Vehicle {
             double latestStartAtInsertion = Math.min(this.startOfServices.get(i+1) - distFromCustomer - data.getServiceDurations()[customer], latestStartCustomer);
 
             // if latest start of customer is less than earliest start at position, later position will also not be possible
-            if (latestStartCustomer < earliestStartAtInsertion - Config.epsilon) break;
+            if (latestStartCustomer < earliestStartAtInsertion - Config.getInstance().epsilon) break;
 
             // check if time window feasible (if enough time between customers already in route
-            if (latestStartAtInsertion - earliestStartAtInsertion > Config.epsilon) {
+            if (latestStartAtInsertion - earliestStartAtInsertion > Config.getInstance().epsilon) {
                 double additionTravelCosts = distToCustomer + distFromCustomer - data.getDistanceBetweenCustomers(pred, succ);
                 possibleInsertions.add(new double[] {customer, this.id, i+1, earliestStartAtInsertion, additionTravelCosts});
             }

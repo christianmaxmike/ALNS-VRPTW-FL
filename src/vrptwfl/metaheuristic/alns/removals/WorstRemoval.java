@@ -54,8 +54,8 @@ public class WorstRemoval extends AbstractRemoval {
 
             int idx = 0;
             if (this.randomize) {
-                double rand = Config.randomGenerator.nextDouble();
-                idx = (int) Math.floor(Math.pow(rand, Config.worstRemovalExponent) * possibleRemovals.size());
+                double rand = Config.getInstance().randomGenerator.nextDouble();
+                idx = (int) Math.floor(Math.pow(rand, Config.getInstance().worstRemovalExponent) * possibleRemovals.size());
             }
             // System.out.println(possibleRemovals.get(0)[3] +"\t"+ possibleRemovals.get(possibleRemovals.size()-1)[3]);
             double[] removal = possibleRemovals.get(idx);

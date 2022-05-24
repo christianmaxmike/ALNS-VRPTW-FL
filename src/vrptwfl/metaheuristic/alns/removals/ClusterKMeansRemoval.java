@@ -105,7 +105,7 @@ public class ClusterKMeansRemoval extends AbstractRemoval {
 		int iteration = 0;
 		
 		double sum_squared_err = Double.MAX_VALUE;
-		double PRECISION = Config.epsilon;
+		double PRECISION = Config.getInstance().epsilon;
 		
 		// initialize & reset kmeans settings
 		Arrays.fill(this.customerAssignmentToClusters, -1);

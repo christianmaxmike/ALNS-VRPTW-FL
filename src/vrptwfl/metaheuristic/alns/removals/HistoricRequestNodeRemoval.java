@@ -49,8 +49,8 @@ public class HistoricRequestNodeRemoval extends AbstractRemoval {
     		// randomize
     		int idx = 0;
     		if (this.randomize) {
-    			double rand = Config.randomGenerator.nextDouble();
-    			idx = (int) Math.floor(Math.pow(rand, Config.historicRequestRemovalExponent) * possibleRemovals.size());
+    			double rand = Config.getInstance().randomGenerator.nextDouble();
+    			idx = (int) Math.floor(Math.pow(rand, Config.getInstance().historicRequestRemovalExponent) * possibleRemovals.size());
     		}
     		
     		// apply removal

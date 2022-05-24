@@ -33,9 +33,9 @@ import java.util.TreeSet;
 public class ALNSCore {
 	
 	// In/Out 
-	private FileWriter writerRemovals;
-	private FileWriter writerRepairs;
-	private FileWriter writerPenalties;
+//	private FileWriter writerRemovals;
+//	private FileWriter writerRepairs;
+//	private FileWriter writerPenalties;
 
 	// Data
     private Data data;
@@ -80,16 +80,7 @@ public class ALNSCore {
      * @param data: Data object
      * @throws ArgumentOutOfBoundsException
      */
-    public ALNSCore(Data data) throws ArgumentOutOfBoundsException {
-    	// Initialize Writers
-    	try {
-    		this.writerRemovals = new FileWriter("./out/" + data.getInstanceName() + "_removalProbabilities.txt", true);
-    		this.writerRepairs = new FileWriter("./out/" + data.getInstanceName() + "__repairProbabilities.txt", true);
-    		this.writerPenalties = new FileWriter("./out/" + data.getInstanceName() + "__penaltiesCount.txt");
-    	} catch (IOException e) {
-    		e.printStackTrace();
-    	}
-    	
+    public ALNSCore(Data data) throws ArgumentOutOfBoundsException {    	
     	// Initialize class variables
         this.data = data;
         this.visitedSolutions = new HashMap<Integer, Solution>();
@@ -99,7 +90,7 @@ public class ALNSCore {
         this.initDestroyOperators();
         
         // Initialized GLS arrays
-        if (Config.enableGLS || Config.enableGLSFeature)
+        if (Config.getInstance().enableGLS || Config.getInstance().enableGLSFeature)
         	data.initGLSSettings();
     }
 
@@ -113,31 +104,31 @@ public class ALNSCore {
     private void initDestroyOperators() throws ArgumentOutOfBoundsException {
         List<AbstractRemoval> destroyList = new ArrayList<>();
 
-        if (Config.useHistoricNodePairRemovalDeterministic || Config.useHistoricNodePairRemovalRandom) this.initNeighborGraph();
-        if (Config.useHistoricRequestPairRemoval) this.initRequestGraph();
+        if (Config.getInstance().useHistoricNodePairRemovalDeterministic || Config.getInstance().useHistoricNodePairRemovalRandom) this.initNeighborGraph();
+        if (Config.getInstance().useHistoricRequestPairRemoval) this.initRequestGraph();
 
-        if (Config.useHistoricNodePairRemovalDeterministic) destroyList.add(new HistoricNodePairRemoval(data, this,false));
-        if (Config.useHistoricNodePairRemovalRandom) destroyList.add(new HistoricNodePairRemoval(data, this, true));
-        if (Config.useClusterRemovalKruskal) destroyList.add(new ClusterKruskalRemoval(data));
-        if (Config.useRandomRemoval) destroyList.add(new RandomRemoval(data));
-        if (Config.useRandomRouteRemoval) destroyList.add(new RandomRouteRemoval(data));
-        if (Config.useHistoricRequestPairRemoval) destroyList.add(new HistoricRequestNodeRemoval(data, this, false));
-        if (Config.useShawSimplifiedRemovalDeterministic) destroyList.add(new ShawSimplifiedRemoval(data, false));
-        if (Config.useShawSimplifiedRemovalRandom) destroyList.add(new ShawSimplifiedRemoval(data, true));
-        if (Config.useTimeOrientedRemovalJungwirthDeterministic) destroyList.add(new TimeOrientedRemoval(data, false, Config.timeOrientedJungwirthWeightStartTimeIinSolution));
-        if (Config.useTimeOrientedRemovalJungwirthRandom) destroyList.add(new TimeOrientedRemoval(data, true, Config.timeOrientedJungwirthWeightStartTimeIinSolution));
-        if (Config.useTimeOrientedRemovalPisingerDeterministic) destroyList.add(new TimeOrientedRemoval(data, false, 1.0));
-        if (Config.useTimeOrientedRemovalPisingerRandom) destroyList.add(new TimeOrientedRemoval(data, true, 1.0));
-        if (Config.useWorstRemovalDeterministic) destroyList.add(new WorstRemoval(data, false));
-        if (Config.useWorstRemovalRandom) destroyList.add(new WorstRemoval(data, true));
-        if (Config.useSkillMismatchRemovalDeterministic) destroyList.add(new SkillMismatchRemoval(data, false));
-        if (Config.useSkillMismatchRemovalRandom) destroyList.add(new SkillMismatchRemoval(data, true));
-        if (Config.useTimeFlexibilityRemovalDeterministic) destroyList.add(new TimeFlexibilityRemoval(data, false));
-        if (Config.useTimeFlexibilityRemovalRandom) destroyList.add(new TimeFlexibilityRemoval(data, true));
-        if (Config.useKMeansRemoval) {for (Integer k: Config.kMeansClusterSettings) destroyList.add(new ClusterKMeansRemoval(data, k));};
-        if (Config.useRouteEliminationLeast) destroyList.add(new RouteLengthRemoval(data, true));
-        if (Config.useRouteEliminationMost) destroyList.add(new RouteLengthRemoval(data, false));
-        if (Config.useZoneRemoval) destroyList.add(new ZoneRemoval(data));
+        if (Config.getInstance().useHistoricNodePairRemovalDeterministic) destroyList.add(new HistoricNodePairRemoval(data, this,false));
+        if (Config.getInstance().useHistoricNodePairRemovalRandom) destroyList.add(new HistoricNodePairRemoval(data, this, true));
+        if (Config.getInstance().useClusterRemovalKruskal) destroyList.add(new ClusterKruskalRemoval(data));
+        if (Config.getInstance().useRandomRemoval) destroyList.add(new RandomRemoval(data));
+        if (Config.getInstance().useRandomRouteRemoval) destroyList.add(new RandomRouteRemoval(data));
+        if (Config.getInstance().useHistoricRequestPairRemoval) destroyList.add(new HistoricRequestNodeRemoval(data, this, false));
+        if (Config.getInstance().useShawSimplifiedRemovalDeterministic) destroyList.add(new ShawSimplifiedRemoval(data, false));
+        if (Config.getInstance().useShawSimplifiedRemovalRandom) destroyList.add(new ShawSimplifiedRemoval(data, true));
+        if (Config.getInstance().useTimeOrientedRemovalJungwirthDeterministic) destroyList.add(new TimeOrientedRemoval(data, false, Config.getInstance().timeOrientedJungwirthWeightStartTimeIinSolution));
+        if (Config.getInstance().useTimeOrientedRemovalJungwirthRandom) destroyList.add(new TimeOrientedRemoval(data, true, Config.getInstance().timeOrientedJungwirthWeightStartTimeIinSolution));
+        if (Config.getInstance().useTimeOrientedRemovalPisingerDeterministic) destroyList.add(new TimeOrientedRemoval(data, false, 1.0));
+        if (Config.getInstance().useTimeOrientedRemovalPisingerRandom) destroyList.add(new TimeOrientedRemoval(data, true, 1.0));
+        if (Config.getInstance().useWorstRemovalDeterministic) destroyList.add(new WorstRemoval(data, false));
+        if (Config.getInstance().useWorstRemovalRandom) destroyList.add(new WorstRemoval(data, true));
+        if (Config.getInstance().useSkillMismatchRemovalDeterministic) destroyList.add(new SkillMismatchRemoval(data, false));
+        if (Config.getInstance().useSkillMismatchRemovalRandom) destroyList.add(new SkillMismatchRemoval(data, true));
+        if (Config.getInstance().useTimeFlexibilityRemovalDeterministic) destroyList.add(new TimeFlexibilityRemoval(data, false));
+        if (Config.getInstance().useTimeFlexibilityRemovalRandom) destroyList.add(new TimeFlexibilityRemoval(data, true));
+        if (Config.getInstance().useKMeansRemoval) {for (Integer k: Config.getInstance().kMeansClusterSettings) destroyList.add(new ClusterKMeansRemoval(data, k));};
+        if (Config.getInstance().useRouteEliminationLeast) destroyList.add(new RouteLengthRemoval(data, true));
+        if (Config.getInstance().useRouteEliminationMost) destroyList.add(new RouteLengthRemoval(data, false));
+        if (Config.getInstance().useZoneRemoval) destroyList.add(new ZoneRemoval(data));
         
         this.destroyOperators = new AbstractRemoval[destroyList.size()];
         this.destroyOperators = destroyList.toArray(this.destroyOperators);
@@ -149,7 +140,8 @@ public class ALNSCore {
         	entry.setProbability(1.0/this.destroyOperators.length);
         	entry.setDraws(0);
         }
-        WriterUtils.initWriterRemovalProbabilities(writerRemovals, destroyOperators);
+        
+        WriterUtils.initWriterRemovalProbabilities(WriterUtils.writerRemovals, destroyOperators);
     }
 
     /**
@@ -159,13 +151,13 @@ public class ALNSCore {
     private void initRepairOperators() throws ArgumentOutOfBoundsException {
         List<AbstractInsertion> repairList = new ArrayList<>();
 
-        if (Config.useGreedyInsert) repairList.add(new GreedyInsertion(data));
-        if (Config.useSkillMatchingInsert) repairList.add(new SkillMatchingInsertion(data));
-        if (Config.useNRegret2) repairList.add(new RegretInsertion(2, data));
-        if (Config.useNRegret3) repairList.add(new RegretInsertion(3, data));
-        if (Config.useNRegret4) repairList.add(new RegretInsertion(4, data));
-        if (Config.useNRegret5) repairList.add(new RegretInsertion(5, data));
-        if (Config.useNRegret6) repairList.add(new RegretInsertion(6, data));
+        if (Config.getInstance().useGreedyInsert) repairList.add(new GreedyInsertion(data));
+        if (Config.getInstance().useSkillMatchingInsert) repairList.add(new SkillMatchingInsertion(data));
+        if (Config.getInstance().useNRegret2) repairList.add(new RegretInsertion(2, data));
+        if (Config.getInstance().useNRegret3) repairList.add(new RegretInsertion(3, data));
+        if (Config.getInstance().useNRegret4) repairList.add(new RegretInsertion(4, data));
+        if (Config.getInstance().useNRegret5) repairList.add(new RegretInsertion(5, data));
+        if (Config.getInstance().useNRegret6) repairList.add(new RegretInsertion(6, data));
         
         this.repairOperators = new AbstractInsertion[repairList.size()];
         this.repairOperators = repairList.toArray(this.repairOperators);
@@ -177,7 +169,8 @@ public class ALNSCore {
         	entry.setProbability(1.0/this.repairOperators.length);
         	entry.setDraws(0);
         }
-        WriterUtils.initWriterRepairProbabilities(writerRepairs, repairOperators);
+        WriterUtils.initWriterRepairProbabilities(WriterUtils.writerRepairs, repairOperators);
+        // WriterUtils.initWriterRepairProbabilities(writerRepairs, repairOperators);
     }
     
     /**
@@ -188,7 +181,7 @@ public class ALNSCore {
         // complete, directed, weighted graph
         this.neighborGraph = new double[this.data.getnCustomers() + 1][this.data.getnCustomers() + 1];
         // edges are initially set to infinity (or a reasonably high value)
-        Arrays.stream(this.neighborGraph).forEach(row -> Arrays.fill(row, Config.bigMRegret));
+        Arrays.stream(this.neighborGraph).forEach(row -> Arrays.fill(row, Config.getInstance().bigMRegret));
     }
     
     /**
@@ -210,8 +203,8 @@ public class ALNSCore {
      * @param costInitialSolution: costs of the initial solution
      */
     private void initTemperature(double costInitialSolution) {
-    	this.temperature = -(Config.startTempControlParam / Math.log(Config.bigOmega)) * costInitialSolution;
-    	this.temperatureEnd = Config.minTempPercent * this.temperature;
+    	this.temperature = -(Config.getInstance().startTempControlParam / Math.log(Config.getInstance().bigOmega)) * costInitialSolution;
+    	this.temperatureEnd = Config.getInstance().minTempPercent * this.temperature;
     }
     
     //
@@ -235,29 +228,29 @@ public class ALNSCore {
         Solution solutionBestGlobal = solutionConstr.copyDeep();
 
         // add information from construction to neighbor graph
-        if (Config.useHistoricNodePairRemovalRandom || Config.useHistoricNodePairRemovalDeterministic) 
+        if (Config.getInstance().useHistoricNodePairRemovalRandom || Config.getInstance().useHistoricNodePairRemovalDeterministic) 
         	this.updateNeighborGraph(solutionConstr);
-        if (Config.useHistoricRequestPairRemoval)
+        if (Config.getInstance().useHistoricRequestPairRemoval)
         	this.updateRequestGraph(solutionConstr);
 
         // Start ALNS
-        for (int iteration = 1; iteration <= Config.alnsIterations; iteration++) {
+        for (int iteration = 1; iteration <= Config.getInstance().alnsIterations; iteration++) {
             acceptedNewSolution = false;
         	Solution solutionTemp = solutionCurrent.copyDeep();
             // TODO Alex: random auswaehlen aus Operatoren (geht das irgendwie mit Lambdas besser ?)
 
             // draw destroy operation
-            AbstractRemoval destroyOp = Config.drawOpUniformly? getDestroyOperatorAtRandom() : drawDestroyOperator();
+            AbstractRemoval destroyOp = Config.getInstance().drawOpUniformly? getDestroyOperatorAtRandom() : drawDestroyOperator();
             destroyOp.destroy(solutionTemp);
 
             // draw repair operation
-            AbstractInsertion repairOp = Config.drawOpUniformly? getRepairOperatorAtRandom() : drawInsertionOperator();
+            AbstractInsertion repairOp = Config.getInstance().drawOpUniformly? getRepairOperatorAtRandom() : drawInsertionOperator();
             repairOp.solve(solutionTemp);
 
             // update neighbor graph if new solution was found (TODO Alex - check if the solution is really a new one (hashtable?)
-            if (Config.useHistoricNodePairRemovalRandom || Config.useHistoricNodePairRemovalDeterministic) 
+            if (Config.getInstance().useHistoricNodePairRemovalRandom || Config.getInstance().useHistoricNodePairRemovalDeterministic) 
             	this.updateNeighborGraph(solutionTemp);
-            if (Config.useHistoricRequestPairRemoval)
+            if (Config.getInstance().useHistoricRequestPairRemoval)
             	this.updateRequestGraph(solutionTemp);
             
             // Verbose
@@ -268,7 +261,8 @@ public class ALNSCore {
                 System.out.println("Cost glob " + solutionBestGlobal.getTotalCosts());
             }
             
-            if (Config.enableGLS||Config.enableSchiffer||Config.enableGLSFeature)
+            //TODO : abhängig machen von update interval 
+            if (Config.getInstance().enableGLS||Config.getInstance().enableSchiffer||Config.getInstance().enableGLSFeature)
             	solutionCurrent.calculateTotalCosts();
 
             // check for improvement of the current solution
@@ -290,17 +284,17 @@ public class ALNSCore {
             // by checking if a penalty occurred in the last x iterations 
             // (just on accepted solutions? on every solution? Does it need to be a new violation? 
             // if a violation couldn't be resolved, does it count as a new or known violation) 
-            if (Config.enableSchiffer) {
+            if (Config.getInstance().enableSchiffer) {
             	if (acceptedNewSolution)
             		checkForPenalties(solutionTemp);
-            	if (iteration % Config.penaltyWeightUpdateIteration == 0) {
+            	if (iteration % Config.getInstance().penaltyWeightUpdateIteration == 0) {
             		updatePenaltyWeights();
             		resetPenaltyFlags();
             	}            	
             }
             
             // CHECK GLS Updates
-            if (Config.enableGLS || Config.enableGLSFeature) {
+            if (Config.getInstance().enableGLS || Config.getInstance().enableGLSFeature) {
             	lastGLSUpdate ++;
             	if (acceptedNewSolution) {
             		data.updateGLSCounter(solutionTemp);
@@ -309,27 +303,29 @@ public class ALNSCore {
             		
         		// first check for new solution, then if iteration number is fulfilled (an iteration w/ an accepted solution does 
         		// not necessarily fulfill the modulo operation, hence the counter to the last update lastGLSUpdate is introduced)
-        		// if (lastGLSUpdate>=Config.glsIterUntilPenaltyUpdate || iteration % Config.glsIterUntilPenaltyUpdate == 0) {
-        		if (iteration % Config.glsIterUntilPenaltyUpdate == 0) {
+        		// if (lastGLSUpdate>=Config.getInstance().glsIterUntilPenaltyUpdate || iteration % Config.getInstance().glsIterUntilPenaltyUpdate == 0) {
+        		if (iteration % Config.getInstance().glsIterUntilPenaltyUpdate == 0) {
         			/*System.out.println("--- Penalty Summary ---");
         			for (int i = 0; i< data.getSumGLSCounterViolations().length; i++) {
         				double entry = data.getSumGLSCounterViolations()[i];
         				System.out.println(DataUtils.PenaltyIdx.values()[i] + ":" + entry);
         			}
         			System.out.println("---");*/
-        			if (Config.enableGLS)
+        			if (Config.getInstance().enableGLS)
 						data.glsUpdatePenaltyWeights();
         			else
-        				data.glsFeatureUpdatePenaltyWeights();
+        				data.glsFeatureUpdatePenaltyWeights();        			
+        			WriterUtils.writePenaltyCounts(iteration, data.getSumGLSCounterViolations());
+        			
         			data.resetGLSSettings();
-        			lastGLSUpdate = 0 ;            			
+        			lastGLSUpdate = 0 ;    
         		}
             }
             
             // Tracking of operator probabilities
-        	if (iteration % Config.updateInterval == 0) {
-        		WriterUtils.writeRemovalProbabilities(writerRemovals, destroyOperators, iteration);
-        		WriterUtils.writeRepairProbabilities(writerRepairs, repairOperators, iteration);        		
+        	if (iteration % Config.getInstance().updateInterval == 0) {
+        		WriterUtils.writeRemovalProbabilities(WriterUtils.writerRemovals, destroyOperators, iteration);
+        		WriterUtils.writeRepairProbabilities(WriterUtils.writerRepairs, repairOperators, iteration);        		
         	}
             // END OF ITERATION
         }
@@ -353,19 +349,19 @@ public class ALNSCore {
      * the sub-procedure singleUpdatePenaltyWeight.
      */
     private void updatePenaltyWeights () {
-    	Config.penaltyWeightUnservedCustomer = this.singleUpdatePenaltyWeight(Config.penaltyWeightUnservedCustomer, Config.penaltyWeightUnservedCustomerRange, this.flagPenaltyUnservedCustomer);
-    	Config.penaltyWeightTimeWindow = this.singleUpdatePenaltyWeight(Config.penaltyWeightTimeWindow, Config.penaltyWeightTimeWindowRange, this.flagPenaltyTimeWindow);
-    	Config.penaltyWeightCapacity = this.singleUpdatePenaltyWeight(Config.penaltyWeightCapacity, Config.penaltyWeightCapacityRange, this.flagPenaltyCapacity);
-    	Config.penaltyWeightPredecessorJobs = this.singleUpdatePenaltyWeight(Config.penaltyWeightPredecessorJobs, Config.penaltyWeightPredecessorJobsRange, this.flagPenaltyPredecessorJob);
-    	Config.penaltyWeightSkillLvl = this.singleUpdatePenaltyWeight(Config.penaltyWeightSkillLvl, Config.penaltyWeightSkillLvlRange, this.flagPenaltySkillLvl);
+    	Config.getInstance().penaltyWeightUnservedCustomer = this.singleUpdatePenaltyWeight(Config.getInstance().penaltyWeightUnservedCustomer, Config.getInstance().penaltyWeightUnservedCustomerRange, this.flagPenaltyUnservedCustomer);
+    	Config.getInstance().penaltyWeightTimeWindow = this.singleUpdatePenaltyWeight(Config.getInstance().penaltyWeightTimeWindow, Config.getInstance().penaltyWeightTimeWindowRange, this.flagPenaltyTimeWindow);
+    	Config.getInstance().penaltyWeightCapacity = this.singleUpdatePenaltyWeight(Config.getInstance().penaltyWeightCapacity, Config.getInstance().penaltyWeightCapacityRange, this.flagPenaltyCapacity);
+    	Config.getInstance().penaltyWeightPredecessorJobs = this.singleUpdatePenaltyWeight(Config.getInstance().penaltyWeightPredecessorJobs, Config.getInstance().penaltyWeightPredecessorJobsRange, this.flagPenaltyPredecessorJob);
+    	Config.getInstance().penaltyWeightSkillLvl = this.singleUpdatePenaltyWeight(Config.getInstance().penaltyWeightSkillLvl, Config.getInstance().penaltyWeightSkillLvlRange, this.flagPenaltySkillLvl);
     }
     
     /**
      * Update a single penalty term. 
-     * The weights are multiplied by Config.penaltyWeightOmega if a penalty 
-     * occurred during the last Config.penaltyWeightUpdateIteration iterations, 
-     * and are divided by Config.penaltyWeightOmega if no penalty occurred 
-     * during the last Config.penaltyWeightUpdateIteration iterations. 
+     * The weights are multiplied by Config.getInstance().penaltyWeightOmega if a penalty 
+     * occurred during the last Config.getInstance().penaltyWeightUpdateIteration iterations, 
+     * and are divided by Config.getInstance().penaltyWeightOmega if no penalty occurred 
+     * during the last Config.getInstance().penaltyWeightUpdateIteration iterations. 
      * Thus, we are capable of switching between diversifying and intensifying 
      * search phases.
      * @param value penalty term to be updated
@@ -374,8 +370,8 @@ public class ALNSCore {
      * @return updated penalty term
      */
     private double singleUpdatePenaltyWeight (double value, double[] range, boolean flag) {
-    	if (flag) value = Math.min(value * Config.penaltyWeightOmega, range[1]);
-    	else value = Math.max(value / Config.penaltyWeightOmega, range[0]);
+    	if (flag) value = Math.min(value * Config.getInstance().penaltyWeightOmega, range[1]);
+    	else value = Math.max(value / Config.getInstance().penaltyWeightOmega, range[0]);
     	return value;
     }
     
@@ -406,7 +402,7 @@ public class ALNSCore {
                 for (int c = 1; c < customers.size(); c++) {
                     succ = customers.get(c);
 
-                    if (this.neighborGraph[pred][succ] > obj + Config.epsilon) 
+                    if (this.neighborGraph[pred][succ] > obj + Config.getInstance().epsilon) 
                     	this.neighborGraph[pred][succ] = obj;
 
                     pred = succ;
@@ -421,7 +417,7 @@ public class ALNSCore {
      */
     private void updateRequestGraph(Solution solution) {
     	// if size of solution set has not reached its max limit, add new solution
-    	if (this.solutionSet.size() < Config.requestGraphSolutionsSize) {
+    	if (this.solutionSet.size() < Config.getInstance().requestGraphSolutionsSize) {
     		this.solutionSet.add(solution);
     		adaptWeightsRequestGraph(solution, +1);
     	}
@@ -477,9 +473,10 @@ public class ALNSCore {
      */
     private Solution checkImprovement(Solution solutionTemp, Solution solutionCurrent, Solution solutionBestGlobal) {
         // CASE 1 : check if improvement of global best
-        if (solutionTemp.isFeasible() || (Config.enableGLS||Config.enableSchiffer||Config.enableGLSFeature)) {
-            if (solutionBestGlobal.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon) {
-            	this.currentSigma = Config.sigma1;
+        //if (solutionTemp.isFeasible() || (Config.getInstance().enableGLS||Config.getInstance().enableSchiffer||Config.getInstance().enableGLSFeature)) {
+        if (solutionTemp.isFeasible()) {
+            if (solutionBestGlobal.getTotalCosts() > solutionTemp.getTotalCosts() + Config.getInstance().epsilon) {
+            	this.currentSigma = Config.getInstance().sigma1;
                 solutionBestGlobal.setSolution(solutionTemp);
                 this.acceptedNewSolution = true;
                 return solutionTemp;
@@ -491,7 +488,7 @@ public class ALNSCore {
             // check if temporary solution become new current solution
         	// CASE 2: temporary objective function better than current solution 
             if (this.tempSolutionIsAcceptedByCosts(solutionTemp, solutionCurrent)) {
-            	this.currentSigma = Config.sigma2;
+            	this.currentSigma = Config.getInstance().sigma2;
             	this.acceptedNewSolution = true;
                 return solutionTemp;
             }
@@ -499,7 +496,7 @@ public class ALNSCore {
             // CASE 3: simulated annealing - temporary solution shows no improvement but still accepted 
         	double val = Math.exp(-(solutionTemp.getTotalCosts()-solutionCurrent.getTotalCosts()) / this.temperature);
     		if(Math.random() < val){
-                this.currentSigma = Config.sigma3;
+                this.currentSigma = Config.getInstance().sigma3;
                 this.acceptedNewSolution = true;
                 return solutionTemp;
         	}
@@ -527,7 +524,7 @@ public class ALNSCore {
      *                 the costs of the current solution
      */
     private boolean tempSolutionIsAcceptedByCosts(Solution solutionTemp, Solution solutionCurrent) {    	
-        return solutionCurrent.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon;
+        return solutionCurrent.getTotalCosts() > solutionTemp.getTotalCosts() + Config.getInstance().epsilon;
     }
 
     
@@ -539,7 +536,7 @@ public class ALNSCore {
      * @return Insertion operator
      */
     private AbstractInsertion getRepairOperatorAtRandom() {
-        int idx = Config.randomGenerator.nextInt(this.repairOperators.length);
+        int idx = Config.getInstance().randomGenerator.nextInt(this.repairOperators.length);
         this.currentRepairOpIdx = idx;
         return this.repairOperators[idx];
     }
@@ -549,7 +546,7 @@ public class ALNSCore {
      * @return Destroy operator
      */
     private AbstractRemoval getDestroyOperatorAtRandom() {
-        int idx = Config.randomGenerator.nextInt(this.destroyOperators.length);
+        int idx = Config.getInstance().randomGenerator.nextInt(this.destroyOperators.length);
         this.currentDestroyOpIdx = idx;
         return this.destroyOperators[this.currentDestroyOpIdx];
     }
@@ -559,7 +556,7 @@ public class ALNSCore {
      * @return drawn destroy operator
      */
     private AbstractRemoval drawDestroyOperator() {
-    	double randomValue = Config.randomGenerator.nextDouble();
+    	double randomValue = Config.getInstance().randomGenerator.nextDouble();
     	double cumulatedSum = 0.0;
     	for (int idx = 0; idx<this.destroyOperators.length; idx++) {
     		cumulatedSum += this.destroyOperators[idx].getProbability();
@@ -576,7 +573,7 @@ public class ALNSCore {
      * @return drawn repair operator
      */
     private AbstractInsertion drawInsertionOperator() {
-    	double randomValue = Config.randomGenerator.nextDouble();
+    	double randomValue = Config.getInstance().randomGenerator.nextDouble();
     	double cumulatedSum = 0.0;
     	for (int idx = 0; idx < this.repairOperators.length; idx++) {
     		cumulatedSum += this.repairOperators[idx].getProbability();
@@ -605,11 +602,11 @@ public class ALNSCore {
     	{
         	this.destroyOperators[this.currentDestroyOpIdx].incrementDraws();
         	this.destroyOperators[this.currentDestroyOpIdx].addToPI(this.currentSigma);
-        	if (currentIteration % Config.updateInterval == 0) {
-        		double portionOldWeight = this.destroyOperators[this.currentDestroyOpIdx].getWeight() * (1 - Config.reactionFactor);
+        	if (currentIteration % Config.getInstance().updateInterval == 0) {
+        		double portionOldWeight = this.destroyOperators[this.currentDestroyOpIdx].getWeight() * (1 - Config.getInstance().reactionFactor);
         		double updatedWeight = this.destroyOperators[this.currentDestroyOpIdx].getPi() / 
         				(double) this.destroyOperators[this.currentDestroyOpIdx].getDraws();
-        		updatedWeight *= Config.reactionFactor;
+        		updatedWeight *= Config.getInstance().reactionFactor;
         		this.destroyOperators[this.currentDestroyOpIdx].setWeight(portionOldWeight + updatedWeight);        		
             	this.updateProbabilitiesDestroyOps(this.getSumWeightsDestroyOps());    	
         	}
@@ -619,11 +616,11 @@ public class ALNSCore {
     	{
         	this.repairOperators[this.currentRepairOpIdx].incrementDraws();
         	this.destroyOperators[this.currentDestroyOpIdx].addToPI(this.currentSigma);
-        	if (currentIteration % Config.updateInterval == 0) {
-        		double portionOldWeight = this.repairOperators[this.currentRepairOpIdx].getWeight() * (1 - Config.reactionFactor);
+        	if (currentIteration % Config.getInstance().updateInterval == 0) {
+        		double portionOldWeight = this.repairOperators[this.currentRepairOpIdx].getWeight() * (1 - Config.getInstance().reactionFactor);
         		double updatedWeight = this.repairOperators[this.currentRepairOpIdx].getPi() / 
         				(double) this.repairOperators[this.currentRepairOpIdx].getDraws();
-        		updatedWeight *= Config.reactionFactor;
+        		updatedWeight *= Config.getInstance().reactionFactor;
         		this.repairOperators[this.currentRepairOpIdx].setWeight(portionOldWeight + updatedWeight);        		
             	this.updateProbabilitiesRepairOps(this.getSumWeightsRepairOps());
         	}
@@ -637,7 +634,7 @@ public class ALNSCore {
     private void updateProbabilitiesRepairOps(double sumWeights) {
     	for (AbstractInsertion entry : this.repairOperators) {
     		double newProb = entry.getWeight() / sumWeights;
-    		entry.setProbability(newProb > Config.minOpProb ? newProb : Config.minOpProb);
+    		entry.setProbability(newProb > Config.getInstance().minOpProb ? newProb : Config.getInstance().minOpProb);
     	}
     }
     
@@ -648,7 +645,7 @@ public class ALNSCore {
     private void updateProbabilitiesDestroyOps(double sumWeights) {
     	for (AbstractRemoval entry : this.destroyOperators) {
     		double newProb = entry.getWeight() / sumWeights;
-    		entry.setProbability(newProb > Config.minOpProb ? newProb : Config.minOpProb);
+    		entry.setProbability(newProb > Config.getInstance().minOpProb ? newProb : Config.getInstance().minOpProb);
     	}
     }
     
@@ -658,7 +655,7 @@ public class ALNSCore {
      */
     private void updateTemperature() {
     	if (this.temperature > this.temperatureEnd)
-    		this.temperature *= Config.coolingRate;
+    		this.temperature *= Config.getInstance().coolingRate;
     }
     
     
@@ -717,7 +714,7 @@ public class ALNSCore {
     // TODO Alex - hier brauchen wir auch noch Test cases
     private Solution checkImprovement_orig(Solution solutionTemp, Solution solutionCurrent, Solution solutionBestGlobal) {
         if (solutionTemp.isFeasible()) {
-            if (solutionBestGlobal.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon) {
+            if (solutionBestGlobal.getTotalCosts() > solutionTemp.getTotalCosts() + Config.getInstance().epsilon) {
                 solutionBestGlobal.setSolution(solutionTemp);
             }
         }
@@ -733,9 +730,9 @@ public class ALNSCore {
 //        if (solutionCurrent.isFeasible()) {
 //            if (solutionTemp.isFeasible()) {
 //                // improvement
-//                if (solutionCurrent.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon) {
+//                if (solutionCurrent.getTotalCosts() > solutionTemp.getTotalCosts() + Config.getInstance().epsilon) {
 //                    // check if also better than best global
-////                    if (solutionBestGlobal.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon) {
+////                    if (solutionBestGlobal.getTotalCosts() > solutionTemp.getTotalCosts() + Config.getInstance().epsilon) {
 ////                        solutionBestGlobal.setSolution(solutionTemp);
 ////                    }
 //                    return solutionTemp;
@@ -743,7 +740,7 @@ public class ALNSCore {
 //            }
 //        } else { // if no feasible solution found yet
 //            // improvement
-//            if (solutionCurrent.getTotalCosts() > solutionTemp.getTotalCosts() + Config.epsilon) {
+//            if (solutionCurrent.getTotalCosts() > solutionTemp.getTotalCosts() + Config.getInstance().epsilon) {
 //                return solutionTemp;
 //            }
 //        }

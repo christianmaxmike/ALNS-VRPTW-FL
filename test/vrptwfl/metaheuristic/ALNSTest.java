@@ -18,8 +18,8 @@ public class ALNSTest {
     	Data[] data;
     	data = MainALNS.loadSolomonInstance(instanceName, nCustomers);
     	
-    	MainALNS alns = new MainALNS(outFile, "test_out.txt", true);
-        alns.runALNS(data[0], instanceName);
+    	MainALNS alns = new MainALNS(instanceName, true);
+        alns.runALNS(data[0], instanceName, "result_test.txt", "./test_out/");
 
         // assertEquals(0.0, obj, 0.001);
     }

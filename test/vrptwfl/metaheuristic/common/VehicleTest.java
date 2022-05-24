@@ -25,14 +25,14 @@ public class VehicleTest {
 
     @Test
     public void dummyLeaveDepotAtTimeZero() {
-        assertEquals("Leaving depot start", 0.0, vehicle.getStartOfServices().get(0), Config.epsilon);
-        assertEquals("Leaving depot end", 0.0, vehicle.getEndOfServices().get(0), Config.epsilon);
+        assertEquals("Leaving depot start", 0.0, vehicle.getStartOfServices().get(0), Config.getInstance().epsilon);
+        assertEquals("Leaving depot end", 0.0, vehicle.getEndOfServices().get(0), Config.getInstance().epsilon);
     }
 
     @Test
     public void dummyEnterDepotAtEndOfPlanningHorizon() {
-        assertEquals("Returning to depot start", 230.0, vehicle.getStartOfServices().get(1), Config.epsilon);
-        assertEquals("Returning to depot end", 230.0, vehicle.getEndOfServices().get(1), Config.epsilon);
+        assertEquals("Returning to depot start", 230.0, vehicle.getStartOfServices().get(1), Config.getInstance().epsilon);
+        assertEquals("Returning to depot end", 230.0, vehicle.getEndOfServices().get(1), Config.getInstance().epsilon);
     }
 
 //    @Test

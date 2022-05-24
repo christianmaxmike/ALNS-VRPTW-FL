@@ -58,12 +58,12 @@ public abstract class AbstractRemoval {
     //
     /**
      * Get the number of removals which are applied. The number of removals is chosen 
-     * in the range defined by Config.lowerBoundRevomals and Config.upperBoundRemovals
+     * in the range defined by Config.getInstance().lowerBoundRevomals and Config.getInstance().upperBoundRemovals
      * @param solution: Solution object
      * @return number of removals
      */
     final int getNRemovals(Solution solution) {
-        int nRemovals = CalcUtils.getRandomNumberInClosedRange(Config.lowerBoundRemovals, Config.upperBoundRemovals);
+        int nRemovals = CalcUtils.getRandomNumberInClosedRange(Config.getInstance().lowerBoundRemovals, Config.getInstance().upperBoundRemovals);
         int nrOfAssignedCustomers = solution.getNrOfAssignedCustomers();
         if (nRemovals > nrOfAssignedCustomers) nRemovals = nrOfAssignedCustomers;
         return nRemovals;

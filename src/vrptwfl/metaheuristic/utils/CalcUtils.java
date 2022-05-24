@@ -33,7 +33,7 @@ public class CalcUtils {
      */
     public static int getRandomNumberInClosedRange(int lowerBound, int upperBound) {
         upperBound++; // otherwise [lowerBound, upperBound)
-        return Config.randomGenerator.nextInt((upperBound - lowerBound)) + lowerBound;
+        return Config.getInstance().randomGenerator.nextInt((upperBound - lowerBound)) + lowerBound;
     }
 
     /**
@@ -47,7 +47,7 @@ public class CalcUtils {
         // add all numbers in range to list (numbers will be sorted in ascending order)
         List<Integer> numbersInRange = new ArrayList<>() {{ for (int i = rangeLowerBound; i <= rangeUpperBound; i++) add(i); }};
 
-        Collections.shuffle(numbersInRange, Config.randomGenerator); // shuffle order of numbers in list
+        Collections.shuffle(numbersInRange, Config.getInstance().randomGenerator); // shuffle order of numbers in list
         numbersInRange = numbersInRange.subList(0, nNumbers);  // get first n numbers of shuffled list
 
         Collections.sort(numbersInRange); // sort these first n elements
@@ -65,7 +65,7 @@ public class CalcUtils {
         // add all numbers in range to list (numbers will be sorted in ascending order)
         List<Integer> numbersInRange = new ArrayList<>() {{ for (int i = rangeLowerBound; i <= rangeUpperBound; i++) add(i); }};
 
-        Collections.shuffle(numbersInRange, Config.randomGenerator); // shuffle order of numbers in list
+        Collections.shuffle(numbersInRange, Config.getInstance().randomGenerator); // shuffle order of numbers in list
         numbersInRange = numbersInRange.subList(0, nNumbers);  // get first n numbers of shuffled list
 
         return numbersInRange;

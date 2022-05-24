@@ -98,7 +98,7 @@ public class SolomonInstanceGenerator {
             
         }
         
-        for (int nLocations = 1; nLocations < Config.numberOfLocationsPerCustomer; nLocations++) {
+        for (int nLocations = 1; nLocations < Config.getInstance().numberOfLocationsPerCustomer; nLocations++) {
         	for (int customerId = 1; customerId < customerToLocations.size()-1; customerId++) {
         		customerToLocations.get(customerId).add(customerToLocations.get(customerId+1).get(customerToLocations.get(customerId+1).size()-1));
         	}
