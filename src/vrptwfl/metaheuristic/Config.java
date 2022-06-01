@@ -377,13 +377,20 @@ public class Config {
     	getInstance().glsPenaltyReduction = randomizeDoubleValue(0.25, getInstance().glsPenaltyReduction);
     	
     	getInstance().exponentSwappingLocations = (int) randomizeDoubleValue(2, getInstance().exponentSwappingLocations);
-    	getInstance().historicNodePairRemovalExponent = (int) randomizeDoubleValue(6, getInstance().historicNodePairRemovalExponent);
-    	getInstance().historicRequestRemovalExponent = (int) randomizeDoubleValue(6, getInstance().historicRequestRemovalExponent);
-    	getInstance().shawRemovalExponent = (int) randomizeDoubleValue(6, getInstance().shawRemovalExponent);
-    	getInstance().skillMismatchRemovalExponent = (int) randomizeDoubleValue(6, getInstance().skillMismatchRemovalExponent);
-    	getInstance().timeFlexibilityRemovalExponent = (int) randomizeDoubleValue(6, getInstance().timeFlexibilityRemovalExponent);
-    	getInstance().timeOrientedRemovalExponent = (int) randomizeDoubleValue(6, getInstance().timeFlexibilityRemovalExponent);
-    	getInstance().worstRemovalExponent = (int) randomizeDoubleValue(6, getInstance().worstRemovalExponent);
+    	getInstance().historicNodePairRemovalExponent = (int) randomizeDoubleValue(12, getInstance().historicNodePairRemovalExponent);
+    	getInstance().historicRequestRemovalExponent = (int) randomizeDoubleValue(12, getInstance().historicRequestRemovalExponent);
+    	getInstance().shawRemovalExponent = (int) randomizeDoubleValue(12, getInstance().shawRemovalExponent);
+    	getInstance().skillMismatchRemovalExponent = (int) randomizeDoubleValue(12, getInstance().skillMismatchRemovalExponent);
+    	getInstance().timeFlexibilityRemovalExponent = (int) randomizeDoubleValue(12, getInstance().timeFlexibilityRemovalExponent);
+    	getInstance().timeOrientedRemovalExponent = (int) randomizeDoubleValue(12, getInstance().timeFlexibilityRemovalExponent);
+    	getInstance().worstRemovalExponent = (int) randomizeDoubleValue(12, getInstance().worstRemovalExponent);
+    	
+    	getInstance().glsLambdaUnscheduled = (double) randomizeDoubleValue(15, getInstance().glsLambdaUnscheduled);
+    	getInstance().glsLambdaTimeWindow = (double) randomizeDoubleValue(1, getInstance().glsLambdaTimeWindow);
+    	getInstance().glsLambdaPredJobs = (double) randomizeDoubleValue(5, getInstance().glsLambdaPredJobs);
+    	getInstance().glsLambdaCapacity = (double) randomizeDoubleValue(5, getInstance().glsLambdaCapacity);
+    	getInstance().glsLambdaSkill = (double) randomizeDoubleValue(5, getInstance().glsLambdaSkill);
+    	
     }
     
     private double randomizeDoubleValue (double upperBound, double startValue) {

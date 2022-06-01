@@ -148,7 +148,7 @@ public class Solution {
      * @param startServiceSucc: start service time of successor
      * @return
      */
-    public ArrayList<double[]> getPossibleLTWInsertionsForCustomer(int customer, int earliestStartCustomer, int latestStartCustomer, int serviceTime, int pred, int succ, int endServicePred, int startServiceSucc) {
+    public ArrayList<double[]> getPossibleLTWInsertionsForCustomer(int customer, int earliestStartCustomer, int latestStartCustomer, int serviceTime, int pred, int succ, double endServicePred, double startServiceSucc) {
     	ArrayList<double[]> possibleInsertions = new ArrayList<double[]>();
     	for (int locationIdx=0; locationIdx < this.data.getCustomersToLocations().get(this.data.getOriginalCustomerIds()[customer]).size() ; locationIdx ++) {
     		// Get current location id for customer (e.g. customer 1 with locations: 3, 4 ; locationIdx refers to 0 -> 3, 1 -> 4)
@@ -196,21 +196,24 @@ public class Solution {
     				if (timeSucc[0] < endServicePred) 
     					continue; 
     				
-    				// TODO Chris - Check conditions
-    				// i)   predecessor in location ends before current starting point for job
-    				// ii)  predecessor in vehicle's route ends before current starting point for job
-    				// iii) successor in location starts after current job is served
-    				// iv)  successor in vehicle's route starts after current job is served
-    				if (timePred[1] < earliestStartAtInsertion & 
-    					endServicePred < earliestStartAtInsertion &
-    					timeSucc[0] > earliestStartAtInsertion + serviceTime & 
-    					startServiceSucc > earliestStartAtInsertion + serviceTime
-    					) {
-						
-    					double timeStart = earliestStartAtInsertion;
-						// TODO_DONE: retrieve multiple solutions (possible that first match not the best one)
-						double[] possibleInsertion = new double[]{locationIdx, capacity, timeStart, additionalTravelCosts, entryIdx};
-						possibleInsertions.add(possibleInsertion);
+    				for (;timeSucc[0] > earliestStartAtInsertion + serviceTime & 
+							startServiceSucc > earliestStartAtInsertion + serviceTime; earliestStartAtInsertion += Config.getInstance().maxTimeWindowViolation) {
+    					// TODO Chris - Check conditions
+    					// i)   predecessor in location ends before current starting point for job
+    					// ii)  predecessor in vehicle's route ends before current starting point for job
+    					// iii) successor in location starts after current job is served
+    					// iv)  successor in vehicle's route starts after current job is served
+    					if (timePred[1] < earliestStartAtInsertion & 
+    							endServicePred < earliestStartAtInsertion &
+    							timeSucc[0] > earliestStartAtInsertion + serviceTime & 
+    							startServiceSucc > earliestStartAtInsertion + serviceTime
+    							) {
+    						
+    						double timeStart = earliestStartAtInsertion;
+    						// TODO_DONE: retrieve multiple solutions (possible that first match not the best one)
+    						double[] possibleInsertion = new double[]{locationIdx, capacity, timeStart, additionalTravelCosts, entryIdx};
+    						possibleInsertions.add(possibleInsertion);
+    					}
     				}
     			}    			
     		}
@@ -267,7 +270,7 @@ public class Solution {
             }
         }
         // sort by travelTimeReduction
-        possibleRemovals.sort(Comparator.comparing(a -> a[3], Collections.reverseOrder())); 
+        possibleRemovals.sort(Comparator.comparing(a -> (a[3]+a[4]), Collections.reverseOrder())); 
         return possibleRemovals;
     }
 
@@ -316,7 +319,7 @@ public class Solution {
     	// corresponding edge in the request graph is high.'
     	
     	// here: high scores first with Collections.reverseOrder()
-    	possibleRemovals.sort(Comparator.comparing(a -> a[3], Collections.reverseOrder()));
+    	possibleRemovals.sort(Comparator.comparing(a -> (a[3]+a[4]), Collections.reverseOrder()));
     	return possibleRemovals;
     }
     
@@ -406,6 +409,7 @@ public class Solution {
             this.notAssignedCustomers.addAll(removedCustomers);
             isFeasible = false;
         }
+        this.calculatePenaltyCosts();
     }
 
     /**
@@ -429,6 +433,9 @@ public class Solution {
         this.calcCostsForTimeWindowViolation();
         this.calcCostsForPredJobsViolation();
         this.calcCostsForSkillViolation();
+        
+        if (this.listOfPenalties.size() > 0)
+        	this.isFeasible = false;
     }
 
     /**
@@ -508,7 +515,10 @@ public class Solution {
 		// POSSIBLE PRED JOBS VIOLATION
 		double predJobsViolation = calcCustomerCostsForPredJobs(customerID);
 		
-    	return skillViolation + timeWindowViolation + predJobsViolation;
+		return (Config.getInstance().glsLambdaTimeWindow * timeWindowViolation) +
+				(Config.getInstance().glsLambdaSkill * skillViolation) +
+				(Config.getInstance().glsLambdaPredJobs * predJobsViolation);
+    	// return skillViolation + timeWindowViolation + predJobsViolation;
     }
     
     public double getCustomersCostsForViolations(int customerID) {

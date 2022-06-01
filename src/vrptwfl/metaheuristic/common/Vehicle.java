@@ -108,7 +108,7 @@ public class Vehicle {
         double latestStartCustomer = data.getLatestStartTimes()[customer];
         
         if ((Config.getInstance().enableGLS||Config.getInstance().enableSchiffer || Config.getInstance().enableGLSFeature) & !solution.isConstruction()) {
-        	earliestStartCustomer = Math.max(earliestStartCustomer -Config.getInstance().maxTimeWindowViolation, 0);
+        	earliestStartCustomer = Math.max(earliestStartCustomer - Config.getInstance().maxTimeWindowViolation, 0);
         	latestStartCustomer = Math.min(latestStartCustomer + Config.getInstance().maxTimeWindowViolation,  solution.getData().getEndOfPlanningHorizon());
         }
 
@@ -126,7 +126,7 @@ public class Vehicle {
             		                                                     (int) latestStartCustomer,
             		                                                     data.getServiceDurations()[customer],
             															 pred, succ,
-            															 (int) endServicePred, (int) startServiceSucc);
+            															 endServicePred, startServiceSucc);
             if (customersPossibleLTW.size() == 0)  // no match
             	continue;
             else  // add matches
@@ -145,7 +145,6 @@ public class Vehicle {
             		if (Config.getInstance().enableGLS || Config.getInstance().enableSchiffer || Config.getInstance().enableGLSFeature) {
             			//double penaltyCosts = solution.getCustomersCostsForViolations(customer);
             			double penaltyCosts = solution.getViolationCostsForInsertion(newInsertion);
-            			// System.out.println(penaltyCosts);
             			newInsertion[8] += penaltyCosts;
             		}
 
@@ -192,13 +191,16 @@ public class Vehicle {
             double travelTimeReduction = distToCustomer + distFromCustomer - distWithoutCustomer;
             
             double costs = travelTimeReduction;
+            double penaltyCosts = 0.0;
             if (Config.getInstance().enableGLS || Config.getInstance().enableSchiffer || Config.getInstance().enableGLSFeature) {
-    			double penaltyCosts = solution.getCustomersCostsForViolations(customer);
-    			costs += penaltyCosts;
+    			penaltyCosts = solution.getCustomersCostsForViolations(customer);
+    			//if (penaltyCosts > 0)
+    			//	System.out.println();
+    			//costs += penaltyCosts;
     		}
             	
             // Add to possible removals
-            possibleRemovals.add(new double[] {customer, this.id, i, costs});
+            possibleRemovals.add(new double[] {customer, this.id, i, costs, penaltyCosts});
             i++;
         } while (i < this.customers.size() - 1);
         return possibleRemovals;
@@ -269,12 +271,13 @@ public class Vehicle {
     		}
     		
             double costs = scoreI;
+            double penaltyCosts = 0.0;
             if (Config.getInstance().enableGLS || Config.getInstance().enableSchiffer || Config.getInstance().enableGLSFeature) {
-    			double penaltyCosts = solution.getCustomersCostsForViolations(customerI);
-    			costs += penaltyCosts;
+    			penaltyCosts = solution.getCustomersCostsForViolations(customerI);
+    			// costs += penaltyCosts;
     		}
             	
-    		possibleRemovals.add(new double[] {customerI, this.id, i, costs});
+    		possibleRemovals.add(new double[] {customerI, this.id, i, costs, penaltyCosts});
     	}
     	
     	return possibleRemovals;

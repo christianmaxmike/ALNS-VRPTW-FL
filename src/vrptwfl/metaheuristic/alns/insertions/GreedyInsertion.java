@@ -56,12 +56,12 @@ public class GreedyInsertion extends AbstractInsertion {
 	                iter.remove();
             	}
             } else {
-                possibleInsertionsForCustomer.sort(Comparator.comparing(a -> a[4])); // sort by additional costs
+                possibleInsertionsForCustomer.sort(Comparator.comparing(a -> (a[4]+a[8]))); // sort by additional costs
                 double[] possibleInsertion = possibleInsertionsForCustomer.get(0);
 
                 // compare cost increase to currently best (lowest) cost increase
-                if (possibleInsertion[4] + Config.getInstance().epsilon < minCostIncrease) {
-                	minCostIncrease = possibleInsertion[4];  // update new min cost
+                if ((possibleInsertion[4]+possibleInsertion[8]) + Config.getInstance().epsilon < minCostIncrease) {
+                	minCostIncrease = possibleInsertion[4] + possibleInsertion[8];  // update new min cost
                     nextInsertion = possibleInsertion;
                 }
             }

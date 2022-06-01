@@ -81,7 +81,7 @@ public class RegretInsertion extends AbstractInsertion {
                 // if regret is higher than currently highest regret, update maxRegret and update nextInsertion
                 if (regret > maxRegret - Config.getInstance().epsilon) {  // check if regret >= maxRegret
                     // either (regret > maxRegret) or (regret == maxRegret but lower insertion cost (tie-breaker))
-                    if ((regret > maxRegret + Config.getInstance().epsilon) || (nextInsertion[4] < possibleInsertionsForCustomer.get(0)[4] + Config.getInstance().epsilon)) {
+                    if ((regret > maxRegret + Config.getInstance().epsilon) || ((nextInsertion[4]+nextInsertion[8]) < (possibleInsertionsForCustomer.get(0)[4]+possibleInsertionsForCustomer.get(0)[8]) + Config.getInstance().epsilon)) {
                         maxRegret = regret;
                         nextInsertion = possibleInsertionsForCustomer.get(0);
                     }
@@ -103,15 +103,19 @@ public class RegretInsertion extends AbstractInsertion {
      */
     private double calculateRegret(int k, ArrayList<double[]> possibleInsertionsForCustomer) {
         double regret = 0.;
-        possibleInsertionsForCustomer.sort(Comparator.comparing(a -> a[4])); // sort by additional costs
-
+        // possibleInsertionsForCustomer.sort(Comparator.comparing(a -> a[4])); // sort by additional costs
+        possibleInsertionsForCustomer.sort(Comparator.comparing(a -> (a[4]+a[8]))); // sort by additional costs
+        
         for (int i = k; i>=2; i--) {
             if (possibleInsertionsForCustomer.size() >= i) {
                 // if k-regret can be calculated as there enough at least k insertions
-                regret += possibleInsertionsForCustomer.get(i - 1)[4] - possibleInsertionsForCustomer.get(0)[4];
+            	// regret += possibleInsertionsForCustomer.get(i - 1)[4] - possibleInsertionsForCustomer.get(0)[4];
+            	regret += (possibleInsertionsForCustomer.get(i - 1)[4] + possibleInsertionsForCustomer.get(i - 1)[8]) 
+            			- (possibleInsertionsForCustomer.get(0)[4] + possibleInsertionsForCustomer.get(0)[8]);
             } else {
                 // if list has entries, but not k (i.e. not enough to calculate k-regret)
-                regret += (i - possibleInsertionsForCustomer.size())*Config.getInstance().bigMRegret - possibleInsertionsForCustomer.get(0)[4];
+                // regret += (i - possibleInsertionsForCustomer.size())*Config.getInstance().bigMRegret - possibleInsertionsForCustomer.get(0)[4];
+                regret += (i - possibleInsertionsForCustomer.size())*Config.getInstance().bigMRegret - (possibleInsertionsForCustomer.get(0)[4] + possibleInsertionsForCustomer.get(0)[8]);
             }
 
             // if only the regret between n-th and best should be considered, break loop

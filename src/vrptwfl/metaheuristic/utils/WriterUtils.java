@@ -24,6 +24,7 @@ public class WriterUtils {
 	public static FileWriter writerResults;
 	public static FileWriter writerConfig;
 	public static FileWriter writerFinalTour;
+	public static FileWriter writerBacktracking;
 	public static String outDir;
 	
 	public static void initWriters(Data data, String parentDir, String outputFile, String instanceName) {
@@ -43,6 +44,7 @@ public class WriterUtils {
 			writerResults = new FileWriter("./"+ parentDir +"/" + outputFile, true);
 			writerConfig = new FileWriter(outDir + "config.json");
 			writerFinalTour = new FileWriter(outDir + "finalTour.txt");
+			writerBacktracking = new FileWriter(outDir + "backTrackingLog.txt");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -165,6 +167,16 @@ public class WriterUtils {
 		}
 	}
 	
+	public static void initBacktrackingLogging () {
+		StringBuilder builder = new StringBuilder("trial;noJumps;bestCosts\n");
+		try {
+			writerBacktracking.write(builder.toString());
+			writerBacktracking.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void writePenaltyCounts (int iteration, double[] penaltyCnts) {
 		StringBuilder builder = new StringBuilder("" + iteration);
 		int i = 0;
@@ -185,6 +197,15 @@ public class WriterUtils {
 		try {
 			writer.write(tour);
 			writer.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void writeBacktrackingInfo (int trial, int jumps, double costs) {
+		try {
+			writerBacktracking.write(trial + ";" + jumps + ";" + costs + "\n");
+			writerBacktracking.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

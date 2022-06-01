@@ -209,7 +209,7 @@ public class MainALNS {
         	tuningParam(numConfigs, numRunsPerConfig, nCustomers, outDir, outFile);        	
         }
         else
-        	System.out.println("Unknonw mode - 1:run single instance; 2:run parameter tuning");
+        	System.out.println("Unknown mode - 1:run single instance; 2:run parameter tuning");
         	System.exit(0);
     }
     

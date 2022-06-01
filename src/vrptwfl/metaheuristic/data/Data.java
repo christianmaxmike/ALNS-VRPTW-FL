@@ -241,29 +241,34 @@ public class Data {
     }
     
     private void calcUtilitySet (TreeSet<double[]> utilitiesSet) {
-    	for (Solution s : this.glsSolutionHistory) {
+    	//for (Solution s : this.glsSolutionHistory) {
     		// Iterate observed penalties in attached solution
-    		for (int[] entry: s.getListOfPenalties()) {
-    			// Get counter & penalty values
-    			double counter = this.glsCounterViolations[entry[0]][entry[1]];
-    			double penalty = this.glsPenalties[entry[0]][entry[1]];
-    			
-    			// Get cost of violation
-    			double violationCost = -1;
-    			DataUtils.PenaltyIdx whichPenalty = DataUtils.PenaltyIdx.values()[entry[0]];
-    			switch(whichPenalty) {
-    			case TWViolation: violationCost = Config.getInstance().costTimeWindowViolation; break;
-    			case Unscheduled: violationCost = Config.getInstance().costUnservedCustomerViolation; break;
-    			case Predecessor: violationCost = Config.getInstance().costPredJobsViolation; break;
-    			case Capacity: violationCost = Config.getInstance().costCapacityViolation; break;
-    			case SkillLvl: violationCost = Config.getInstance().costSkillLvlViolation; break;
-    			default: violationCost = -1;
+    		//for (int[] entry: s.getListOfPenalties()) {	
+    		for (int violationid = 0 ; violationid < DataUtils.PenaltyIdx.values().length; violationid ++) {
+    			for (int customerid = 0; customerid<this.customers.length; customerid++) {
+    				int[] entry = new int[] {violationid, customerid};
+    				// Get counter & penalty values
+    				double counter = this.glsCounterViolations[entry[0]][entry[1]];
+    				double penalty = this.glsPenalties[entry[0]][entry[1]];
+    				
+    				// Get cost of violation
+    				double violationCost = -1;
+    				DataUtils.PenaltyIdx whichPenalty = DataUtils.PenaltyIdx.values()[entry[0]];
+    				switch(whichPenalty) {
+    				case TWViolation: violationCost = Config.getInstance().costTimeWindowViolation; break;
+    				case Unscheduled: violationCost = Config.getInstance().costUnservedCustomerViolation; break;
+    				case Predecessor: violationCost = Config.getInstance().costPredJobsViolation; break;
+    				case Capacity: violationCost = Config.getInstance().costCapacityViolation; break;
+    				case SkillLvl: violationCost = Config.getInstance().costSkillLvlViolation; break;
+    				default: violationCost = -1;
+    				}
+    				
+    				// Calculate utility and add to set of utilities (sorted by utility values in descending order)
+    				double utility = (counter * violationCost) / (1 + penalty);
+    				utilitiesSet.add(new double[] {utility, entry[0], entry[1]});
     			}
-    			
-    			// Calculate utility and add to set of utilities (sorted by utility values in descending order)
-    			double utility = (counter * violationCost) / (1 + penalty);
-    			utilitiesSet.add(new double[] {utility, entry[0], entry[1]});
-    		}
+    		//}
+    		//}
     	}
     }
     
@@ -338,8 +343,8 @@ public class Data {
     	for (int i = 0 ; i<this.glsPenalties.length; i++) {
     		for (int j = 0; j<this.glsPenalties[i].length; j++) {
     			// TODO: checken, Auswirkung von init value
-    			// this.glsPenalties[i][j] = Math.max(Config.getInstance().glsPenaltyInitValue, this.glsPenalties[i][j] - Config.getInstance().glsPenaltyReduction);
-    			this.glsPenalties[i][j] = Math.max(0, this.glsPenalties[i][j] - Config.getInstance().glsPenaltyReduction);
+    			this.glsPenalties[i][j] = Math.max(Config.getInstance().glsPenaltyInitValue, this.glsPenalties[i][j] - Config.getInstance().glsPenaltyReduction);
+    			// this.glsPenalties[i][j] = Math.max(0, this.glsPenalties[i][j] - Config.getInstance().glsPenaltyReduction);
     		}
     	}
     	

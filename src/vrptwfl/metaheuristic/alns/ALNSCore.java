@@ -446,7 +446,7 @@ public class ALNSCore {
     private void adaptWeightsRequestGraph(Solution solution, double value) {
     	for (Vehicle v: solution.getVehicles()) {
     		for (int i = 1 ; i < v.getCustomers().size()-2; i++) {
-    			for (int j = i+1; j<v.getCustomers().size()-1; j++) {
+    			for (int j = i+1; j < v.getCustomers().size()-1; j++) {
     				// Get customer identifiers
     				int customerI = v.getCustomers().get(i);
     				int customerJ = v.getCustomers().get(j);
@@ -474,7 +474,7 @@ public class ALNSCore {
     private Solution checkImprovement(Solution solutionTemp, Solution solutionCurrent, Solution solutionBestGlobal) {
         // CASE 1 : check if improvement of global best
         //if (solutionTemp.isFeasible() || (Config.getInstance().enableGLS||Config.getInstance().enableSchiffer||Config.getInstance().enableGLSFeature)) {
-        if (solutionTemp.isFeasible()) {
+        if (solutionTemp.isFeasible()) { // && solutionTemp.getListOfPenalties().size() == 0) {
             if (solutionBestGlobal.getTotalCosts() > solutionTemp.getTotalCosts() + Config.getInstance().epsilon) {
             	this.currentSigma = Config.getInstance().sigma1;
                 solutionBestGlobal.setSolution(solutionTemp);

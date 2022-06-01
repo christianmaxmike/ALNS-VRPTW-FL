@@ -9,6 +9,7 @@ import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
+import vrptwfl.metaheuristic.utils.WriterUtils;
 
 /**
  * This class implements the backtracking mechanism using the 
@@ -108,6 +109,8 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
     			}
     		}
     		System.out.println("Number of backtrack jumps in this trial: " + this.noBackTrackJumps);
+            this.bestInitialSolution.updateSolutionAfterInsertion();
+    		WriterUtils.writeBacktrackingInfo(trial, noBackTrackJumps, this.bestInitialSolution.getTotalCosts());
     	}
     	
         // update best solution object, then return it
