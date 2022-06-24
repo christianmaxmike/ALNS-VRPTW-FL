@@ -78,7 +78,7 @@ public abstract class AbstractRemoval {
      * @throws ArgumentOutOfBoundsException: is thrown if the specific destroy
      *              operation couldn't be executed
      */
-    public final void destroy(Solution solution) throws ArgumentOutOfBoundsException {
+    public final List<Integer> destroy(Solution solution) throws ArgumentOutOfBoundsException {
         // get number of removals based on parameters defined in configuration file
         int nRemovals = getNRemovals(solution);
 
@@ -86,7 +86,9 @@ public abstract class AbstractRemoval {
 
         // Update the solution object.  The tours of the vehicle are already update by the removals.  However, global
         // information such as the total costs and list of notAssignedCustomers still need to be updated.
-        solution.updateSolutionAfterRemoval(removedCustomers);
+        solution.updateSolutionAfterRemoval(removedCustomers, false);
+        
+        return removedCustomers;
     }
 
     

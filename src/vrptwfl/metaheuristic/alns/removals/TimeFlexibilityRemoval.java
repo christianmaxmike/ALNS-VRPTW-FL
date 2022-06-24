@@ -75,6 +75,6 @@ public class TimeFlexibilityRemoval extends AbstractRemoval {
 	 * {@inheritDoc}
 	 */
 	public String getFormattedClassName() {
-		return "Time Flexibility (" + (this.randomize?"determ.":"random") + ")";
+		return "Time Flexibility (" + (this.randomize?"random":"determ.") + ")";
 	}
 }

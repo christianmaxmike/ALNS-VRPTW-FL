@@ -37,6 +37,7 @@ public class Config {
     public int upperBoundRemovals;
     public double upperBoundRemovalsFactor;
     public int upperBoundRemovalsMax;
+    public double checkIntervalInsertion;
 
     // --- GLS SETTINGS ---
     // GLS Instance-based
@@ -112,6 +113,9 @@ public class Config {
     public boolean useRouteEliminationLeast;
     public boolean useRouteEliminationMost;
     public boolean useZoneRemoval;
+    public boolean useSubrouteRemoval;
+    public boolean useLocationRelatedRemoval;
+    public boolean useLocationAndTimeRelatedRemoval;
     // insertions
     public boolean useGreedyInsert;
     public boolean useSkillMatchingInsert;
@@ -174,6 +178,7 @@ public class Config {
     public double avgOptimalityGapValue = Double.MAX_VALUE;
     public double optimalityGapValue = Double.MAX_VALUE;
     
+    public static String configFile; // = "resources/config.yaml";
 
     //NOTE maybe as singleton pattern (getInstance())
     private static Config instance;
@@ -196,7 +201,7 @@ public class Config {
     private void loadConfig() {
         InputStream inputStream = null;
         try {
-            inputStream = new FileInputStream(new File("resources/config.yaml"));
+            inputStream = new FileInputStream(new File(configFile));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -215,6 +220,7 @@ public class Config {
 
         // --- ALNS configurations ---
         alnsIterations = (int) obj.get("alns_iterations");
+        checkIntervalInsertion = (double) obj.get("check_interval_for_insertion");
 
         // --- DESTROY / REPAIR OPERATORS ---
         // removals
@@ -240,6 +246,10 @@ public class Config {
         useRouteEliminationLeast = (boolean) obj.get("use_route_eliminiation_least");
         useRouteEliminationMost = (boolean) obj.get("use_route_eliminiation_most");
         useZoneRemoval = (boolean) obj.get("use_zone_removal");
+        useSubrouteRemoval = (boolean) obj.get("use_subroute_removal");
+        useLocationRelatedRemoval = (boolean) obj.get("use_locationRelated_removal");
+        useLocationAndTimeRelatedRemoval = (boolean) obj.get("use_locationAndTimeRelated_removal");
+        
         // insertions
         useGreedyInsert = (boolean) obj.get("use_greedy_insert");
         useSkillMatchingInsert = (boolean) obj.get("use_skill_matching_insert");
@@ -345,7 +355,6 @@ public class Config {
         penaltyWeightSkillLvl = (double) obj.get("penalty_weight_skillLvl");
         penaltyWeightOmega = (double) obj.get("penalty_weight_omega");
         penaltyWeightUpdateIteration = (int) obj.get("penalty_weight_update_iteration");
-        
     
         // --- LOCATION SETTINGS (for solomon instances) ---
         numberOfLocationsPerCustomer = (int) obj.get("numberOfLocationsPerCustomer");
@@ -390,6 +399,8 @@ public class Config {
     	getInstance().glsLambdaPredJobs = (double) randomizeDoubleValue(5, getInstance().glsLambdaPredJobs);
     	getInstance().glsLambdaCapacity = (double) randomizeDoubleValue(5, getInstance().glsLambdaCapacity);
     	getInstance().glsLambdaSkill = (double) randomizeDoubleValue(5, getInstance().glsLambdaSkill);
+    	
+    	getInstance().updateInterval = (int) randomizeDoubleValue(200, 1);
     	
     }
     

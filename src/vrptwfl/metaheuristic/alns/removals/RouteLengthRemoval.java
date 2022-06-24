@@ -56,6 +56,7 @@ public class RouteLengthRemoval extends AbstractRemoval {
 		if (!this.shortestRoutesFirst) 
 			Collections.reverse(copyVehicles);
 		
+		routeLength:
 		while (nRemovals > 0) {
 			for (int rv_idx = 0; rv_idx <copyVehicles.size(); rv_idx ++) {
 				Vehicle rv = copyVehicles.get(rv_idx);
@@ -65,9 +66,8 @@ public class RouteLengthRemoval extends AbstractRemoval {
 					removedCustomers.add(rCustomer);
 					
 					nRemovals--;
-					if (nRemovals == 0) break;
+					if (nRemovals == 0) break routeLength;
 				}
-				
 			}
 		}
 		return removedCustomers;

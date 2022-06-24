@@ -8,7 +8,7 @@ do
 	do
 		for v in {1..5}
 		do
-			java -jar ALNS-VRPTW-FL-main-0.0.1-SNAPSHOT-jar-with-dependencies.jar "hospital_instance_i020_b$b_f$f_v0$v.json"
+			java -jar ALNS-VRPTW-FL-main-0.0.1-SNAPSHOT-jar-with-dependencies.jar 0 out_hospital_20 "hospital_instance_i020_b$b_f$f_v0$v.json" 20
 		done
 	done
 done

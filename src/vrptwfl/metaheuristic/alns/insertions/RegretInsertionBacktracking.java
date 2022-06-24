@@ -9,6 +9,7 @@ import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
+import vrptwfl.metaheuristic.utils.CalcUtils;
 import vrptwfl.metaheuristic.utils.WriterUtils;
 
 /**
@@ -24,7 +25,8 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
     private int backtrackJump;    
     private int noBackTrackJumps;
     private ArrayList<Solution> solutionSequence;
-    private Solution bestInitialSolution = null;
+    private Solution bestSolutionInTrial = null;
+    private Solution bestSolution = null;
 
    /**
     * Initialize k-regret w/ backtracking heuristic
@@ -44,7 +46,9 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
     public Solution runBacktracking(Solution solution) {
     	// Try backtracking for x trials
     	for (int trial = 0; trial<Config.getInstance().backtrackTrials; trial++) {
+    		long startTime = System.currentTimeMillis();
     		this.noBackTrackJumps = 0;
+    		bestSolutionInTrial = null;
     		System.out.println("Backtracking Trial:" + trial);
     		
     		// Get a copy of the 'empty' solution
@@ -59,9 +63,13 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
     		Solution currSolution = initSolution;
     		
     		// loop while there are unscheduled customers
-    		while (!currSolution.getNotAssignedCustomers().isEmpty() && this.noBackTrackJumps < Config.getInstance().maxBacktrackJumps) {
-    			
-    			// receive the next possible insertions in the current node in the backtracking-tree
+    		//while (!currSolution.isFeasible() && !currSolution.getNotAssignedCustomers().isEmpty() && this.noBackTrackJumps < Config.getInstance().maxBacktrackJumps) {
+        	while (!currSolution.isFeasible() && this.noBackTrackJumps < Config.getInstance().maxBacktrackJumps) {
+    			boolean backTrackFlag = false;
+        		if (currSolution.getNotAssignedCustomers().isEmpty())
+        			backTrackFlag = true;
+
+        		// receive the next possible insertions in the current node in the backtracking-tree
     			// if in a backtrack-node a tuple (customerID, vehicleId,...) has already been tried, it 
     			// is not further considered as a possible next insertions, i.e, the subprocedure
     			// getNextInsertion() filters tuples having already been explored in earlier iterations
@@ -86,18 +94,21 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
     				currSolution.getNotAssignedCustomers().remove(Integer.valueOf((int) nextInsertion[0]));
     				
     				// update solution object
-    				currSolution.updateSolutionAfterInsertion();
+    				currSolution.updateSolutionAfterInsertion(false);
     				
     				// check for new best solution
-    				if (this.bestInitialSolution==null || currSolution.getTotalCosts() < this.bestInitialSolution.getTotalCosts() ) 
-    					this.bestInitialSolution = currSolution;
+
+    				//  solutionTemp.getTotalPenalyCosts() <= solutionBestGlobal.getTotalPenalyCosts()
+    				if (this.bestSolutionInTrial==null || currSolution.getTotalCosts() < this.bestSolutionInTrial.getTotalCosts()  ) 
+    					this.bestSolutionInTrial = currSolution;
     				
     				// Add the current solution in the solution sequence (path in the backtracking-tree) we currently explore
     				solutionSequence.add(currSolution);
     			}
     			else {
+    				/*
     				// Get id in the solution sequence (=path in the backtracking-tree) where we jump back
-    				int jumpToSolIdx = getJumpIdx(solutionSequence.size() - 1 );
+    				int jumpToSolIdx = getJumpIdx(solutionSequence.size() - 1);
     				// Set the current solution
     				currSolution = solutionSequence.get(jumpToSolIdx);
     				// delete all successors from the current path (=old (explored) branch in the backtracking-tree)
@@ -106,16 +117,40 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
     				
     				// increment counter for number of backtrack jumps
     				this.noBackTrackJumps ++;
+    				*/
+    				backTrackFlag = true;
     			}
+    			
+    			if (backTrackFlag)
+    				currSolution = doBackTrack();
     		}
+    		this.bestSolutionInTrial.updateSolutionAfterInsertion(false);
     		System.out.println("Number of backtrack jumps in this trial: " + this.noBackTrackJumps);
-            this.bestInitialSolution.updateSolutionAfterInsertion();
-    		WriterUtils.writeBacktrackingInfo(trial, noBackTrackJumps, this.bestInitialSolution.getTotalCosts());
+    		System.out.println("Costs of best solution found: " + this.bestSolutionInTrial.getTotalCosts());
+    		WriterUtils.writeBacktrackingInfo(trial, noBackTrackJumps, this.bestSolutionInTrial.getTotalCosts(), (System.currentTimeMillis() - startTime));
+    		
+    		if (this.bestSolution==null || this.bestSolutionInTrial.getTotalCosts() < this.bestSolution.getTotalCosts())
+    			this.bestSolution = this.bestSolutionInTrial;
     	}
     	
         // update best solution object, then return it
-        this.bestInitialSolution.updateSolutionAfterInsertion();
-    	return this.bestInitialSolution;
+        // this.bestInitialSolution.updateSolutionAfterInsertion();
+        this.bestSolution.calculateTotalCosts(false);
+    	return this.bestSolution;
+    }
+    
+    private Solution doBackTrack() {
+		// Get id in the solution sequence (=path in the backtracking-tree) where we jump back
+		int jumpToSolIdx = getJumpIdx(solutionSequence.size() - 1);
+		// Set the current solution
+		Solution currSolution = solutionSequence.get(jumpToSolIdx);
+		// delete all successors from the current path (=old (explored) branch in the backtracking-tree)
+		for (int removeIdx = solutionSequence.size()-1 ; removeIdx > jumpToSolIdx; removeIdx--)
+			solutionSequence.remove(removeIdx);
+		
+		// increment counter for number of backtrack jumps
+		this.noBackTrackJumps ++;
+		return currSolution;
     }
 
     /**
@@ -172,7 +207,8 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
             	}
             } else {
                 // get regret by sorting list and calculating difference between best and k-th best insertion
-                regret = this.calculateRegret(this.k, possibleInsertionsForCustomer);
+                //regret = this.calculateRegret(this.k, possibleInsertionsForCustomer);
+                regret = this.calculateRegret(CalcUtils.getRandomNumberInClosedRange(2, 3), possibleInsertionsForCustomer);
 
                 // if regret is higher than currently highest regret, update maxRegret and update nextInsertion
                 if (regret > maxRegret - Config.getInstance().epsilon) {  // check if regret >= maxRegret
@@ -245,6 +281,13 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
     		// jumpToSolIdx = Math.min( depth, Config.getInstance().backtrackJumpToLevel);
     	}
     	return jumpToSolIdx;
+    }
+    
+    private void updateBestSolution () {
+    	for (Solution s: this.solutionSequence) {
+    		if (this.bestSolutionInTrial == null || s.getTotalCosts() < this.bestSolutionInTrial.getTotalCosts())
+    			this.bestSolutionInTrial = s;
+    	}
     }
     
 	/**

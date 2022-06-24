@@ -60,6 +60,6 @@ public class HistoricNodePairRemoval extends AbstractRemoval {
 	 * {@inheritDoc}
 	 */
 	public String getFormattedClassName() {
-		return "Historic Neighbor (" + (this.randomize?"determ.":"random") + ")";
+		return "Historic Neighbor (" + (this.randomize?"random":"determ.") + ")";
 	}
 }

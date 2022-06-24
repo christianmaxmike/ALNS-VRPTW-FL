@@ -1,5 +1,7 @@
 package vrptwfl.metaheuristic.alns.insertions;
 
+import java.util.Collections;
+
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.data.Data;
 
@@ -61,7 +63,7 @@ public abstract class AbstractInsertion {
      */
     public final Solution solve(Solution solution) {
         // function is final such that method cannot be accidentally overridden in subclass
-        
+    	// Collections.shuffle(solution.getNotAssignedCustomers());
     	while (!solution.getNotAssignedCustomers().isEmpty()) {
         	
             double[] nextInsertion = this.getNextInsertion(solution);
@@ -77,7 +79,7 @@ public abstract class AbstractInsertion {
         }
 
         // update solution object, then return it
-        solution.updateSolutionAfterInsertion();
+        solution.updateSolutionAfterInsertion(false);
 
         // NOTE Chris - call by reference, den return value könnte man sich wohl sparen
         return solution;

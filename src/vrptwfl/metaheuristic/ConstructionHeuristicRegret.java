@@ -5,6 +5,7 @@ import vrptwfl.metaheuristic.alns.insertions.RegretInsertionBacktracking;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
+import vrptwfl.metaheuristic.utils.WriterUtils;
 import vrptwfl.metaheuristic.Config;
 
 /**
@@ -43,6 +44,7 @@ public class ConstructionHeuristicRegret {
         	return inserter.solve(emptySolution);        	
         }
         else {
+        	WriterUtils.initBacktrackingLogging();
         	RegretInsertionBacktracking inserter = new RegretInsertionBacktracking(k, data);
         	return inserter.solveBacktrack(emptySolution);
         }

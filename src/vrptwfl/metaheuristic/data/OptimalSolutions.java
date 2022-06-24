@@ -79,4 +79,110 @@ public class OptimalSolutions {
             entry("RC107", new int[] {3, 6, 12}),
             entry("RC108", new int[] {3, 6, 11})
     );
+    
+    public static Map<String, Double> optimalHospital = Map.ofEntries(
+    		// I040 - B1 - F6
+    		entry("i040_b1_f6_v01_m", 56.0),
+    		entry("i040_b1_f6_v01_e", 71.0),
+    		entry("i040_b1_f6_v02_m", 62.0),
+    		entry("i040_b1_f6_v02_e", 49.0),
+    		entry("i040_b1_f6_v03_m", 70.0),
+    		entry("i040_b1_f6_v03_e", 47.0),
+    		entry("i040_b1_f6_v04_m", 60.0),
+    		entry("i040_b1_f6_v04_e", 49.0),
+    		entry("i040_b1_f6_v05_m", 51.0),
+    		entry("i040_b1_f6_v05_e", 62.0),
+    		// I040 - B2 - F3
+    		entry("i040_b2_f3_v01_m", 50.0),
+    		entry("i040_b2_f3_v01_e", 41.0),
+    		entry("i040_b2_f3_v02_m", 44.0),
+    		entry("i040_b2_f3_v02_e", 57.0),
+    		entry("i040_b2_f3_v03_m", 53.0),
+    		entry("i040_b2_f3_v03_e", 71.0),
+    		entry("i040_b2_f3_v04_m", 44.0),
+    		entry("i040_b2_f3_v04_e", 51.0),
+    		entry("i040_b2_f3_v05_m", 53.0),
+    		entry("i040_b2_f3_v05_e", 59.0),
+    		// I040 - B6 - F1
+    		entry("i040_b6_f1_v01_m", 77.0),
+    		entry("i040_b6_f1_v01_e", 44.0),
+    		entry("i040_b6_f1_v02_m", 54.0),
+    		entry("i040_b6_f1_v02_e", 34.0),
+    		entry("i040_b6_f1_v03_m", 59.0),
+    		entry("i040_b6_f1_v03_e", 53.0),
+    		entry("i040_b6_f1_v04_m", 53.0),
+    		entry("i040_b6_f1_v04_e", 46.0),
+    		entry("i040_b6_f1_v05_m", 39.0),
+    		entry("i040_b6_f1_v05_e", 45.0),
+    		//
+    		//
+    		// I080 - B1 - F6
+    		entry("i080_b1_f6_v01_m", 79.0),
+    		entry("i080_b1_f6_v01_e", 91.0),
+    		entry("i080_b1_f6_v02_m", 86.0),
+    		entry("i080_b1_f6_v02_e", 78.0),
+    		entry("i080_b1_f6_v03_m", 88.0),
+    		entry("i080_b1_f6_v03_e", 96.0),
+    		entry("i080_b1_f6_v04_m", 75.0),
+    		entry("i080_b1_f6_v04_e", 96.0),
+    		entry("i080_b1_f6_v05_m", 94.0),
+    		entry("i080_b1_f6_v05_e", 74.0),
+    		// I080 - B2 - F3
+    		entry("i080_b2_f3_v01_m", 89.0),
+    		entry("i080_b2_f3_v01_e", 80.0),
+    		entry("i080_b2_f3_v02_m", 92.0),
+    		entry("i080_b2_f3_v02_e", 79.0),
+    		entry("i080_b2_f3_v03_m", 92.0),
+    		entry("i080_b2_f3_v03_e", 108.0),
+    		entry("i080_b2_f3_v04_m", 70.0),
+    		entry("i080_b2_f3_v04_e", 102.0),
+    		entry("i080_b2_f3_v05_m", 109.0),
+    		entry("i080_b2_f3_v05_e", 96.0),  // LB 94.57
+    		// I080 - B6 - F1
+    		entry("i080_b6_f1_v01_m", 78.0),
+    		entry("i080_b6_f1_v01_e", 92.0),
+    		entry("i080_b6_f1_v02_m", 59.0),
+    		entry("i080_b6_f1_v02_e", 108.0),
+    		entry("i080_b6_f1_v03_m", 84.0),
+    		entry("i080_b6_f1_v03_e", 84.0),
+    		entry("i080_b6_f1_v04_m", 79.0),
+    		entry("i080_b6_f1_v04_e", 99.0),
+    		entry("i080_b6_f1_v05_m", 77.0),
+    		entry("i080_b6_f1_v05_e", 93.0),
+    		//
+    		//
+    		// I120 - B1 - F6
+    		entry("i120_b1_f6_v01_m", 124.0),
+    		entry("i120_b1_f6_v01_e", 128.0),
+    		entry("i120_b1_f6_v02_m", 110.0),
+    		entry("i120_b1_f6_v02_e", 118.0),
+    		entry("i120_b1_f6_v03_m", 105.0),
+    		entry("i120_b1_f6_v03_e", 153.0),
+    		entry("i120_b1_f6_v04_m", 113.0),
+    		entry("i120_b1_f6_v04_e", 121.98),
+    		entry("i120_b1_f6_v05_m", 120.0),
+    		entry("i120_b1_f6_v05_e", 134.0),
+    		// I120 - B2 - F3
+    		entry("i120_b2_f3_v01_m", 126.0),
+    		entry("i120_b2_f3_v01_e", 140.0),
+    		entry("i120_b2_f3_v02_m", 108.0),
+    		entry("i120_b2_f3_v02_e", 100.0),
+    		entry("i120_b2_f3_v03_m", 115.0),
+    		entry("i120_b2_f3_v03_e", 96.0),
+    		entry("i120_b2_f3_v04_m", 113.0),
+    		entry("i120_b2_f3_v04_e", 135.0),
+    		entry("i120_b2_f3_v05_m", 120.0),
+    		entry("i120_b2_f3_v05_e", 111.0), // LB 109.10
+    		// I120 - B6 - F1
+    		entry("i120_b6_f1_v01_m", 111.0),
+    		entry("i120_b6_f1_v01_e", 128.0),
+    		entry("i120_b6_f1_v02_m", 119.0),
+    		entry("i120_b6_f1_v02_e", 95.0),
+    		entry("i120_b6_f1_v03_m", 126.0),
+    		entry("i120_b6_f1_v03_e", 103.0),
+    		entry("i120_b6_f1_v04_m", 106.0),
+    		entry("i120_b6_f1_v04_e", 117.0),
+    		entry("i120_b6_f1_v05_m", 143.0),
+    		entry("i120_b6_f1_v05_e", 119.0)
+    );
 }

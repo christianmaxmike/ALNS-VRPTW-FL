@@ -138,6 +138,7 @@ public class HospitalInstanceLoader {
         List<Integer> customerIds = IntStream.rangeClosed(1, jobInformation[0].length-1).boxed().collect(Collectors.toList());
 		int[] originalCustomerIds = DataUtils.convertDoubleArrToIntArr(jobInformation[6]);
         data.setEndOfPlanningHorizon((int) jobInformation[1][0]); // <-- Depot Info
+        data.setStartOfPlanningHorizon((int) jobInformation[0][0]);
 		data.setCustomers(DataUtils.convertListToArray(customerIds));
         data.setOriginalCustomerIds(originalCustomerIds);
 		data.setEarliestStartTimes(DataUtils.convertDoubleArrToIntArr(jobInformation[0]));
@@ -455,13 +456,4 @@ public class HospitalInstanceLoader {
 		return max;
 	}
 
-	/**
-	 * Main function for debugging purpose.
-	 * @param args
-	 * @throws IOException
-	 */
-    public static void main(String[] args) throws IOException {
-    	HospitalInstanceLoader loader = new HospitalInstanceLoader();
-    	loader.loadHospitalInstanceFromJSON("hospital_instance_i020_b1_f6_v01");
-    }
 }

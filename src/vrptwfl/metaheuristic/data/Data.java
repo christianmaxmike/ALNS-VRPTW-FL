@@ -37,6 +37,7 @@ public class Data {
     private int[] latestStartTimes;
     private int[] serviceDurations;
     private double maxDistanceInGraph;
+    private double startOfPlanningHorizon;
     private double endOfPlanningHorizon;
     private double[][] distanceMatrix;
     private double[][] swappingCosts;
@@ -109,7 +110,7 @@ public class Data {
 
         // service Durations always the same within the dataset
         // latest StartTimes of first customer (depot) indicates the max latest start time
-        this.endOfPlanningHorizon = this.latestStartTimes[0] + this.serviceDurations[0];
+        // this.endOfPlanningHorizon = this.latestStartTimes[0] + this.serviceDurations[0];
 
         // Creates the distance matrix w.r.t the locations
         this.createDistanceMatrix(location2Id);
@@ -189,7 +190,7 @@ public class Data {
     public ArrayList<Vehicle> initializeVehicles() {
         ArrayList<Vehicle> vehicles = new ArrayList<>();
         for (int i = 0; i < this.nVehicles; i++) {
-            vehicles.add(new Vehicle(i, this.vehicleCapacity, this.endOfPlanningHorizon, this.vehiclesSkillLvl[i]));
+            vehicles.add(new Vehicle(i, this.vehicleCapacity, this.startOfPlanningHorizon, this.endOfPlanningHorizon, this.vehiclesSkillLvl[i]));
         }
         return vehicles;
     }
@@ -286,19 +287,19 @@ public class Data {
 			DataUtils.PenaltyIdx whichPenalty = DataUtils.PenaltyIdx.values()[penaltyIdx];
 			switch(whichPenalty) {
 				case Unscheduled: 
-					if (!penaltyFlags[penaltyIdx]) 
+					if (!penaltyFlags[penaltyIdx] && counter != 0.0) 
 						Config.getInstance().glsFeatureUnserved = Math.min(Config.getInstance().glsFeatureRangeUnserved[1], Config.getInstance().glsFeatureUnserved * (counter * Config.getInstance().glsFeatureOmega));
 				case TWViolation: 
-					if (!penaltyFlags[penaltyIdx]) 
+					if (!penaltyFlags[penaltyIdx] && counter != 0.0) 
 						Config.getInstance().glsFeatureTimeWindow = Math.min(Config.getInstance().glsFeatureRangeTimeWindow[1], Config.getInstance().glsFeatureTimeWindow * (counter * Config.getInstance().glsFeatureOmega));
 				case Predecessor: 
-					if (!penaltyFlags[penaltyIdx]) 
+					if (!penaltyFlags[penaltyIdx] && counter != 0.0) 
 						Config.getInstance().glsFeaturePredJobs = Math.min(Config.getInstance().glsFeatureRangePredJobs[1], Config.getInstance().glsFeaturePredJobs * (counter * Config.getInstance().glsFeatureOmega));					
 				case Capacity:
-					if (!penaltyFlags[penaltyIdx]) 
+					if (!penaltyFlags[penaltyIdx] && counter != 0.0) 
 						Config.getInstance().glsFeatureCapacity = Math.min(Config.getInstance().glsFeatureRangeCapacity[1], Config.getInstance().glsFeatureCapacity * (counter * Config.getInstance().glsFeatureOmega));				
 				case SkillLvl: 
-					if (!penaltyFlags[penaltyIdx])
+					if (!penaltyFlags[penaltyIdx] && counter != 0.0)
 						Config.getInstance().glsFeatureSkill = Math.min(Config.getInstance().glsFeatureRangeSkill[1], Config.getInstance().glsFeatureSkill * (counter * Config.getInstance().glsFeatureOmega));
 			}   		
 			penaltyFlags[penaltyIdx] = true; 
@@ -420,6 +421,10 @@ public class Data {
      */
     public double getEndOfPlanningHorizon() {
         return endOfPlanningHorizon;
+    }
+    
+    public double getStartOfPlanningHorizon() {
+    	return startOfPlanningHorizon;
     }
 
     /**
@@ -701,6 +706,10 @@ public class Data {
      */
     public void setEndOfPlanningHorizon(int endOfPlanningHorizon) {
     	this.endOfPlanningHorizon = endOfPlanningHorizon;
+    }
+    
+    public void setStartOfPlanningHorizon (int startOfPlanningHorizon) {
+    	this.startOfPlanningHorizon = startOfPlanningHorizon;
     }
     
     /**

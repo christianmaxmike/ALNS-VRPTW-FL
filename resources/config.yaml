@@ -1,26 +1,25 @@
 ##### GENERAL CONFIGURATIONS #####
-random_seed: 42  # if null, no random seed will be used
-
+random_seed: 5325  # if null, no random seed will be used
 
 ### ALNS CONFIGURATION
 alns_iterations: 25_000
 # Upper bound and lower bound values taken from Ropke C&OR §6.1.1 p. 2417
-lower_bound_nr_of_removals: 10 # 10 # 30
+lower_bound_nr_of_removals: 30
 lower_bound_factor_nr_of_removals: 0.1
-upper_bound_nr_of_removals: 15 # 15 # 60
+upper_bound_nr_of_removals: 60
 upper_bound_factor_nr_of_removals: 0.4
-
+check_interval_for_insertion: 0.25
 
 ### PENALTY UPDATE - SETTINGS
-enable_gls: true
+enable_gls: false
 enable_schiffer: false
 enable_glsFeature: false
 # lambda values
 gls_lambda_unscheduled: 10.0
 gls_lambda_timeWindow: 0.5
-gls_lambda_predJobs: 3.0
+gls_lambda_predJobs: 5.0
 gls_lambda_capacity: 1.0
-gls_lambda_skill: 1.0
+gls_lambda_skill: 5.0
 # general penalty settings
 exponent_swapping_locations: 1								# exponent for swapping costs: (loc2 - loc1) ^ exp  (default: 1)
 cost_factor_unserved_customer: 3.0  						# cost for unserviced customers is equal to this number times the maximum distance in the graph (default: 5.0)
@@ -31,16 +30,16 @@ cost_skillLvl_violation: 2.0								# default: 5.0
 max_timeWindow_violation: 10.0								# default: 10.0
 # gls feature-based
 gls_feature_omega: 1.15
-gls_feature_range_unserved: [1.0, 100.0]
-gls_feature_range_timeWindow: [1.0, 100.0]
-gls_feature_range_predJobs: [1.0, 100.0]
-gls_feature_range_capacity: [1.0, 100.0]
-gls_feature_range_skill: [1.0, 100.0]
-gls_feature_weight_unserved: 10.0
-gls_feature_weight_timeWindow: 10.0
-gls_feature_weight_predJobs: 10.0
-gls_feature_weight_capacity: 10.0
-gls_feature_weight_skill: 10.0
+gls_feature_range_unserved: [10.0, 100.0]
+gls_feature_range_timeWindow: [10.0, 100.0]
+gls_feature_range_predJobs: [10.0, 100.0]
+gls_feature_range_capacity: [10.0, 100.0]
+gls_feature_range_skill: [10.0, 100.0]
+gls_feature_weight_unserved: 50.0
+gls_feature_weight_timeWindow: 50.0
+gls_feature_weight_predJobs: 50.0
+gls_feature_weight_capacity: 50.0
+gls_feature_weight_skill: 50.0
 # gls instance-based
 gls_iterUntilPenaltyUpdate: 25
 gls_nFeaturesForPenaltyUpdate: 10
@@ -64,28 +63,31 @@ penalty_weight_skillLvl: 10.0                          # 100.0
 
 ### DEFINE ACTIVE OPERATORS (DESTROY + REPAIR)
 # removals
-use_cluster_removal_kruskal: false							
-use_historic_node_pair_removal_deterministic: false
-use_historic_node_pair_removal_random: false		 
-use_random_removal: false				 
-use_random_route_removal: false
-use_shaw_simplified_deterministic: false
-use_shaw_simplified_random: false			 		 
-use_time_oriented_removal_jungwirth_deterministic: false
-use_time_oriented_removal_jungwirth_random: false	 
-use_time_oriented_removal_pisinger_deterministic: false
-use_time_oriented_removal_pisinger_random: false	 
-use_worst_removal_deterministic: false
+use_cluster_removal_kruskal: true							
+use_historic_node_pair_removal_deterministic: true
+use_historic_node_pair_removal_random: true		 
+use_random_removal: true				 
+use_random_route_removal: true
+use_shaw_simplified_deterministic: true
+use_shaw_simplified_random: true			 		 
+use_time_oriented_removal_jungwirth_deterministic: true
+use_time_oriented_removal_jungwirth_random: true	 
+use_time_oriented_removal_pisinger_deterministic: true
+use_time_oriented_removal_pisinger_random: true	 
+use_worst_removal_deterministic: true
 use_worst_removal_random: true
-use_historic_request_pair_removal: false
-use_skill_mismatch_removal_deterministic: false
-use_skill_mismatch_removal_random: false
-use_time_flexibility_removal_deterministic: false
-use_time_flexibility_removal_random: false
-use_kmeans_removal: false
-use_route_eliminiation_least: false
-use_route_eliminiation_most: false
-use_zone_removal : false
+use_historic_request_pair_removal: true
+use_skill_mismatch_removal_deterministic: true
+use_skill_mismatch_removal_random: true
+use_time_flexibility_removal_deterministic: true
+use_time_flexibility_removal_random: true
+use_kmeans_removal: true
+use_route_eliminiation_least: true
+use_route_eliminiation_most: true
+use_zone_removal: true
+use_subroute_removal: true
+use_locationRelated_removal: true
+use_locationAndTimeRelated_removal: true
 # insertions
 use_greedy_insert: true										# default: true		# v
 use_skill_matching_insert: true
@@ -113,13 +115,13 @@ kmeansNClusters: [2, 3, 6]
 
 
 ### BACKTRACKING SETTINGS (for initial solution)
-enable_backtracking: true
+enable_backtracking: false
 backtrackTrials : 4			 								# how many restarts
 backtrackJump: 5
 backtrackJumpToLevel: 5
 backtrackJumpToLevelProbabilities: [1.0, 0.6, 0.3, 0.2, 0.1]
-backtrackBySteps: true  									# backtracking by steps (=false) or by levels (=true) 
-maxBacktrackJumps: 10_000
+backtrackBySteps: false  									# backtracking by steps (=false) or by levels (=true) 
+maxBacktrackJumps: 1_000
 
 
 ### UPDATE VALUES FOR DESTROY/REPAIR OPS - SIGMAS
@@ -129,7 +131,7 @@ sigma2: 13
 sigma3: 9
 reactionFactor: 0.1
 minOpProb: 0.01
-updateInterval: 100
+updateInterval: 50
 
 
 ### SIMULATED ANNEALING

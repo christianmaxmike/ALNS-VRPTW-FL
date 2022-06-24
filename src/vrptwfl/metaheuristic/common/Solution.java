@@ -38,6 +38,9 @@ public class Solution {
     private double penaltyTimeWindowViolation;
     private double penaltyPredJobsViolation;
     private double penaltySkillViolation;
+    private double cumDeltaTW;
+    private double cumDeltaSkill;
+    private double totalPenaltyCosts;
     private boolean isFeasible = false;
     private boolean isConstruction = false;
     private HashMap<Integer, HashMap<Integer, ArrayList<Double[]>>> map; // location -> capacitySlot -> list of service time tuples [start, end]
@@ -68,12 +71,18 @@ public class Solution {
 		this.penaltySkillViolation = solutionTemp.penaltySkillViolation;
 		this.penaltyTimeWindowViolation = solutionTemp.penaltyTimeWindowViolation;
 		this.penaltyUnservedCustomers = solutionTemp.penaltyUnservedCustomers;
+		this.cumDeltaSkill = solutionTemp.cumDeltaSkill;
+		this.cumDeltaTW = solutionTemp.cumDeltaTW;
+		this.totalPenaltyCosts = solutionTemp.totalPenaltyCosts;
 		this.swappingCosts = solutionTemp.swappingCosts;
 		this.vehicleTourCosts = solutionTemp.vehicleTourCosts;
 		this.isFeasible = solutionTemp.isFeasible();
 		this.customersAssignedCapacitySlot = Arrays.copyOf(solutionTemp.getCustomerAffiliationToCapacity(), solutionTemp.getCustomerAffiliationToCapacity().length);
 		this.customersAssignedLocations = Arrays.copyOf(solutionTemp.getCustomerAffiliationToLocations(), solutionTemp.getCustomerAffiliationToLocations().length);
 		this.customersAssignedToVehicles = Arrays.copyOf(solutionTemp.getCustomersAssignedToVehicles(), solutionTemp.getCustomersAssignedToVehicles().length);
+		this.listOfPenalties = new ArrayList<int[]>();
+		for (int[] entry: solutionTemp.getListOfPenalties())
+        	this.listOfPenalties.add(Arrays.copyOf(entry, entry.length));
 		
         this.triedInsertions = new HashMap<Integer, ArrayList<double[]>>();
 
@@ -123,7 +132,7 @@ public class Solution {
         for (int loc = 0; loc<data.getDistanceMatrix().length; loc++) {
         	for (int capacity = 0; capacity < data.getLocationCapacity()[loc]; capacity ++) {
         		ArrayList<Double[]> tmp = new ArrayList<Double[]>();
-        		tmp.add(new Double[] {-1.0, 0.0});
+        		tmp.add(new Double[] {-1.0, data.getStartOfPlanningHorizon()});
         		tmp.add(new Double[] {data.getEndOfPlanningHorizon(), -1.0});
         		if (start.map.get(loc) == null)
         			start.map.put(loc, new HashMap<Integer, ArrayList<Double[]>>());
@@ -135,21 +144,23 @@ public class Solution {
 	
     //
     // FUNCTIONALITY
-    //
+    //    
     /**
      * Retrieve the available Location-TimeWindow (LTW) information of a customer.
      * @param customer: customer id
      * @param earliestStartCustomer: earliest start service time 
      * @param latestStartCustomer: latest end service time
      * @param serviceTime: service time duration
-     * @param pred: id of predecessor within the route
-     * @param succ: id of successor within the route
+     * @param pred: predecessor's id within the route
+     * @param succ: successor's id within the route
      * @param endServicePred: end service time of predecessor
      * @param startServiceSucc: start service time of successor
      * @return
      */
-    public ArrayList<double[]> getPossibleLTWInsertionsForCustomer(int customer, int earliestStartCustomer, int latestStartCustomer, int serviceTime, int pred, int succ, double endServicePred, double startServiceSucc) {
+    public ArrayList<double[]> getPossibleLTWInsertionsForCustomer(int customer, double earliestStartCustomer, double latestStartCustomer, int serviceTime, int pred, int succ, double endServicePred, double startServiceSucc) {
     	ArrayList<double[]> possibleInsertions = new ArrayList<double[]>();
+    	
+    	// Iterate customer's possible locations
     	for (int locationIdx=0; locationIdx < this.data.getCustomersToLocations().get(this.data.getOriginalCustomerIds()[customer]).size() ; locationIdx ++) {
     		// Get current location id for customer (e.g. customer 1 with locations: 3, 4 ; locationIdx refers to 0 -> 3, 1 -> 4)
     		int location = this.data.getCustomersToLocations().get(this.data.getOriginalCustomerIds()[customer]).get(locationIdx);
@@ -161,24 +172,24 @@ public class Solution {
             double earliestStartAtInsertion = Math.max(endServicePred + distToCustomer, earliestStartCustomer);
             double latestStartAtInsertion = Math.min(startServiceSucc - distFromCustomer - this.data.getServiceDurations()[customer], latestStartCustomer);
             
-            
             // XXX:(if Config.getInstance().enableGLS) -> check for violations in calculatePenaltyCosts()
             // Check end service time of dependencies to predecessor jobs [customerId, endServiceTime, LocationIdx];
             // if there is no latest predecessor job, the sub-procedure returns an array consisting of -1's ,ie., [-1,-1,-1]
-            
             if (!(Config.getInstance().enableGLS || Config.getInstance().enableSchiffer || Config.getInstance().enableGLSFeature) || this.isConstruction) {
 	            double[] infoOfLatestPredJob = this.getEndServiceTimeOfLatestPredJob(customer);
 	            // if a predecessor job couldn't be scheduled, the current job can also not be scheduled; break
 	            if (infoOfLatestPredJob[1] == -1) return possibleInsertions;
-	            else if  (infoOfLatestPredJob[1] > 0){
+	            else if  (infoOfLatestPredJob[2] > 0){
 	            	double distToPredecessorJob = data.getDistanceBetweenLocations(DataUtils.getLocationIndex((int) infoOfLatestPredJob[0], this), location);
 	            	earliestStartAtInsertion = Math.max(earliestStartAtInsertion, infoOfLatestPredJob[1] + distToPredecessorJob);            	
 	            }
-            }            
+            }           
+            
             // check if location is feasible at all w.r.t to service times
             // E.g. : 10 < 10.00004 - 1e-6  ; just prevent numerical instability
-            // if (latestStartCustomer < earliestStartAtInsertion - Config.getInstance().epsilon) break;
-            if (latestStartAtInsertion < earliestStartAtInsertion - Config.getInstance().epsilon) break;
+            // TODO : check
+            if (latestStartCustomer < earliestStartAtInsertion - Config.getInstance().epsilon) break;
+            // if (latestStartAtInsertion < earliestStartAtInsertion - Config.getInstance().epsilon) break;
  
 			double additionalTravelCosts = distToCustomer + distFromCustomer - data.getDistanceBetweenLocations(DataUtils.getLocationIndex(pred, this), DataUtils.getLocationIndex(succ, this));
             // check available capacity
@@ -193,28 +204,29 @@ public class Solution {
     				Double[] timePred = map.get(location).get(capacity).get(entryIdx-1);
     				Double[] timeSucc = map.get(location).get(capacity).get(entryIdx);
     				
+    				// check if location's successor is before vehicle's predecessor
+    				// if so -> jump to next as no scheduling is possible back in time
     				if (timeSucc[0] < endServicePred) 
     					continue; 
     				
-    				for (;timeSucc[0] > earliestStartAtInsertion + serviceTime & 
-							startServiceSucc > earliestStartAtInsertion + serviceTime; earliestStartAtInsertion += Config.getInstance().maxTimeWindowViolation) {
-    					// TODO Chris - Check conditions
-    					// i)   predecessor in location ends before current starting point for job
-    					// ii)  predecessor in vehicle's route ends before current starting point for job
-    					// iii) successor in location starts after current job is served
-    					// iv)  successor in vehicle's route starts after current job is served
-    					if (timePred[1] < earliestStartAtInsertion & 
-    							endServicePred < earliestStartAtInsertion &
-    							timeSucc[0] > earliestStartAtInsertion + serviceTime & 
-    							startServiceSucc > earliestStartAtInsertion + serviceTime
-    							) {
-    						
-    						double timeStart = earliestStartAtInsertion;
-    						// TODO_DONE: retrieve multiple solutions (possible that first match not the best one)
-    						double[] possibleInsertion = new double[]{locationIdx, capacity, timeStart, additionalTravelCosts, entryIdx};
-    						possibleInsertions.add(possibleInsertion);
+					// TODO Chris - Check conditions
+					// i)   predecessor in location ends before current starting point for job
+					// ii)  predecessor in vehicle's route ends before current starting point for job
+					// iii) successor in location starts after current job is served
+					// iv)  successor in vehicle's route starts after current job is served
+					// v)   job starts before latest starting point
+					if (
+							timePred[1] < earliestStartAtInsertion &
+							endServicePred < earliestStartAtInsertion &
+							timeSucc[0] > earliestStartAtInsertion + serviceTime &
+							startServiceSucc > earliestStartAtInsertion + serviceTime &
+							// 
+							earliestStartAtInsertion <= latestStartAtInsertion
+							) {
+						double timeStart = earliestStartAtInsertion;
+						double[] possibleInsertion = new double[]{locationIdx, capacity, timeStart, additionalTravelCosts, entryIdx};
+						possibleInsertions.add(possibleInsertion);
     					}
-    				}
     			}    			
     		}
     	}
@@ -354,12 +366,12 @@ public class Solution {
 	 * Calculates the total costs. Calls sub-procedures for calculating 
 	 * i) the routing costs of vehicles; ii) swapping costs; and iii) penalty costs  
 	 */
-	public void calculateTotalCosts() {
+	public void calculateTotalCosts(boolean fixedCosts) {
         this.calculateCostsFromVehicles();
         this.calculateSwappingCostsForLocations();
-       	this.calculatePenaltyCosts();
+       	this.calculatePenaltyCosts(fixedCosts);
         
-       	if ((Config.getInstance().enableGLS||Config.getInstance().enableGLSFeature) && !this.isConstruction) {
+       	if (!fixedCosts && (Config.getInstance().enableGLS||Config.getInstance().enableGLSFeature) && !this.isConstruction) {
        		this.totalCosts = this.vehicleTourCosts + this.swappingCosts + 
        				(Config.getInstance().glsLambdaUnscheduled * this.penaltyUnservedCustomers) + 
        				(Config.getInstance().glsLambdaPredJobs * this.penaltyPredJobsViolation) +
@@ -402,38 +414,42 @@ public class Solution {
      * the feasibility of the solution to false.
      * @param removedCustomers: list of removed customers
      */
-    public void updateSolutionAfterRemoval(List<Integer> removedCustomers) {
+    public void updateSolutionAfterRemoval(List<Integer> removedCustomers, boolean fixedCosts) {
     	// TODO Chris - do we really need to calculate the costs after removals?
     	// this.calculateTotalCosts();
         if (!removedCustomers.isEmpty()) {
             this.notAssignedCustomers.addAll(removedCustomers);
             isFeasible = false;
         }
-        this.calculatePenaltyCosts();
+        this.calculatePenaltyCosts(fixedCosts);
     }
 
     /**
      * Update the solution's state after an insertion operation. 
      */
-    public void updateSolutionAfterInsertion() {
+    public void updateSolutionAfterInsertion(boolean fixedCosts) {
     	this.addInfeasiblesToNotAssigned();
-        this.calculateTotalCosts();
+        this.calculateTotalCosts(fixedCosts);
     }
 
     /**
      * Method calculates the penalty costs. The results are stored in their respective field
      * variables.
      */
-    private void calculatePenaltyCosts() {
+    private void calculatePenaltyCosts(boolean fixedCosts) {
     	// the variable listOfPenalties is used for updating the penalty weights
     	// it is cleared here in first place. In each sub-procedure a violation is
     	// added to this list.
     	this.listOfPenalties.clear();
-        this.calcCostsForUnservedCustomers();
-        this.calcCostsForTimeWindowViolation();
-        this.calcCostsForPredJobsViolation();
-        this.calcCostsForSkillViolation();
+    	this.cumDeltaSkill = 0.0;
+    	this.cumDeltaTW = 0.0;
+        this.calcCostsForUnservedCustomers(fixedCosts);
+        this.calcCostsForTimeWindowViolation(fixedCosts);
+        this.calcCostsForPredJobsViolation(fixedCosts);
+        this.calcCostsForSkillViolation(fixedCosts);
         
+        this.totalPenaltyCosts = this.penaltyUnservedCustomers + this.penaltyTimeWindowViolation +
+        						 this.penaltyPredJobsViolation + this.penaltySkillViolation;
         if (this.listOfPenalties.size() > 0)
         	this.isFeasible = false;
     }
@@ -441,13 +457,15 @@ public class Solution {
     /**
      * The function aggregates the penalty costs for unassigned customers.
      */
-    private void calcCostsForUnservedCustomers() {
+    private void calcCostsForUnservedCustomers(boolean fixedCosts) {
     	this.penaltyUnservedCustomers = 0;
     	// Compute penalty for unscheduled customers
     	for (Integer unscheduledCustomer : this.notAssignedCustomers) {
     		
 			// Aggregate penalty costs 
-    		if (Config.getInstance().enableSchiffer && !this.isConstruction)
+    		if (fixedCosts)
+    			this.penaltyUnservedCustomers += Config.getInstance().penaltyUnservedCustomer;
+    		else if (Config.getInstance().enableSchiffer && !this.isConstruction)
     			this.penaltyUnservedCustomers += (Config.getInstance().penaltyWeightUnservedCustomer * Config.getInstance().penaltyUnservedCustomer);
     		else if (Config.getInstance().enableGLS && !this.isConstruction)
     			this.penaltyUnservedCustomers += (this.data.getGLSPenalties()[DataUtils.PenaltyIdx.Unscheduled.getId()][unscheduledCustomer]);
@@ -460,7 +478,7 @@ public class Solution {
     	}
     }
     
-    public double getViolationCostsForInsertion(double[] newInsertion) {
+    public double getViolationCostsForInsertion(double[] newInsertion, boolean fixedCosts) {
     	// customer, vehicleId, posInRoute, starTime, costs, location, capacity, entryIdxInLoc
     	int customerID = (int) newInsertion[0];
     	int vehicleID = (int) newInsertion[1];
@@ -469,9 +487,11 @@ public class Solution {
     	// POSSIBLE SKILL VIOLATION
     	double skillViolation = 0.0;
 		if (this.data.getRequiredSkillLvl()[customerID] > this.vehicles.get(vehicleID).getSkillLvl()) {
-			double delta = Math.round(this.data.getRequiredSkillLvl()[customerID] - this.vehicles.get(vehicleID).getSkillLvl());
+			double delta = this.data.getRequiredSkillLvl()[customerID] - this.vehicles.get(vehicleID).getSkillLvl();
 			// Aggregate penalty costs 
-			if (Config.getInstance().enableSchiffer && !this.isConstruction)
+			if (fixedCosts)
+				skillViolation += (delta * Config.getInstance().costSkillLvlViolation);
+			else if (Config.getInstance().enableSchiffer && !this.isConstruction)
 				skillViolation += (delta * Config.getInstance().penaltyWeightSkillLvl * Config.getInstance().costSkillLvlViolation);
 			else if (Config.getInstance().enableGLS && !this.isConstruction)
 				skillViolation += (delta * this.data.getGLSPenalties()[DataUtils.PenaltyIdx.SkillLvl.getId()][customerID]);
@@ -487,9 +507,11 @@ public class Solution {
 		// i) the current scheduling is earlier compared to the given earliest starting point for the customer
 		// ii) the current scheduling is later compared to the given latest ending points for the customer		
 		if (this.data.getEarliestStartTimes()[customerID] > startTime) {
-			double delta = Math.round(Math.abs(this.data.getEarliestStartTimes()[customerID] - startTime));
+			double delta = this.data.getEarliestStartTimes()[customerID] - startTime;
 			
-			if (Config.getInstance().enableSchiffer && !this.isConstruction)
+			if (fixedCosts)
+				timeWindowViolation += (delta * Config.getInstance().costTimeWindowViolation);
+			else if (Config.getInstance().enableSchiffer && !this.isConstruction)
 				timeWindowViolation += (delta * Config.getInstance().penaltyWeightTimeWindow * Config.getInstance().costTimeWindowViolation);
 			else if (Config.getInstance().enableGLS && !this.isConstruction)
 				timeWindowViolation += (delta * data.getGLSPenalties()[DataUtils.PenaltyIdx.TWViolation.getId()][customerID]);
@@ -500,9 +522,11 @@ public class Solution {
 		}
 		
 		if (this.data.getLatestStartTimes()[customerID] < startTime) {			
-			double delta = Math.round(Math.abs(startTime - this.data.getLatestStartTimes()[customerID]));
+			double delta = startTime - this.data.getLatestStartTimes()[customerID];
 
-			if (Config.getInstance().enableSchiffer && !this.isConstruction)
+			if (fixedCosts)
+				timeWindowViolation += (delta * Config.getInstance().costTimeWindowViolation);
+			else if (Config.getInstance().enableSchiffer && !this.isConstruction)
 				timeWindowViolation += (delta * Config.getInstance().penaltyWeightTimeWindow *Config.getInstance().costTimeWindowViolation);
 			else if (Config.getInstance().enableGLS && !this.isConstruction)
 				timeWindowViolation += (delta * data.getGLSPenalties()[DataUtils.PenaltyIdx.TWViolation.getId()][customerID]);
@@ -513,18 +537,17 @@ public class Solution {
 		}
 
 		// POSSIBLE PRED JOBS VIOLATION
-		double predJobsViolation = calcCustomerCostsForPredJobs(customerID);
+		double predJobsViolation = calcCustomerCostsForPredJobs(customerID, fixedCosts);
 		
 		return (Config.getInstance().glsLambdaTimeWindow * timeWindowViolation) +
-				(Config.getInstance().glsLambdaSkill * skillViolation) +
-				(Config.getInstance().glsLambdaPredJobs * predJobsViolation);
-    	// return skillViolation + timeWindowViolation + predJobsViolation;
+			   (Config.getInstance().glsLambdaSkill * skillViolation) +
+			   (Config.getInstance().glsLambdaPredJobs * predJobsViolation);
     }
     
-    public double getCustomersCostsForViolations(int customerID) {
-    	return this.calcCustomerCostsForSkillViolation(customerID) + 
-    		   this.calcCustomerCostsForPredJobs(customerID) + 
-    		   this.calcCustomerCostsForTimeWindow(customerID);
+    public double getCustomersCostsForViolations(int customerID, boolean fixedCosts) {
+    	return this.calcCustomerCostsForSkillViolation(customerID, fixedCosts) + 
+    		   this.calcCustomerCostsForPredJobs(customerID, fixedCosts) + 
+    		   this.calcCustomerCostsForTimeWindow(customerID, fixedCosts);
     }
     
     /**
@@ -532,7 +555,7 @@ public class Solution {
      * A skill violation occurs if a customer/patient is handled by a vehicle/therapist 
      * whose skill level is below the required one of a customer. 
      */
-    private void calcCostsForSkillViolation() {
+    private void calcCostsForSkillViolation(boolean fixedCosts) {
     	this.penaltySkillViolation = 0;
     	// Iterate customers
     	for (int i = 1; i < this.data.getCustomers().length; i++) {
@@ -540,7 +563,7 @@ public class Solution {
     		int customerID = this.data.getCustomers()[i];    		
 
     		// Calculate skill violation of customer's scheduling (if any)
-    		double customerSkillViolation = calcCustomerCostsForSkillViolation(customerID);
+    		double customerSkillViolation = calcCustomerCostsForSkillViolation(customerID, fixedCosts);
     	
     		// potentially add violation to list of violations and update global violation costs
     		if (customerSkillViolation != 0.0) {
@@ -550,15 +573,19 @@ public class Solution {
     	}
     }
     
-    public double calcCustomerCostsForSkillViolation(int customerID) {
+    public double calcCustomerCostsForSkillViolation(int customerID, boolean fixedCosts) {
     	double penaltySkillViolation = 0.0;
 		// Check whether customer is scheduled; if not -> no skill violation possible
     	if (this.customersAssignedToVehicles[customerID] == -1) return penaltySkillViolation;
 		// Check if vehicles skill level satisfies the customer's required skill level
 		if (this.data.getRequiredSkillLvl()[customerID] > this.vehicles.get(this.customersAssignedToVehicles[customerID]).getSkillLvl()) {
-			double delta = Math.round(this.data.getRequiredSkillLvl()[customerID] - this.vehicles.get(this.customersAssignedToVehicles[customerID]).getSkillLvl());
+			double delta = this.data.getRequiredSkillLvl()[customerID] - this.vehicles.get(this.customersAssignedToVehicles[customerID]).getSkillLvl();
+			this.cumDeltaSkill += delta;
+			
 			// Aggregate penalty costs 
-			if (Config.getInstance().enableSchiffer && !this.isConstruction)
+			if (fixedCosts)
+				penaltySkillViolation += (delta * Config.getInstance().costSkillLvlViolation);
+			else if (Config.getInstance().enableSchiffer && !this.isConstruction)
 				penaltySkillViolation += (delta * Config.getInstance().penaltyWeightSkillLvl * Config.getInstance().costSkillLvlViolation);
 			else if (Config.getInstance().enableGLS && !this.isConstruction)
 				penaltySkillViolation += (delta * this.data.getGLSPenalties()[DataUtils.PenaltyIdx.SkillLvl.getId()][customerID]);
@@ -576,14 +603,14 @@ public class Solution {
      * jobs are not scheduled yet, respectively, which is scheduled in a non-consecutive
      * ordering.
      */
-    private void calcCostsForPredJobsViolation() {
+    private void calcCostsForPredJobsViolation(boolean fixedCosts) {
     	this.penaltyPredJobsViolation = 0;
     	// Iterate given predecessor jobs and check for violations
     	for (Map.Entry<Integer, ArrayList<Integer>> entry : this.data.getPredCustomers().entrySet()) {
     		int entryJobId = Arrays.stream(this.data.getOriginalCustomerIds()).boxed().collect(Collectors.toList()).indexOf(entry.getKey());
     		
     		// Calculate predecessor job violation of customer's scheduling (if any)
-    		double customerPredJobViolation = this.calcCustomerCostsForPredJobs(entryJobId);
+    		double customerPredJobViolation = this.calcCustomerCostsForPredJobs(entryJobId, fixedCosts);
     		
     		// potentially add violation to list of violations and update global violation costs
     		if (customerPredJobViolation != 0.0) {
@@ -594,7 +621,7 @@ public class Solution {
     	}
     }
     
-    public double calcCustomerCostsForPredJobs(int customerID) {
+    public double calcCustomerCostsForPredJobs(int customerID, boolean fixedCosts) {
     	double penaltyPredJobsViolation = 0.0;
     	int entryJobId = customerID;
     	// int entryJobId = Arrays.stream(this.data.getOriginalCustomerIds()).boxed().collect(Collectors.toList()).indexOf(customerID);
@@ -611,7 +638,9 @@ public class Solution {
 				if (predJobId != -1 && this.customersAssignedToVehicles[predJobId] == -1) {
 					
 					// Aggregate penalty costs
-					if (Config.getInstance().enableSchiffer && !this.isConstruction)
+					if (fixedCosts)
+						penaltyPredJobsViolation += Config.getInstance().costPredJobsViolation;
+					else if (Config.getInstance().enableSchiffer && !this.isConstruction)
 						penaltyPredJobsViolation += (Config.getInstance().penaltyWeightPredecessorJobs * Config.getInstance().costPredJobsViolation);
 					else if (Config.getInstance().enableGLS && !this.isConstruction)
 						penaltyPredJobsViolation += (this.data.getGLSPenalties()[DataUtils.PenaltyIdx.Predecessor.getId()][entryJobId]);
@@ -636,7 +665,7 @@ public class Solution {
      * input information. The maximal violation of the service times are predefined
      * by the max_timeWindow_violation parameter in the configuration file (default: 10 time units)
      */
-    private void calcCostsForTimeWindowViolation() {
+    private void calcCostsForTimeWindowViolation(boolean fixedCosts) {
     	this.penaltyTimeWindowViolation = 0;
     	// Iterate customers and check for time window violations
     	for (int i = 0; i<this.data.getCustomers().length; i++) {
@@ -644,7 +673,7 @@ public class Solution {
     		int customerID = this.data.getCustomers()[i];
 
     		// Calculate time window violation of customer's scheduling (if any)
-    		double customerTimeWindowViolation = this.calcCustomerCostsForTimeWindow(customerID);
+    		double customerTimeWindowViolation = this.calcCustomerCostsForTimeWindow(customerID, fixedCosts);
 
     		// potentially add violation to list of violations and update global violation costs
     		if (customerTimeWindowViolation != 0.0) {
@@ -654,7 +683,7 @@ public class Solution {
     	}
     }
     
-    public double calcCustomerCostsForTimeWindow (int customerID) {
+    public double calcCustomerCostsForTimeWindow (int customerID, boolean fixedCosts) {
     	double penaltyTimeWindowViolation = 0.0;
 		// Check whether customer is scheduled; if not -> no time window violation possible
 		if (this.customersAssignedToVehicles[customerID] == -1)
@@ -670,9 +699,15 @@ public class Solution {
 		double delta = 0.0;
 		
 		if (this.data.getEarliestStartTimes()[customerID] > vehicleOfInterest.getStartOfServices().get(idxInRoute)) {
-			delta = Math.round(Math.abs(this.data.getEarliestStartTimes()[customerID] - vehicleOfInterest.getStartOfServices().get(idxInRoute)));
 			
-			if (Config.getInstance().enableSchiffer && !this.isConstruction)
+			delta = this.data.getEarliestStartTimes()[customerID] - vehicleOfInterest.getStartOfServices().get(idxInRoute);
+			if (delta == 0.0)
+				System.out.println();
+			this.cumDeltaTW += delta;
+			
+			if (fixedCosts)
+				penaltyTimeWindowViolation += (delta * Config.getInstance().costTimeWindowViolation);
+			else if (Config.getInstance().enableSchiffer && !this.isConstruction)
 				penaltyTimeWindowViolation += (delta * Config.getInstance().penaltyWeightTimeWindow * Config.getInstance().costTimeWindowViolation);
 			else if (Config.getInstance().enableGLS && !this.isConstruction)
 				penaltyTimeWindowViolation += (delta * data.getGLSPenalties()[DataUtils.PenaltyIdx.TWViolation.getId()][customerID]);
@@ -683,9 +718,13 @@ public class Solution {
 		}
 		
 		if (this.data.getLatestStartTimes()[customerID] + this.data.getServiceDurations()[customerID] < vehicleOfInterest.getEndOfServices().get(idxInRoute)) {			
-			delta = Math.round(Math.abs(vehicleOfInterest.getEndOfServices().get(idxInRoute) - (this.data.getLatestStartTimes()[customerID] + this.data.getServiceDurations()[customerID])));
-
-			if (Config.getInstance().enableSchiffer && !this.isConstruction)
+			delta = vehicleOfInterest.getEndOfServices().get(idxInRoute) - (this.data.getLatestStartTimes()[customerID] + this.data.getServiceDurations()[customerID]);
+			this.cumDeltaTW += delta;
+			if (delta == 0.0)
+				System.out.println();
+			if (fixedCosts)
+				penaltyTimeWindowViolation += (delta * Config.getInstance().costTimeWindowViolation);
+			else if (Config.getInstance().enableSchiffer && !this.isConstruction)
 				penaltyTimeWindowViolation += (delta * Config.getInstance().penaltyWeightTimeWindow *Config.getInstance().costTimeWindowViolation);
 			else if (Config.getInstance().enableGLS && !this.isConstruction)
 				penaltyTimeWindowViolation += (delta * data.getGLSPenalties()[DataUtils.PenaltyIdx.TWViolation.getId()][customerID]);
@@ -738,8 +777,11 @@ public class Solution {
     		
     		// if there is a predecessor job which couldn't be scheduled, the current customer
     		// can also not be scheduled and a -1 is returned
-    		if (predCustomerId == -1 ||  this.customersAssignedToVehicles[predCustomerId] == -1) {
-    			endServiceTimeOfLatestPredJob = -1;    			
+    		if (predCustomerId == -1) {
+    			endServiceTimeOfLatestPredJob = this.getData().getStartOfPlanningHorizon();
+    			return new double[] {0, endServiceTimeOfLatestPredJob, -1};
+    		}
+    		else if	(this.customersAssignedToVehicles[predCustomerId] == -1) {
     			return new double[] {-1, -1,-1};    			
     		}
     		// check the end service time
@@ -749,6 +791,7 @@ public class Solution {
 				endServiceTimeOfLatestPredJob = v.getEndOfServices().get(idx);
 				customerIdOfLatestPredJob = predCustomerId;
 				locationIdOfLatestPredJob = this.customersAssignedLocations[predCustomerId];
+				//locationIdOfLatestPredJob = this.data.getLocationsToCustomers().get(predCustomerId).get(this.customersAssignedLocations[predCustomerId]);
 			}
     	}
     	return new double[] {customerIdOfLatestPredJob, endServiceTimeOfLatestPredJob, locationIdOfLatestPredJob};
@@ -915,6 +958,14 @@ public class Solution {
     }
     
     /**
+     * Retrieve total penalty score 
+     * @return aggregated penalty scores
+     */
+    public double getTotalPenalyCosts () {
+    	return this.totalPenaltyCosts;
+    }
+    
+    /**
      * Retrieve penalty score for unserved customers
      * @return penalty for unserved customers
      */
@@ -954,7 +1005,21 @@ public class Solution {
     	return this.listOfPenalties;
     }
     
+    public double getCumDeltaTW() {
+    	return this.cumDeltaTW;
+    }
+    
+    public double getCumDeltaskill() {
+    	return this.cumDeltaSkill;
+    }
+    
+    public double getVehicleTourCosts() {
+    	return this.vehicleTourCosts;
+    }
 
+    public double getSwappingCosts() {
+    	return this.swappingCosts;
+    }
     //
     // CUSTOM SETTER FUNCS
     //
@@ -1121,6 +1186,9 @@ public class Solution {
         sol.penaltyPredJobsViolation = this.penaltyPredJobsViolation;
         sol.penaltySkillViolation = this.penaltySkillViolation;
         sol.penaltyTimeWindowViolation = this.penaltyTimeWindowViolation;
+        sol.cumDeltaSkill = this.cumDeltaSkill;
+        sol.cumDeltaTW = this.cumDeltaTW;
+        sol.totalPenaltyCosts = this.totalPenaltyCosts;
         sol.swappingCosts = this.swappingCosts;
         sol.vehicleTourCosts = this.vehicleTourCosts;
         sol.isConstruction = this.isConstruction;
@@ -1219,6 +1287,39 @@ public class Solution {
 			}
     	}
     	);
+    	return vehiclesInfo.hashCode();
+    }
+    
+    public int hashCode_new () {
+    	ArrayList<ArrayList<Double[]>> vehiclesInfo = new ArrayList<ArrayList<Double[]>> ();
+    	for (Vehicle v: this.vehicles) {
+    		ArrayList<Double[]> tmp = new ArrayList<Double[]>();
+    		for (int c = 1 ; c<v.getCustomers().size() - 1; c++) {
+    			int customer = v.getCustomers().get(c);
+    			double startService = v.getStartOfServices().get(c);
+    			int location = this.customersAssignedLocations[customer];
+    			tmp.add(new Double[] {(double) customer ,startService, (double) DataUtils.getLocationIndex(customer, this)});
+    		}
+    		vehiclesInfo.add(tmp);
+    	}
+    	
+    	vehiclesInfo.sort(new Comparator<ArrayList<Double[]>>() {
+
+			@Override
+			public int compare(ArrayList<Double[]> o1, ArrayList<Double[]> o2) {
+				if (o1.size() < o2.size()) return -1;
+				else if (o1.size() > o2.size()) return 1;
+				else {
+					for (int customerFirst = 0 ; customerFirst < o1.size(); customerFirst ++) {
+						if (o1.get(customerFirst)[0] < o2.get(customerFirst)[0]) return -1;
+						else if (o1.get(customerFirst)[0] > o2.get(customerFirst)[0]) return 1;
+					}
+				}
+				return 0;
+			}
+    		
+    	});
+    	
     	return vehiclesInfo.hashCode();
     }
 

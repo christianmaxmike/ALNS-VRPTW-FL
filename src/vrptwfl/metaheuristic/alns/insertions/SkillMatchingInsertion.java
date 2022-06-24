@@ -79,7 +79,7 @@ public class SkillMatchingInsertion extends AbstractInsertion {
         	if (inspectedSkillLvl == -1)
         		inspectedSkillLvl = solution.getData().getRequiredSkillLvl()[customer];
         	else
-        		if (solution.getData().getRequiredSkillLvl()[customer] != inspectedSkillLvl)
+        		if (nextInsertion[4] != -1 && solution.getData().getRequiredSkillLvl()[customer] != inspectedSkillLvl)
         			break;
 
         	// Get possible insertions
