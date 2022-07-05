@@ -373,10 +373,10 @@ public class Config {
     	getInstance().sigma2 = (int) (randomizeDoubleValue(20.0, getInstance().sigma2));
     	getInstance().sigma3 = (int) (randomizeDoubleValue(15.0, getInstance().sigma3));
     	
-    	getInstance().coolingRate = randomizeDoubleValue(0.9998, getInstance().coolingRate);
+    	getInstance().coolingRate = randomizeDoubleValue(0.9999, getInstance().coolingRate);
     	
     	getInstance().costUnservedCustomerViolation = randomizeDoubleValue(5, getInstance().costUnservedCustomerViolation);
-    	getInstance().costTimeWindowViolation = randomizeDoubleValue(2, getInstance().costTimeWindowViolation);
+    	getInstance().costTimeWindowViolation = randomizeDoubleValue(6, getInstance().costTimeWindowViolation);
     	getInstance().costPredJobsViolation = randomizeDoubleValue(10, getInstance().costPredJobsViolation);
     	getInstance().costSkillLvlViolation = randomizeDoubleValue(5, getInstance().costSkillLvlViolation);
     	getInstance().costCapacityViolation = randomizeDoubleValue(5, getInstance().costCapacityViolation);
@@ -385,17 +385,17 @@ public class Config {
     	getInstance().glsPenaltyIncrease = randomizeDoubleValue(0.5, getInstance().glsPenaltyIncrease);
     	getInstance().glsPenaltyReduction = randomizeDoubleValue(0.25, getInstance().glsPenaltyReduction);
     	
-    	getInstance().exponentSwappingLocations = (int) randomizeDoubleValue(2, getInstance().exponentSwappingLocations);
-    	getInstance().historicNodePairRemovalExponent = (int) randomizeDoubleValue(12, getInstance().historicNodePairRemovalExponent);
-    	getInstance().historicRequestRemovalExponent = (int) randomizeDoubleValue(12, getInstance().historicRequestRemovalExponent);
-    	getInstance().shawRemovalExponent = (int) randomizeDoubleValue(12, getInstance().shawRemovalExponent);
-    	getInstance().skillMismatchRemovalExponent = (int) randomizeDoubleValue(12, getInstance().skillMismatchRemovalExponent);
-    	getInstance().timeFlexibilityRemovalExponent = (int) randomizeDoubleValue(12, getInstance().timeFlexibilityRemovalExponent);
-    	getInstance().timeOrientedRemovalExponent = (int) randomizeDoubleValue(12, getInstance().timeFlexibilityRemovalExponent);
-    	getInstance().worstRemovalExponent = (int) randomizeDoubleValue(12, getInstance().worstRemovalExponent);
+    	getInstance().exponentSwappingLocations = (int) randomizeDoubleValue(1, getInstance().exponentSwappingLocations);
+    	getInstance().historicNodePairRemovalExponent = (int) randomizeDoubleValue(9, getInstance().historicNodePairRemovalExponent);
+    	getInstance().historicRequestRemovalExponent = (int) randomizeDoubleValue(9, getInstance().historicRequestRemovalExponent);
+    	getInstance().shawRemovalExponent = (int) randomizeDoubleValue(9, getInstance().shawRemovalExponent);
+    	getInstance().skillMismatchRemovalExponent = (int) randomizeDoubleValue(9, getInstance().skillMismatchRemovalExponent);
+    	getInstance().timeFlexibilityRemovalExponent = (int) randomizeDoubleValue(9, getInstance().timeFlexibilityRemovalExponent);
+    	getInstance().timeOrientedRemovalExponent = (int) randomizeDoubleValue(9, getInstance().timeFlexibilityRemovalExponent);
+    	getInstance().worstRemovalExponent = (int) randomizeDoubleValue(9, getInstance().worstRemovalExponent);
     	
     	getInstance().glsLambdaUnscheduled = (double) randomizeDoubleValue(15, getInstance().glsLambdaUnscheduled);
-    	getInstance().glsLambdaTimeWindow = (double) randomizeDoubleValue(1, getInstance().glsLambdaTimeWindow);
+    	getInstance().glsLambdaTimeWindow = (double) randomizeDoubleValue(5, getInstance().glsLambdaTimeWindow);
     	getInstance().glsLambdaPredJobs = (double) randomizeDoubleValue(5, getInstance().glsLambdaPredJobs);
     	getInstance().glsLambdaCapacity = (double) randomizeDoubleValue(5, getInstance().glsLambdaCapacity);
     	getInstance().glsLambdaSkill = (double) randomizeDoubleValue(5, getInstance().glsLambdaSkill);

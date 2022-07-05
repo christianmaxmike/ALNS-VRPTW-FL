@@ -108,7 +108,7 @@ public class SolomonInstanceGenerator {
         List<Integer> customerIds = IntStream.rangeClosed(1, nCustomers).boxed().collect(Collectors.toList());
         
         // Create and return data object
-        return new Data(
+        Data data = new Data(
                 instanceName,
                 nCustomers,
                 nVehicles,
@@ -127,6 +127,9 @@ public class SolomonInstanceGenerator {
                 predJobs,
                 DataUtils.convertListToArray(preferredLocations)
         );
+        data.setEndOfPlanningHorizon(latestStartTimes.get(0) + serviceDurations.get(0));
+        
+        return data;
     }
     
 	/**

@@ -227,7 +227,7 @@ public class WriterUtils {
 			
 			double solutionBestFeasibleFixed = -1;
 			double solutionBestFeasibleVariable = -1;
-			if (solutionBestFeasible != null) {
+			if (solutionBestFeasible.isFeasible()) {
 				solutionBestFeasible.calculateTotalCosts(true);
 				solutionBestFeasibleFixed = solutionBestFeasible.getTotalCosts();
 				solutionBestFeasible.calculateTotalCosts(false);
@@ -331,7 +331,7 @@ public class WriterUtils {
 		 * vehicleID, customerID, OriginalCustomerId, servedLoc, preferredLoc, capacity, duration, starttime, endtime, travelTimePred, travelTimeSucc
 		 */
 		try {
-			writer.write("vehicleID;customerID;originalCustomerID;servedLoc;preferredLoc;capacitySlot;duration;starttime;endtime;customersStartTime;customersEndTime;distFrom;distTo\n");
+			writer.write("vehicleID;customerID;originalCustomerID;servedLoc;preferredLoc;capacitySlot;duration;starttime;endtime;customersStartTime;customersEndTime;distFrom;distTo;distToPreferredLoc\n");
 			for (Vehicle v: s.getVehicles()) {
 				int vehicleId = v.getId();
 				for (int i = 1; i < v.getCustomers().size() - 1 ; i++) {
@@ -351,12 +351,14 @@ public class WriterUtils {
 		            int locSucc = s.getData().getCustomersToLocations().get(s.getData().getOriginalCustomerIds()[v.getCustomers().get(i+1)]).get(s.getCustomerAffiliationToLocations()[v.getCustomers().get(i+1)]);
 		            double distPred = s.getData().getDistanceBetweenLocations(locPred, locCurr);
 		            double distSucc = s.getData().getDistanceBetweenLocations(locCurr, locSucc);
+		            
+		            double distToPreferredLoc = s.getData().getDistanceBetweenLocations(servedLoc, preferredLoc);
 					
 					writer.write(vehicleId + ";" + customerId + ";" + originalCustomerId + ";" + 
 							     servedLoc  + ";" + preferredLoc + ";" + capacitySlot  + ";" +
 							     duration + ";" + startService + ";" + endService + ";" +
 							     customersStartTime + ";" + customersEndTime + ";" + 
-							     distPred + ";" + distSucc + "\n");
+							     distPred + ";" + distSucc + ";" + distToPreferredLoc + "\n");
 				}
 			}
 			writer.close();

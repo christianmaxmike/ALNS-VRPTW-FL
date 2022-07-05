@@ -273,15 +273,25 @@ public class MainALNS {
 //    			/*"R101", "R102", "R103", "R104", "R105", "R106", "R107", "R108", "R109", "R110", "R111", "R112"*/
 //    		};
     	
+//    	String[] instanceNamesRandom = {
+//    			"hospital_instance_i040_b1_f6_v01",
+//    			"hospital_instance_i040_b2_f3_v05",
+//    			"hospital_instance_i080_b2_f3_v03",
+//    			"hospital_instance_i080_b6_f1_v04",
+//    			"hospital_instance_i120_b6_f1_v02",
+//    			"hospital_instance_i120_b1_f6_v01"    			
+//    	};
+
     	String[] instanceNamesRandom = {
-    			"hospital_instance_i040_b1_f6_v01",
-    			"hospital_instance_i040_b2_f3_v05",
-    			"hospital_instance_i080_b2_f3_v03",
-    			"hospital_instance_i080_b6_f1_v04",
-    			"hospital_instance_i120_b6_f1_v02",
-    			"hospital_instance_i120_b1_f6_v01"    			
+    			"hospital_instance_i120_b1_f6_v02",
+    			"hospital_instance_i120_b1_f6_v03",
+    			"hospital_instance_i120_b2_f3_v03",
+    			"hospital_instance_i120_b2_f3_v05",
+    			"hospital_instance_i120_b6_f1_v04" //,
+    			//"hospital_instance_i100_b2_f3_v04",    			
+    			//"hospital_instance_i100_b2_f3_v05",
     	};
-        
+    	
     	for (int config_idx = 0; config_idx < maxConfigs; config_idx++) {
     		Config.getInstance().randomizeConfig();
     		System.out.println("Start config id:" + config_idx);

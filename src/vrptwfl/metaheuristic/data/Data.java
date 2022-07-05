@@ -171,13 +171,15 @@ public class Data {
      */
     public void createSwappingCosts() {
     	this.swappingCosts = new double[this.distanceMatrix.length][this.distanceMatrix[0].length];
-    	for (int n = 0; n < swappingCosts.length; n++) {
-    		for (int m = n+1; m < swappingCosts[n].length; m++) {
-    			double dist = this.distanceMatrix[n][m];
-    			double swapCost = Math.pow(dist, Config.getInstance().exponentSwappingLocations);
-    			this.swappingCosts[n][m] = swapCost;
-    			this.swappingCosts[m][n] = swapCost;
-    		}
+    	if (Config.getInstance().exponentSwappingLocations >= 0) {
+    		for (int n = 0; n < swappingCosts.length; n++) {
+    			for (int m = n+1; m < swappingCosts[n].length; m++) {
+    				double dist = this.distanceMatrix[n][m];
+    				double swapCost = Math.pow(dist, Config.getInstance().exponentSwappingLocations);
+    				this.swappingCosts[n][m] = swapCost;
+    				this.swappingCosts[m][n] = swapCost;
+    			}
+    		}    		
     	}
     }
 

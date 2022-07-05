@@ -225,7 +225,7 @@ public class ALNSCore {
         // Get copies of initial solutions
         Solution solutionCurrent = solutionConstr.copyDeep();
         Solution solutionBestGlobal = solutionConstr.copyDeep();
-        Solution solutionBestGlobalFeasible = solutionConstr.isFeasible() ? solutionConstr.copyDeep() : null;
+        Solution solutionBestGlobalFeasible = solutionConstr.copyDeep();
     	Solution solutionTemp = solutionCurrent.copyDeep();
         
     	WriterUtils.writeProcessLog(solutionBestGlobal, solutionTemp, solutionCurrent, solutionBestGlobalFeasible, data.getInstanceName(), 0, System.currentTimeMillis() - startTime, temperature, -1.0, null, null, 0);
@@ -466,7 +466,8 @@ public class ALNSCore {
     	solutionTemp.calculateTotalCosts(true);
     	
     	if (solutionTemp.isFeasible() && (solutionBestGlobalFeasible == null || solutionBestGlobalFeasible.getTotalCosts() > solutionTemp.getTotalCosts() + Config.getInstance().epsilon)) {
-    		solutionBestGlobalFeasible = solutionTemp.copyDeep();
+    		solutionBestGlobalFeasible.setSolution(solutionTemp);
+    		// solutionBestGlobalFeasible = solutionTemp.copyDeep();
     		solutionBestGlobalFeasible.calculateTotalCosts(true);
     	}
     	
