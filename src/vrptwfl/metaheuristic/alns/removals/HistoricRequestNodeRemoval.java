@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 
  * A request with a low score is situated in an unsuitable route according
  * to the request graph and should be removed.
  * Our initial experiments indicated that this was an unpromising approach, 

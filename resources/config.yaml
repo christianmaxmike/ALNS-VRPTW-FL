@@ -1,5 +1,5 @@
 ##### GENERAL CONFIGURATIONS #####
-random_seed: 5325  # if null, no random seed will be used
+random_seed: 42  # if null, no random seed will be used
 
 ### ALNS CONFIGURATION
 alns_iterations: 25_000
@@ -10,8 +10,11 @@ upper_bound_nr_of_removals: 60
 upper_bound_factor_nr_of_removals: 0.4
 check_interval_for_insertion: 0.25
 
+### USAGE OF SAH, sequential allocation heuristic (SAH), Gartner et al, 2018
+use_sah: false
+
 ### PENALTY UPDATE - SETTINGS
-enable_gls: false
+enable_gls: true
 enable_schiffer: false
 enable_glsFeature: false
 # lambda values

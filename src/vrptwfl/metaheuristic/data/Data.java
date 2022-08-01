@@ -220,6 +220,12 @@ public class Data {
     	this.glsSolutionHistory.clear();
     }
     
+    /**
+     * Update of the GLS counter in the attached solution object.
+     * The method iterates the solution's list of penalties and increments the 
+     * occurrence of a violation for the computation of the GLS parameters
+     * @param s: solution object
+     */
     public void updateGLSCounter (Solution s) {
     	// Iterate observed penalties in attached solution
     	for (int[] entry: s.getListOfPenalties()) {
@@ -229,10 +235,20 @@ public class Data {
     	}    		
     }
     
+    /**
+     * Add a solution to the history of processed solution. 
+     * After a pre-defined number of iterations the history of solution is 
+     * used to updated the GLS parameters.
+     * @param s: solution object being added to the history
+     */
     public void addToGLSSolutionHistory(Solution s) {
     	this.glsSolutionHistory.add(s);
     }
     
+    /**
+     * Initialization of the utility set being used in the GLS procedure
+     * @return Empty Treeset 
+     */
     public TreeSet<double[]> glsInitUtilitySet() {
     	TreeSet<double[]> utilitiesSet =  new TreeSet<double[]>(new Comparator<double[]>() {
 			@Override
@@ -243,6 +259,11 @@ public class Data {
     	return utilitiesSet;
     }
     
+    /**
+     * Calculation of the utility scores. The scores are added to the TreeSet being 
+     * attached as parameter 
+     * @param utilitiesSet: TreeSet where the utility scores are stored
+     */
     private void calcUtilitySet (TreeSet<double[]> utilitiesSet) {
     	//for (Solution s : this.glsSolutionHistory) {
     		// Iterate observed penalties in attached solution
@@ -275,6 +296,9 @@ public class Data {
     	}
     }
     
+    /**
+     * Update of the GLS Features penalty weights.
+     */
     public void glsFeatureUpdatePenaltyWeights() {
     	TreeSet<double[]> utilitiesSet = glsInitUtilitySet();
     	this.calcUtilitySet(utilitiesSet);
@@ -425,6 +449,10 @@ public class Data {
         return endOfPlanningHorizon;
     }
     
+    /**
+     * Get start of the planning horizon
+     * @return start of planning horizon
+     */
     public double getStartOfPlanningHorizon() {
     	return startOfPlanningHorizon;
     }
@@ -703,13 +731,17 @@ public class Data {
     }
     
     /**
-     * Sets the end of the planing horizon. Indicator for end of any service time.
+     * Sets the end of the planning horizon. Indicator for the end of any service time.
      * @param endOfPlanningHorizon: end of planning horizon
      */
     public void setEndOfPlanningHorizon(int endOfPlanningHorizon) {
     	this.endOfPlanningHorizon = endOfPlanningHorizon;
     }
     
+    /**
+     * Sets the start of the planning horizon. Indicator for the start of any service time.
+     * @param startOfPlanningHorizon: start of planning horizon
+     */
     public void setStartOfPlanningHorizon (int startOfPlanningHorizon) {
     	this.startOfPlanningHorizon = startOfPlanningHorizon;
     }

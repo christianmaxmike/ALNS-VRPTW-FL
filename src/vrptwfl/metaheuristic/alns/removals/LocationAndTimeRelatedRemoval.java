@@ -12,10 +12,34 @@ import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
 import vrptwfl.metaheuristic.utils.CalcUtils;
 import vrptwfl.metaheuristic.utils.DataUtils;
 
+/**
+ * This class implemented the Location an Time Related Removal operation.
+ * It computes a score relying on the relatedness to the locations of 
+ * two customers as well as the temporal information given by the service
+ * times of them. 
+ * - Location relatedness: is defined by the number of locations which two customers
+ *   have in common divided by the minimum amount of locations either of the two customers
+ *   can be served. Formally: 1 - (intersection(L_i, L-j)) / min(L_i, L_j)
+ *   
+ * - Time relatedness: is defined by a strong relation between two customers with respect
+ *   to possible service times. 
+ *   
+ * The Location and Time Related Removal now brings the two scores together and weights them
+ * according to a predefined weighting parameter. Per default, the weighting parameter is 0.5
+ * for each of the terms. 
+ * 
+ * @author Christian M.M. Frey
+ *
+ */
 public class LocationAndTimeRelatedRemoval extends AbstractRemoval {
 
     private double weightStartTimeInSolution; // [%] in Pisinger & Ropke = 1; in Jungwirth can be between 0 and 1
 
+    /**
+     * Constructor for the Location and Time Related Removal operation
+     * @param data: data object
+     * @param weightStartTimeInSolution: usage of weighted times
+     */
 	public LocationAndTimeRelatedRemoval(Data data, double weightStartTimeInSolution) throws ArgumentOutOfBoundsException {
 		super(data);
         if (weightStartTimeInSolution < - Config.getInstance().epsilon || weightStartTimeInSolution > 1 + Config.getInstance().epsilon) 
@@ -23,6 +47,10 @@ public class LocationAndTimeRelatedRemoval extends AbstractRemoval {
         this.weightStartTimeInSolution = weightStartTimeInSolution; // alpha_2 - Wert im draft
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * Executes the removal.
+	 */
 	@Override
 	List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) throws ArgumentOutOfBoundsException {
 
@@ -106,7 +134,13 @@ public class LocationAndTimeRelatedRemoval extends AbstractRemoval {
         return removedCustomers;	
     }
 
-	
+	/**
+	 * Method computed the location relatedness between two customers.
+	 * @param customerA: first customer
+	 * @param customerB: second customer
+	 * @param s: solution object
+	 * @return return the location relatedness score
+	 */
 	private double computeLocationRelatedness (int customerA, int customerB, Solution s) {
 		ArrayList<Integer> locationsA = s.getData().getCustomersToLocations().get(customerA);
 		ArrayList<Integer> locationsB = s.getData().getCustomersToLocations().get(customerB);

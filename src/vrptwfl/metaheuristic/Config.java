@@ -28,6 +28,9 @@ public class Config {
     public double epsilon;
     public int bigMRegret;
     public double roundingPrecisionFactor;
+    
+    // --- USE Sequential allocation heuristic (SAH) according to Gartner et al, 2018 ---
+    public boolean useSAH;
 
     // --- ALNS ---
     public int alnsIterations;
@@ -182,7 +185,7 @@ public class Config {
 
     //NOTE maybe as singleton pattern (getInstance())
     private static Config instance;
-    //public Config conf = new Config();
+    // public Config conf = new Config();
 
     public static Config getInstance() {
     	if (instance == null) {
@@ -221,6 +224,9 @@ public class Config {
         // --- ALNS configurations ---
         alnsIterations = (int) obj.get("alns_iterations");
         checkIntervalInsertion = (double) obj.get("check_interval_for_insertion");
+        
+        // --- SAH - sequential allocation heuristic ---
+        useSAH = (boolean) obj.get("use_sah");
 
         // --- DESTROY / REPAIR OPERATORS ---
         // removals
@@ -404,6 +410,14 @@ public class Config {
     	
     }
     
+    /**
+     * This function is used to randomize any value of the current configuration file.
+     * The procedure is primarily used for hyperparameter tuning where a range is defined
+     * for any of the values being used in the optimization heuristic.
+     * @param upperBound: upperBound for the parameter being optimized
+     * @param startValue: start Value of the parameter being optimized
+     * @return randomized value of the parameter being defined by its start value and upperBound
+     */
     private double randomizeDoubleValue (double upperBound, double startValue) {
     	return randomGenerator.nextDouble() * (upperBound - startValue) + startValue;
     }

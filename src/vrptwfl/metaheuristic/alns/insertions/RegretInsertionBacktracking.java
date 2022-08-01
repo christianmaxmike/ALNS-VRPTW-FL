@@ -43,6 +43,9 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
         this.noBackTrackJumps = 0;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     public Solution runBacktracking(Solution solution) {
     	// Try backtracking for x trials
     	for (int trial = 0; trial<Config.getInstance().backtrackTrials; trial++) {
@@ -139,6 +142,12 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
     	return this.bestSolution;
     }
     
+    /**
+     * Performs a backtracking step. The function first retrieves the level to which the backtracking
+     * heuristic jumps and deltes the explored branch in the backtracking tree. The number of
+     * backtracking jumps is incremented.
+     * @return Solution object after jumping back in the backtracking tree
+     */
     private Solution doBackTrack() {
 		// Get id in the solution sequence (=path in the backtracking-tree) where we jump back
 		int jumpToSolIdx = getJumpIdx(solutionSequence.size() - 1);
@@ -283,12 +292,15 @@ public class RegretInsertionBacktracking extends AbstractInsertion {
     	return jumpToSolIdx;
     }
     
-    private void updateBestSolution () {
-    	for (Solution s: this.solutionSequence) {
-    		if (this.bestSolutionInTrial == null || s.getTotalCosts() < this.bestSolutionInTrial.getTotalCosts())
-    			this.bestSolutionInTrial = s;
-    	}
-    }
+//    /**
+//     * Updates the best solution w.r.t the total travelling costs.
+//     */
+//    private void updateBestSolution () {
+//    	for (Solution s: this.solutionSequence) {
+//    		if (this.bestSolutionInTrial == null || s.getTotalCosts() < this.bestSolutionInTrial.getTotalCosts())
+//    			this.bestSolutionInTrial = s;
+//    	}
+//    }
     
 	/**
 	 * {@inheritDoc}

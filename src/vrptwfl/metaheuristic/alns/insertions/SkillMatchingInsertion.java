@@ -106,7 +106,7 @@ public class SkillMatchingInsertion extends AbstractInsertion {
 
     /**
      * Runs the insertion heuristic with the backtracking logic.
-     * TODO Chris : currently not implemented - ask Alex why Backtracking only w/ k-regret
+     * NOTE: currently not implemented
      */
 	@Override
 	public Solution runBacktracking(Solution initSolution) {

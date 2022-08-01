@@ -8,8 +8,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 import vrptwfl.metaheuristic.Config;
 import vrptwfl.metaheuristic.alns.insertions.AbstractInsertion;
@@ -18,6 +23,12 @@ import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
 
+/**
+ * This class implements writers for logging. 
+ * 
+ * @author Christian M.M. Frey
+ *
+ */
 public class WriterUtils {
 	
 	public static FileWriter writerRemovals;
@@ -32,9 +43,18 @@ public class WriterUtils {
 	public static FileWriter writerProcessLog;
 	public static FileWriter writerSummary;
 	public static FileWriter writerUnscheduled;
+	public static FileWriter writerPenaltiesDetailed;
 	public static String outDir;
 	
-	// INITIALIZE WRITERS
+	private static JSONArray penaltiesInfo = new JSONArray();
+	
+	/**
+	 * Initialization of the writers. 
+	 * @param data: data object
+	 * @param parentDir: parent directory where the files are stored
+	 * @param outputFile: output file
+	 * @param instanceName: name of the current instance
+	 */
 	public static void initWriters(Data data, String parentDir, String outputFile, String instanceName) {
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy-HH-mm");  
         Date date = new Date();  
@@ -59,6 +79,7 @@ public class WriterUtils {
 			writerProcessLog = new FileWriter(outDir + "logCosts.txt");
 			writerSummary = new FileWriter(outDir + "summary.txt");
 			writerUnscheduled = new FileWriter(outDir + "unscheduledInfo.csv");
+			writerPenaltiesDetailed = new FileWriter(outDir + "penaltiesDetailed.json");
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -66,7 +87,12 @@ public class WriterUtils {
 	}
 
 	// INTIIALE SINGLE WRITERS - HEADERS
-	public static <T> void initWriterRemovalProbabilities(FileWriter writer, AbstractRemoval[] operators) {
+	/**
+	 * Initialization of the writer for logging removal ops' probabilities.
+	 * @param writer: Writer which logs the removal ops' probabilites
+	 * @param operators: removal operators
+	 */
+	public static void initWriterRemovalProbabilities(FileWriter writer, AbstractRemoval[] operators) {
 		StringBuilder builder = new StringBuilder("iteration");
 		int i = 0;
 		do {
@@ -82,7 +108,12 @@ public class WriterUtils {
 		}
 	}
 	
-	public static <T> void initWriterRepairProbabilities(FileWriter writer, AbstractInsertion[] operators) {
+	/**
+	 * Initilization of the writer for logging insertion ops' probabilities.
+	 * @param writer: Writer which logs the insertion ops' probabilities
+	 * @param operators: ineration operators
+	 */
+	public static void initWriterRepairProbabilities(FileWriter writer, AbstractInsertion[] operators) {
 		StringBuilder builder = new StringBuilder("iteration");
 		int i = 0;
 		do {
@@ -98,6 +129,9 @@ public class WriterUtils {
 		}
 	}
 	
+	/**
+	 * Initialization of the summary writer.
+	 */
 	public static void initSummaryLog() {
 		try {
 			writerSummary.write("iteration;instanceName;nCustomers;nVehicles;nVehiclesUsed;notScheduledCustomers;elapsedTime;totalCosts;RoutingCosts;PenaltyCosts;SwappingCosts\n");
@@ -107,6 +141,9 @@ public class WriterUtils {
 		}
 	}
 	
+	/**
+	 * Initialization of the processing log writer.
+	 */
 	public static void initProcessLog() {
 		try {
 			writerProcessLog.write("instanceName;iteration;GlobalCosts;TmpCosts;CurrCosts;BestFeasibleCosts;isFeasible;timeElapsed;temperature;simulatedAnnealingRandomVal;DestroyOp;InsertionOp;nRemovals;GlobalCosts_var;TmpCosts_var;CurrCosts_var;BestFeasible_var\n");
@@ -115,6 +152,9 @@ public class WriterUtils {
 		}
 	}
 	
+	/**
+	 * Initialization of the penalties writer.
+	 */
 	public static void initPenaltyCounts() {
 		StringBuilder builder = new StringBuilder("iteration;total");
 		int i = 0;
@@ -132,6 +172,9 @@ public class WriterUtils {
 		}
 	}
 	
+	/**
+	 * Initialization of the backtracking logging.
+	 */
 	public static void initBacktrackingLogging() {
 		StringBuilder builder = new StringBuilder("trial;noJumps;bestCosts;time\n");
 		try {
@@ -144,6 +187,12 @@ public class WriterUtils {
 	
 
 	// WRITE INFOS
+	/**
+	 * Write probabilities of the removal operators being drawn. 
+	 * @param writer: FileWriter which logs the removal ops' probabilities
+	 * @param removals: removal operators
+	 * @param iterationNumber: the current iteration number
+	 */
 	public static void writeRemovalProbabilities(FileWriter writer, AbstractRemoval[] removals, int iterationNumber) {
 		StringBuilder builder = new StringBuilder("" + iterationNumber);
 		int i = 0;
@@ -160,6 +209,12 @@ public class WriterUtils {
 		}
 	}
 	
+	/**
+	 * Write probabilities of the insertion operators being drawn.
+	 * @param writer: FileWriter which logs the insertion ops' probabilities
+	 * @param repairs: insertion operators
+	 * @param iterationNumber: the current iteration number
+	 */
 	public static void writeRepairProbabilities(FileWriter writer, AbstractInsertion[] repairs, int iterationNumber) {
 		StringBuilder builder = new StringBuilder("" + iterationNumber);
 		int i = 0;
@@ -176,6 +231,11 @@ public class WriterUtils {
 		}
 	}
 	
+	/**
+	 * Write the configuration file.
+	 * @param writer: Writer which logs the configuration file
+	 * @param config: Configuration file being logged
+	 */
 	public static void writeConfig(FileWriter writer, Config config) {
 		// Gson gson = new Gson();
 	    GsonBuilder gsonBuilder  = new GsonBuilder();
@@ -194,6 +254,12 @@ public class WriterUtils {
 		}
 	}
 
+	/**
+	 * Write the summary of an iteration.
+	 * @param iteration: the current iteration number
+	 * @param s: the current solution object
+	 * @param elapsedTime: the elapsed time
+	 */
 	public static void writeSummaryLog (int iteration, Solution s, long elapsedTime) {
 		// iteration;instanceName;nCustomers;nVehicles;nVehiclesUsed;notScheduledCustomers;elapsedTime;totalCosts;RoutingCosts;PenaltyCosts
 		try {
@@ -206,6 +272,21 @@ public class WriterUtils {
 		}
 	}
 	
+	/**
+	 * Write the information of the current processing state:
+	 * @param solutionGlobal: global solution object
+	 * @param solutionTemp: temporary solution object
+	 * @param solutionCurr: current solution object
+	 * @param solutionBestFeasible: best feasible solution object
+	 * @param instanceName: current instance name being processed
+	 * @param iteration: the current iteration number
+	 * @param timeElapsed: the elapsed time
+	 * @param temperature: the temperature in the current iteration
+	 * @param simulatedAnnealingRandomVal: value for simulated annealing in the current iteration
+	 * @param destroyOp: the selected destroy operation
+	 * @param insertionOp: the selected insertion operation
+	 * @param nRemovals: the number of customer removals in the current iteration
+	 */
 	public static void writeProcessLog(Solution solutionGlobal, Solution solutionTemp, Solution solutionCurr, Solution solutionBestFeasible, 
 			String instanceName, int iteration, long timeElapsed, double temperature, double simulatedAnnealingRandomVal, 
 			AbstractRemoval destroyOp, AbstractInsertion insertionOp, int nRemovals) {
@@ -247,6 +328,13 @@ public class WriterUtils {
 		}
 	}
 	
+	/**
+	 * Write results for the solomon instance.
+	 * @param solutionALNS: solution object after the ALNS procedure
+	 * @param instanceName: current solomon instance being processed
+	 * @param timeElapsed: elapsed time
+	 * @param gap: optimality gap if available
+	 */
 	public static void writeSolomonResults(Solution solutionALNS, String instanceName, long timeElapsed, double gap) {
         try {
 			writerResults.append(instanceName + ";" + solutionALNS.getTotalCosts() + ";" + timeElapsed + ";" + gap + "\n");
@@ -256,6 +344,13 @@ public class WriterUtils {
 		}
 	}
 	
+	/**
+	 * Write results for the hospital instance
+	 * @param data: data object
+	 * @param solutionALNS: solution object after the ALNS procedure
+	 * @param timeElapsed: elapsed time
+	 * @param gap: optimality gap if available
+	 */
 	public static void writerHospitalResults(Data data, Solution solutionALNS, long timeElapsed, double gap) {
 		try {
 			writerResults.append(data.getInstanceName() + ";" + solutionALNS.getTotalCosts() + ";" + timeElapsed + ";" + gap + "\n");
@@ -265,6 +360,11 @@ public class WriterUtils {
 		}
 	}
 	
+	/**
+	 * Writer information of unscheduled customers.
+	 * @param writer: FileWriter which logs the information about unscheduled customers
+	 * @param s: solution object whose information is logged
+	 */
 	public static void writeUnscheduledInfo(FileWriter writer, Solution s) {
 		try {
 			writer.write("customer;originalCustomerID;customersStartTime;customersEndTime;serviceTime;preferredLocation\n");
@@ -301,6 +401,11 @@ public class WriterUtils {
 //		}
 //	}
 	
+	/**
+	 * Write count of penalties.
+	 * @param iteration: current iteration number
+	 * @param solution: solution object
+	 */
 	public static void writePenaltyCount(int iteration, Solution solution) {
 		int[] penaltyArr = new int[5];
 		int sumPenalty = 0;
@@ -326,6 +431,11 @@ public class WriterUtils {
 		}
 	}
 	
+	/**
+	 * Write the resulting scheduling as a formatted csv file.
+	 * @param writer: FileWriter which logs the tour information as csv
+	 * @param s: solution object
+	 */
 	public static void writeTourCSV(FileWriter writer, Solution s) {
 		/*
 		 * vehicleID, customerID, OriginalCustomerId, servedLoc, preferredLoc, capacity, duration, starttime, endtime, travelTimePred, travelTimeSucc
@@ -367,6 +477,11 @@ public class WriterUtils {
 		}
 	}
 	
+	/**
+	 * Write the final tour as un-formatted text.
+	 * @param writer: FileWriter which logs the un-formatted tour
+	 * @param tour: string representation of the current scheduling
+	 */
 	public static void writeFinalTour(FileWriter writer, String tour) {
 		try {
 			writer.write(tour);
@@ -376,10 +491,60 @@ public class WriterUtils {
 		}
 	}
 	
+	/**
+	 * Logging for the backtracking procedure.
+	 * @param trial: current backtracking trial
+	 * @param jumps: number of backtracking jumps
+	 * @param costs: costs of the solution
+	 * @param time: elapsed time
+	 */
 	public static void writeBacktrackingInfo (int trial, int jumps, double costs, long time) {
 		try {
 			writerBacktracking.write(trial + ";" + jumps + ";" + costs + ";" + time + "\n");
 			writerBacktracking.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Helper function for tracking the penalty feature vectors.
+	 * The method iterates the current GLS penalties and stores the in the class variable
+	 * 'penaltiesInfo'.
+	 * 
+	 * @param it: current iteration number
+	 * @param s: solution object
+	 */
+	public static void addToPenaltiesInformation (Integer it, Solution s) {
+		JSONArray customerArr = new JSONArray();
+		for (int customer = 0; customer<s.getData().getGLSPenalties()[0].length; customer ++) {
+			JSONObject customerObj = new JSONObject();
+			JSONObject penaltyObj = new JSONObject();
+			for (int penaltyIdx = 0; penaltyIdx<s.getData().getGLSPenalties().length; penaltyIdx++) {
+				penaltyObj.put(DataUtils.PenaltyIdx.values()[penaltyIdx],
+							   s.getData().getGLSPenalties()[penaltyIdx][customer]
+							   );
+			}
+			customerObj.put(String.valueOf(customer), penaltyObj);
+			customerObj.put("originalCustomerID", s.getData().getOriginalCustomerIds()[customer]);
+			customerArr.add(customerObj);
+		}
+		JSONObject iterationInfo = new JSONObject();
+		iterationInfo.put(it, customerArr);
+		penaltiesInfo.add(iterationInfo);
+	}
+	
+	/**
+	 * Write out the penalty feature vectors being stored in the field variable 'penaltiesInfo'.
+	 */
+	public static void writePenaltiesDetailedInformation () {
+		try {
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			JsonParser jp = new JsonParser();
+			JsonElement je = jp.parse(penaltiesInfo.toJSONString());
+			String prettyJsonString = gson.toJson(je);
+			writerPenaltiesDetailed.write(prettyJsonString);
+			writerPenaltiesDetailed.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

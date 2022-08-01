@@ -151,50 +151,11 @@ public class ShawSimplifiedRemoval extends AbstractRemoval {
         return removedCustomers;
 
     }
-    
-    
+        
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getFormattedClassName() {
 		return "Shaw's Proximity (" + (this.randomize?"random":"determ.") + ")";
 	}
-
-/*
-    public static void main(String[] args) {
-
-        List<Integer> listInt = new ArrayList<>();
-        listInt.add(1);
-        listInt.add(2);
-        listInt.add(3);
-        listInt.add(4);
-
-        System.out.println(listInt); // 1,2,3,4
-
-        List<Double> listDouble = new ArrayList<>();
-        listDouble.add(1.2);
-        listDouble.add(-3.4);
-        listDouble.add(-0.1);
-        listDouble.add(20.1);
-
-        listInt.sort(Comparator.comparing(v->listDouble.get(listInt.indexOf(v))));
-//        listInt.sort(Ordering.explicit(listDouble).onResultOf(List<Double>::indexOf));
-        System.out.println(listInt); // 3, 1, 4, 2
-
-//        for (int i=0; i < 4; i++) {
-//            System.out.println(listDouble.indexOf(i));
-//        }
-
-        List<double[]> newDouble = new ArrayList<>();
-        newDouble.add(new double[] {1., 1.2});
-        newDouble.add(new double[] {2., -3.4});
-        newDouble.add(new double[] {3., -.1});
-        newDouble.add(new double[] {4., 20.1});
-
-        newDouble.sort(Comparator.comparing(v->v[1]));
-        for (double[] d: newDouble) {
-            System.out.println("[" + d[0] + ", " + d[1] + "]");
-        }
-    }
-*/
 }

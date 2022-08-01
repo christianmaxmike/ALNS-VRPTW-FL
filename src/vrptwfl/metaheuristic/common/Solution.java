@@ -253,6 +253,8 @@ public class Solution {
 //                triedUnusedVehicle = true;
 //            }
         	
+        	if (!vehicle.isAvailable()) continue;
+        	
             ArrayList<double[]> insertions = vehicle.getPossibleInsertions(customer, this.data, this);
 
             if (Config.getInstance().regretConsiderAllPossibleInsertionPerRoute) { // add all possible position (can be multiple per route)
@@ -434,7 +436,7 @@ public class Solution {
 
     /**
      * Method calculates the penalty costs. The results are stored in their respective field
-     * variables.
+     * variables. 
      */
     private void calculatePenaltyCosts(boolean fixedCosts) {
     	// the variable listOfPenalties is used for updating the penalty weights
@@ -478,6 +480,20 @@ public class Solution {
     	}
     }
     
+    /**
+     * Retrieve the violation costs for the new insertion being defined by the attached
+     * parameter. The method is used to compute the violation costs for potential 
+     * insertions. The insertion with the lowest total costs (traveling costs + violation costs)
+     * is selected as the next insertion.
+     * A new insertion is defined by:
+     * [customerID, vehicleID, positionInRoute, startTime, costs, location, capacitySlot, entryIndexInLocation]
+     * 
+     * The method is called for potential insertion of a customer.
+     * 
+     * @param newInsertion: array carrying the information about a potential insertion.
+     * @param fixedCosts: boolean if global or dynamic cost function is used for the computation
+     * @return violation costs
+     */
     public double getViolationCostsForInsertion(double[] newInsertion, boolean fixedCosts) {
     	// customer, vehicleId, posInRoute, starTime, costs, location, capacity, entryIdxInLoc
     	int customerID = (int) newInsertion[0];
@@ -544,6 +560,14 @@ public class Solution {
 			   (Config.getInstance().glsLambdaPredJobs * predJobsViolation);
     }
     
+    /**
+     * Retrieve the costs for violation w.r.t a customer being attached as parameter.
+     * The method is called for potential removals of a customer from the current
+     * scheduling.
+     * @param customerID: customer id whose violation costs are calculated
+     * @param fixedCosts: boolean if the global or dynamic cost function is used
+     * @return aggregated violation costs for customer (skill + predJobs + TW)
+     */
     public double getCustomersCostsForViolations(int customerID, boolean fixedCosts) {
     	return this.calcCustomerCostsForSkillViolation(customerID, fixedCosts) + 
     		   this.calcCustomerCostsForPredJobs(customerID, fixedCosts) + 
@@ -573,6 +597,12 @@ public class Solution {
     	}
     }
     
+    /**
+     * Calculates the skill violation of the attached customer in this solution object.
+     * @param customerID: customer id whose skill violation is computed
+     * @param fixedCosts: boolean if the global or dynamic cost function is used
+     * @return costs for skill violation
+     */
     public double calcCustomerCostsForSkillViolation(int customerID, boolean fixedCosts) {
     	double penaltySkillViolation = 0.0;
 		// Check whether customer is scheduled; if not -> no skill violation possible
@@ -621,6 +651,14 @@ public class Solution {
     	}
     }
     
+    /**
+     * Calculates the violation costs of any predecessor job penalties. A predecessor
+     * job violation occurs whenever a predecessor job could not be scheduled for the
+     * current job.
+     * @param customerID: customer id whose predecessor job violation is calculated
+     * @param fixedCosts: boolean if global or dynamic cost function is used
+     * @return violation costs for predecessor job penalties of the attached customer
+     */
     public double calcCustomerCostsForPredJobs(int customerID, boolean fixedCosts) {
     	double penaltyPredJobsViolation = 0.0;
     	int entryJobId = customerID;
@@ -683,6 +721,15 @@ public class Solution {
     	}
     }
     
+    /**
+     * Calculation of the time window violation of the attached customer. 
+     * A time window violation occurs whenever the customer's service time is out of 
+     * bounds of the service time being defined in the input data.
+     * 
+     * @param customerID: customer id whose time window violation is calculated
+     * @param fixedCosts: boolean if global or dynamic cost function is used
+     * @return cost of time window violations
+     */
     public double calcCustomerCostsForTimeWindow (int customerID, boolean fixedCosts) {
     	double penaltyTimeWindowViolation = 0.0;
 		// Check whether customer is scheduled; if not -> no time window violation possible
@@ -1005,18 +1052,34 @@ public class Solution {
     	return this.listOfPenalties;
     }
     
+    /**
+     * Retrieve the cumulated time window delta term.
+     * @return Cumulated delta term for time window violations
+     */
     public double getCumDeltaTW() {
     	return this.cumDeltaTW;
     }
     
+    /**
+     * Retrieve the cumulated skill delta term.
+     * @return Cumulated delta term for skill violations
+     */
     public double getCumDeltaskill() {
     	return this.cumDeltaSkill;
     }
     
+    /**
+     * Retrieve the total vehicles' tour costs.
+     * @return Vehicles' tour costs
+     */
     public double getVehicleTourCosts() {
     	return this.vehicleTourCosts;
     }
 
+    /**
+     * Retrieve the total costs for swapping locations in the current scheduling.
+     * @return total swapping costs
+     */
     public double getSwappingCosts() {
     	return this.swappingCosts;
     }
@@ -1290,6 +1353,13 @@ public class Solution {
     	return vehiclesInfo.hashCode();
     }
     
+    /**
+     * Compute a hashCode for the solution object. The hashCode of a solution object
+     * is dependent on the ordering of the scheduled customers within the vehicles.
+     * Hence, two solution objects have the same hashCode if the routes are the same
+     * for two solution objects.
+     * @return hashCode for solution object
+     */
     public int hashCode_new () {
     	ArrayList<ArrayList<Double[]>> vehiclesInfo = new ArrayList<ArrayList<Double[]>> ();
     	for (Vehicle v: this.vehicles) {
@@ -1342,6 +1412,10 @@ public class Solution {
         }
     }
 
+    /**
+     * Get string representation of the solution object for logging.
+     * @return string representation of the solution object
+     */
     public String getStringRepresentionSolution() {
     	StringBuilder builder = new StringBuilder("");
         int nActiveVehicles = this.getNActiveVehicles();

@@ -2,6 +2,7 @@ package vrptwfl.metaheuristic;
 
 import vrptwfl.metaheuristic.alns.insertions.RegretInsertion;
 import vrptwfl.metaheuristic.alns.insertions.RegretInsertionBacktracking;
+import vrptwfl.metaheuristic.alns.insertions.SequentialAllocationHeuristic;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.data.Data;
 import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
@@ -39,7 +40,11 @@ public class ConstructionHeuristicRegret {
     public Solution constructSolution(int k) throws ArgumentOutOfBoundsException {
     	Solution emptySolution = Solution.getEmptySolution(data);
     	emptySolution.setIsConstruction(true);
-        if (!Config.getInstance().enableBacktracking) {
+    	if (Config.getInstance().useSAH) {
+    		SequentialAllocationHeuristic inserter = new SequentialAllocationHeuristic(data);
+    		return inserter.solve(emptySolution);
+    	}
+    	else if (!Config.getInstance().enableBacktracking) {
         	RegretInsertion inserter = new RegretInsertion(k, data);
         	return inserter.solve(emptySolution);        	
         }

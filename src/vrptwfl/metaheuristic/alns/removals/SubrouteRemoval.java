@@ -12,12 +12,29 @@ import vrptwfl.metaheuristic.exceptions.ArgumentOutOfBoundsException;
 import vrptwfl.metaheuristic.utils.CalcUtils;
 import vrptwfl.metaheuristic.utils.DataUtils;
 
+/**
+ * This class implements the Subroute Removal operation.
+ * A customer-location tuples is randomly selected and then, starting from this tuple,
+ * a virtual route of length n is constructed in a greedy fashion. All tuples in this
+ * virtual route are removed from the existing routes in the current solution.
+ * 
+ * @author Christian M.M. Frey
+ *
+ */
 public class SubrouteRemoval extends AbstractRemoval {
 
+	/**
+	 * Constructor of the subroute removal operation
+	 * @param data: data object
+	 */
 	public SubrouteRemoval(Data data) {
 		super(data);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * Executes the removal.
+	 */
 	@Override
 	List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) throws ArgumentOutOfBoundsException {
         List<Integer> removedCustomers = new ArrayList<>();
@@ -85,7 +102,4 @@ public class SubrouteRemoval extends AbstractRemoval {
 	public String getFormattedClassName() {
 		return "Subroute";
 	}
-	
-	
-
 }

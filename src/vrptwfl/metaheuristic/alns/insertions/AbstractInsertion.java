@@ -8,7 +8,7 @@ import vrptwfl.metaheuristic.data.Data;
 /**
  * This class implements an abstract insertion object
  * 
- * @author: Alexander Jungwirth, Christian M.M. Frey
+ * @author: Christian M.M. Frey, Alexander Jungwirth
  */
 public abstract class AbstractInsertion {
 
@@ -41,6 +41,11 @@ public abstract class AbstractInsertion {
      */
     abstract double[] getNextInsertion(Solution solution);
     
+    /**
+     * Start backtracking heuristic with the current insertion operator.
+     * @param initSolution: initial solution object
+     * @return solution object after the backtracking procedure
+     */
     public abstract Solution runBacktracking(Solution initSolution);
     
     /**

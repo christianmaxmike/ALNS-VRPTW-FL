@@ -135,6 +135,9 @@ public class RegretInsertion extends AbstractInsertion {
         return regret;
     }
 
+    /**
+     * {@inheritDoc}
+     */
 	@Override
 	public Solution runBacktracking(Solution initSolution) {
 		return initSolution;

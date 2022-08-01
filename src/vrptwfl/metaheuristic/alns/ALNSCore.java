@@ -230,7 +230,6 @@ public class ALNSCore {
         
     	WriterUtils.writeProcessLog(solutionBestGlobal, solutionTemp, solutionCurrent, solutionBestGlobalFeasible, data.getInstanceName(), 0, System.currentTimeMillis() - startTime, temperature, -1.0, null, null, 0);
 
-
         // add information from construction to neighbor graph
         if (Config.getInstance().useHistoricNodePairRemovalRandom || Config.getInstance().useHistoricNodePairRemovalDeterministic) 
         	this.updateNeighborGraph(solutionConstr);
@@ -309,9 +308,12 @@ public class ALNSCore {
 						data.glsUpdatePenaltyWeights();
         			else
         				data.glsFeatureUpdatePenaltyWeights();        			
-        		
-        			// solutionBestGlobal.calculateTotalCosts(true);
-        			data.resetGLSSettings();
+        		                	
+        			// write additional information
+                	WriterUtils.addToPenaltiesInformation(iteration, solutionTemp);
+
+                	// solutionBestGlobal.calculateTotalCosts(true);
+                	data.resetGLSSettings();
         		}
             }
             
@@ -321,6 +323,7 @@ public class ALNSCore {
         		WriterUtils.writeRepairProbabilities(WriterUtils.writerRepairs, repairOperators, iteration);        		
         	}
             // END OF ITERATION
+        	
         }
         return solutionBestGlobal;
     }

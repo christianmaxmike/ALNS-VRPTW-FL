@@ -65,10 +65,16 @@ public class MainALNS {
     	WriterUtils.writePenaltyCount(0, solutionConstr);
     	WriterUtils.writeSummaryLog(0, solutionConstr, System.currentTimeMillis() - startTimeConstruction);
         printToConsole("Init solution", solutionConstr);
+        
+        // --- LNS - Vehicle optimization ---
+        LNSOptimization lns = new LNSOptimization(data);
+        Solution solutionLNS = lns.runLNS(solutionConstr);
+        printToConsole("LNS solution:", solutionLNS);
+        
 
         // --- ALNS SOLUTION ---
         ALNSCore alns = new ALNSCore(data);
-        Solution solutionALNS = alns.runALNS(solutionConstr);
+        Solution solutionALNS = alns.runALNS(solutionLNS);
         long timeElapsed = (System.currentTimeMillis() - startTimeConstruction);
         // Print ALNS(+GLS) solution
         printToConsole("ALNS solution", solutionALNS);
@@ -79,6 +85,8 @@ public class MainALNS {
         	logResultSolomon(data, solutionALNS, timeElapsed);
         else 
         	logResultHospital(data, solutionALNS, timeElapsed);
+        
+        WriterUtils.writePenaltiesDetailedInformation();
 
         System.out.println();
         // TODO Alex: brauchen irgendwas, um Lösung zu speichern (ZF und Touren startzeiten etc.)
@@ -237,9 +245,10 @@ public class MainALNS {
         	Config.configFile = String.valueOf(args.length > 6 ? ("resources/"+args[6]): "resources/config.yaml"); 
         	tuningParam(numConfigs, numRunsPerConfig, nCustomers, outDir, outFile);        	
         }
-        else
+        else {
         	System.out.println("Unknown mode - 1:run single instance; 2:run parameter tuning");
         	System.exit(0);
+        }
     }
     
     private static void runSingleInstance(String instanceName, String outFile, String outDir, int nCustomers) throws ArgumentOutOfBoundsException {

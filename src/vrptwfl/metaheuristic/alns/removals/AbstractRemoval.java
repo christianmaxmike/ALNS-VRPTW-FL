@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * This class implements an abstract removal operation.
  * 
- * @author: Alexander Jungwirth, Christian M.M. Frey
+ * @author: Christian M.M. Frey, Alexander Jungwirth 
  */
 public abstract class AbstractRemoval {
 

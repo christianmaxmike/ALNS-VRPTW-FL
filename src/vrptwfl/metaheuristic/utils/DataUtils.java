@@ -10,7 +10,7 @@ import vrptwfl.metaheuristic.common.Solution;
 /**
  * General helper functions for data transformations (e.g., list to array function)
  *
- * @author Alexander Jungwirth, Christian M.M. Frey
+ * @author Christian M.M. Frey, Alexander Jungwirth
  */
 public class DataUtils {
 
@@ -84,6 +84,12 @@ public class DataUtils {
     	return locs;
     }
     
+    /**
+     * Sort the attached double array by its arguments.
+     * @param a: array being sorted
+     * @param ascending: indicator whether the sorting is in ascending order
+     * @return array containing the sorted arguments/indices
+     */
     public static int[] argsort(final double[] a, final boolean ascending) {
         Integer[] indexes = new Integer[a.length];
         for (int i = 0; i < indexes.length; i++) {
@@ -98,7 +104,13 @@ public class DataUtils {
         return asArray(indexes);
     }
     
-    public static <T extends Number> int[] asArray(final T... a) {
+    /**
+     * Helper function transforming the attached values in an array
+     * @param <T>: types of the values being stored
+     * @param a: values being stored in an array
+     * @return
+     */
+    private static <T extends Number> int[] asArray(final T... a) {
         int[] b = new int[a.length];
         for (int i = 0; i < b.length; i++) {
             b[i] = a[i].intValue();
@@ -106,9 +118,15 @@ public class DataUtils {
         return b;
     }
     
-    
-
+    /**
+     * Enumeration being used for penalty indices.
+     * 
+     * @author Christian M.M. Frey
+     *
+     */
     public enum PenaltyIdx {
+    	
+    	// enum constants calling the enum constructors 
     	Unscheduled(0),
     	TWViolation(1), 
     	Predecessor(2),
@@ -117,14 +135,20 @@ public class DataUtils {
     	
         private final int id;
 
+        /**
+         * Constructor for a penalty index being called by the enum constants
+         * @param id: index being used for the enum constant
+         */
         private PenaltyIdx(int id) {
             this.id = id;
         }
 
+        /**
+         * Retrieve the index of the penalty.
+         * @return penalty's identifier
+         */
         public int getId() {
             return id;
         }
     }
-
-    
 }

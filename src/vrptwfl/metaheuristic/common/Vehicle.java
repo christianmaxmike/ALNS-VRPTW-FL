@@ -12,7 +12,7 @@ import java.util.ArrayList;
 /**
  * This class implements a vehicle/therapist object
  * 
- * @author: Alexander Jungwirth, Christian M.M. Frey
+ * @author: Christian M.M. Frey, Alexander Jungwirth
  */
 public class Vehicle {
 	
@@ -28,6 +28,8 @@ public class Vehicle {
     private ArrayList<Double> endOfServices;
     private boolean isUsed;
     private int nCustomersInTour;
+    
+    private boolean isAvailable;
     
     /**
      * Empty constructor
@@ -61,6 +63,8 @@ public class Vehicle {
         this.endOfServices.add(latestEndOfService);
         this.isUsed = false;
         this.skillLvl = skillLvl;
+        
+        this.isAvailable = true;
     }
     
     /**
@@ -79,6 +83,7 @@ public class Vehicle {
         v.setUsed(this.isUsed);
         v.setnCustomersInTour(this.nCustomersInTour);
         v.setSkillLvl(this.skillLvl);
+        v.setAvailable(this.isAvailable);
         return v;
     }
     
@@ -491,6 +496,10 @@ public class Vehicle {
     public void setSkillLvl (int skillLvl) {
     	this.skillLvl = skillLvl;
     }
+    
+    public void setAvailable (boolean isAvailable) {
+    	this.isAvailable = isAvailable;
+    }
 
     //
     // GETTERS
@@ -575,6 +584,16 @@ public class Vehicle {
      */
     public int getSkillLvl() {
     	return skillLvl;
+    }
+    
+    /**
+     * Returns whether the current vehicle is available for scheduling. 
+     * If LNS with vehicle optimiatzion is used before the ALNS procedure,
+     * a vehicles might get blocked and is not used for scheduling customers.
+     * @return
+     */
+    public boolean isAvailable() {
+    	return isAvailable;
     }
     
     
