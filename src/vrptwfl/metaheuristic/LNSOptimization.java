@@ -4,7 +4,7 @@ import vrptwfl.metaheuristic.alns.insertions.AbstractInsertion;
 import vrptwfl.metaheuristic.alns.insertions.GreedyInsertion;
 import vrptwfl.metaheuristic.alns.removals.AbstractRemoval;
 import vrptwfl.metaheuristic.alns.removals.RandomRouteRemoval;
-import vrptwfl.metaheuristic.alns.removals.RandomVehicleRemoval;
+import vrptwfl.metaheuristic.alns.removals.FavVehicleRemoval;
 import vrptwfl.metaheuristic.common.Solution;
 import vrptwfl.metaheuristic.common.Vehicle;
 import vrptwfl.metaheuristic.data.Data;
@@ -41,7 +41,7 @@ public class LNSOptimization {
 		this.data = data;
 		
 		this.repairOperator = new GreedyInsertion(data);
-		this.destroyOperator = new RandomVehicleRemoval(data);
+		this.destroyOperator = new FavVehicleRemoval(data);
 	}
 	
 	/**
@@ -84,7 +84,7 @@ public class LNSOptimization {
 			
 			this.destroyOperator.destroy(solutionTemp);
 			
-			int removedVehicle = ((RandomVehicleRemoval) this.destroyOperator).getSelectedIdx();
+			int removedVehicle = ((FavVehicleRemoval) this.destroyOperator).getSelectedIdx();
 			solutionTemp.getVehicles().get(removedVehicle).setAvailable(false);
 			
 			this.repairOperator.solve(solutionTemp);

@@ -86,7 +86,7 @@ public class ALNSCore {
         if (Config.getInstance().enableGLS || Config.getInstance().enableGLSFeature)
         	data.initGLSSettings();
         
-        vehicleRemoval = new RandomVehicleRemoval(data);
+        vehicleRemoval = new FavVehicleRemoval(data);
     }
 
     //
@@ -221,6 +221,7 @@ public class ALNSCore {
     	long startTime = System.currentTimeMillis();
     	WriterUtils.initProcessLog();
     	WriterUtils.initializeIndividualPenaltiesLogging();
+    	boolean initialLNSbooleanValue = Config.getInstance().useLNSVehicle;
 
     	solutionConstr.setIsConstruction(false);
 
@@ -260,17 +261,20 @@ public class ALNSCore {
         		if (iteration <= maxLNSIter && !vehicleIsRemoved) {
         			vehicleRemoval.destroy(solutionTemp);
         			vehicleIsRemoved = true;
-        			int removedVehicle = ((RandomVehicleRemoval) vehicleRemoval).getSelectedIdx();
+        			int removedVehicle = ((FavVehicleRemoval) vehicleRemoval).getSelectedIdx();
         			solutionTemp.getVehicles().get(removedVehicle).setAvailable(false);  
         			solutionCurrent = solutionTemp.copyDeep();
         		}
         		if (iteration >maxLNSIter) {
         			Config.getInstance().useLNSVehicle = false;
         			if (!this.acceptedNewSolution) {
-        				int removedVehicle = ((RandomVehicleRemoval) vehicleRemoval).getSelectedIdx();
+        				int removedVehicle = ((FavVehicleRemoval) vehicleRemoval).getSelectedIdx();
         				solutionTemp.getVehicles().get(removedVehicle).setAvailable(true);  
         				solutionCurrent = solutionBestGlobal.copyDeep();
         			}
+        			System.out.println("=== LNS Result ===");
+        			System.out.println("vehicles used: " + solutionCurrent.getUsedVehicles().size());
+        			System.out.println("=== END LNS ===");
         		}
         		
         	}
@@ -376,6 +380,8 @@ public class ALNSCore {
         	WriterUtils.addTourInformation(iteration, solutionTemp);
         	WriterUtils.writeIndividualPenalties(iteration, solutionTemp);
         }
+        
+        Config.getInstance().useLNSVehicle = initialLNSbooleanValue;
         return solutionBestGlobal;
     }
     
