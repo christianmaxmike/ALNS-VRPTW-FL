@@ -80,9 +80,9 @@ public class Vehicle {
         v.setCustomers(new ArrayList<>(this.customers));
         v.setStartOfServices(new ArrayList<>(this.startOfServices));
         v.setEndOfServices(new ArrayList<>(this.endOfServices));
-        v.setUsed(this.isUsed);
         v.setnCustomersInTour(this.nCustomersInTour);
         v.setSkillLvl(this.skillLvl);
+        v.setUsed(this.isUsed);
         v.setAvailable(this.isAvailable);
         return v;
     }

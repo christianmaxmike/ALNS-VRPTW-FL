@@ -67,14 +67,14 @@ public class MainALNS {
         printToConsole("Init solution", solutionConstr);
         
         // --- LNS - Vehicle optimization ---
-        LNSOptimization lns = new LNSOptimization(data);
-        Solution solutionLNS = lns.runLNS(solutionConstr);
-        printToConsole("LNS solution:", solutionLNS);
+        //LNSOptimization lns = new LNSOptimization(data);
+        //Solution solutionLNS = lns.runLNS(solutionConstr);
+        //printToConsole("LNS solution:", solutionLNS);
         
 
         // --- ALNS SOLUTION ---
         ALNSCore alns = new ALNSCore(data);
-        Solution solutionALNS = alns.runALNS(solutionLNS);
+        Solution solutionALNS = alns.runALNS(solutionConstr);
         long timeElapsed = (System.currentTimeMillis() - startTimeConstruction);
         // Print ALNS(+GLS) solution
         printToConsole("ALNS solution", solutionALNS);
@@ -87,6 +87,7 @@ public class MainALNS {
         	logResultHospital(data, solutionALNS, timeElapsed);
         
         WriterUtils.writePenaltiesDetailedInformation();
+        WriterUtils.writeAllTourInformation();
 
         System.out.println();
         // TODO Alex: brauchen irgendwas, um Lösung zu speichern (ZF und Touren startzeiten etc.)

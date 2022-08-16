@@ -36,7 +36,9 @@ public class RandomVehicleRemoval extends AbstractRemoval {
 	 */
 	@Override
 	List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) throws ArgumentOutOfBoundsException {
-        // get number of removals based on parameters defined in config file
+        //TODO: nach skill sortieren + Anzahl der momentanen gescheduldeten Customer
+		
+		// get number of removals based on parameters defined in config file
         List<Integer> removedCustomers = new ArrayList<>();
 
         int nVehicles = solution.getVehicles().size();
@@ -49,7 +51,7 @@ public class RandomVehicleRemoval extends AbstractRemoval {
             if (!vehicle.isUsed()) continue;
 
             selectedVehicle = idx;
-            for (int c = 1; c < vehicle.getnCustomersInTour()+1; c++) {  // c starts at 1 as first customer is at position 1 (0 is dummy out)
+            for (int c = vehicle.getnCustomersInTour(); c > 0; c--) {  // c starts at 1 as first customer is at position 1 (0 is dummy out)
                 int removedCustomer = vehicle.applyRemoval(c, this.data, solution);
                 removedCustomers.add(removedCustomer); // vehicle.getCustomers().get(c));
             }

@@ -81,7 +81,7 @@ public class LocationRelatedRemoval extends AbstractRemoval {
 
         // 4) --- remove customers which are related in their location
         int idx = 0;
-        while (nRemovals > 0) {
+        while (nRemovals > 0 && solution.getAssignedCustomers().size() > 0) {
             double[] removal = closest.get(idx);
             removedCustomers.add((int) removal[0]);
             solution.getVehicles().get((int) removal[1]).applyRemovalForCustomer((int) removal[0], this.data, solution);
@@ -90,7 +90,7 @@ public class LocationRelatedRemoval extends AbstractRemoval {
             closest.remove(idx);
 
             nRemovals--;
-            idx ++;
+            //idx ++;
         }
         return removedCustomers;
 	}

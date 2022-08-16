@@ -31,6 +31,10 @@ public class Config {
     
     // --- USE Sequential allocation heuristic (SAH) according to Gartner et al, 2018 ---
     public boolean useSAH;
+    
+    // --- use LNS for vehicle optimmization as preprocessing step for ALNS procedure
+    public boolean useLNSVehicle;
+    public double percentageOfItersForLNS;
 
     // --- ALNS ---
     public int alnsIterations;
@@ -227,6 +231,10 @@ public class Config {
         
         // --- SAH - sequential allocation heuristic ---
         useSAH = (boolean) obj.get("use_sah");
+        
+        // --- LNS - vehicle optimization ---
+        useLNSVehicle = (boolean) obj.get("use_lns_vehicle");
+        percentageOfItersForLNS = (double) obj.get("percentage_lns_vehicle_iters");
 
         // --- DESTROY / REPAIR OPERATORS ---
         // removals

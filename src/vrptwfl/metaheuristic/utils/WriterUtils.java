@@ -44,9 +44,13 @@ public class WriterUtils {
 	public static FileWriter writerSummary;
 	public static FileWriter writerUnscheduled;
 	public static FileWriter writerPenaltiesDetailed;
+	public static FileWriter writerAllTours;
+	public static FileWriter writerIndividualPenalties;
 	public static String outDir;
 	
-	private static JSONArray penaltiesInfo = new JSONArray();
+	// private static JSONArray penaltiesInfo = new JSONArray();
+	private static JSONObject penaltiesInfo = new JSONObject();
+	private static JSONObject allTours = new JSONObject();
 	
 	/**
 	 * Initialization of the writers. 
@@ -80,6 +84,8 @@ public class WriterUtils {
 			writerSummary = new FileWriter(outDir + "summary.txt");
 			writerUnscheduled = new FileWriter(outDir + "unscheduledInfo.csv");
 			writerPenaltiesDetailed = new FileWriter(outDir + "penaltiesDetailed.json");
+			writerAllTours = new FileWriter(outDir + "allTours.json");
+			writerIndividualPenalties = new FileWriter(outDir + "individualPenalties.json");
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -89,7 +95,7 @@ public class WriterUtils {
 	// INTIIALE SINGLE WRITERS - HEADERS
 	/**
 	 * Initialization of the writer for logging removal ops' probabilities.
-	 * @param writer: Writer which logs the removal ops' probabilites
+	 * @param writer: Writer which logs the removal ops' probabilities
 	 * @param operators: removal operators
 	 */
 	public static void initWriterRemovalProbabilities(FileWriter writer, AbstractRemoval[] operators) {
@@ -508,6 +514,111 @@ public class WriterUtils {
 	}
 	
 	/**
+	 * Helper function for tracking a tour information.
+	 * The method extracts the current scheduling and stores it in the class variable
+	 * 'allTours'.
+	 * 
+	 * @param it: current iteration number
+	 * @param s: solution object
+	 */
+	public static void addTourInformation (Integer it, Solution s) {
+		JSONObject tourInfo = new JSONObject();
+		for (Vehicle v: s.getVehicles()) {
+			// JSONObject vehicleInfo = new JSONObject();
+
+			int vehicleId = v.getId();
+			JSONArray customersArrInfo = new JSONArray();
+			
+			for (int i = 1; i < v.getCustomers().size() - 1 ; i++) {
+				// JSONObject customerInfo = new JSONObject();
+				JSONArray customerInfo = new JSONArray();
+
+				int customerId = v.getCustomers().get(i);
+				int originalCustomerId = s.getData().getOriginalCustomerIds()[customerId];
+				int servedLoc = DataUtils.getLocationIndex(customerId, s);
+				int preferredLoc = s.getData().getCustomersPreferredLocation()[customerId];
+				int capacitySlot = s.getCustomerAffiliationToCapacity()[customerId];
+				int duration = s.getData().getServiceDurations()[customerId];
+				double startService = v.getStartOfServices().get(i);
+				double endService = v.getEndOfServices().get(i);
+				double customersStartTime = s.getData().getEarliestStartTimes()[customerId];
+				double customersEndTime = s.getData().getLatestStartTimes()[customerId];
+				
+	            int locPred = s.getData().getCustomersToLocations().get(s.getData().getOriginalCustomerIds()[v.getCustomers().get(i-1)]).get(s.getCustomerAffiliationToLocations()[v.getCustomers().get(i-1)]);
+	            int locCurr = s.getData().getCustomersToLocations().get(s.getData().getOriginalCustomerIds()[v.getCustomers().get(i)]).get(s.getCustomerAffiliationToLocations()[v.getCustomers().get(i)]);
+	            int locSucc = s.getData().getCustomersToLocations().get(s.getData().getOriginalCustomerIds()[v.getCustomers().get(i+1)]).get(s.getCustomerAffiliationToLocations()[v.getCustomers().get(i+1)]);
+	            double distPred = s.getData().getDistanceBetweenLocations(locPred, locCurr);
+	            double distSucc = s.getData().getDistanceBetweenLocations(locCurr, locSucc);
+	            
+	            double distToPreferredLoc = s.getData().getDistanceBetweenLocations(servedLoc, preferredLoc);
+				
+	            
+	            /*
+	            customerInfo.put("customerId", customerId);
+	            customerInfo.put("originalCustomerId", originalCustomerId);
+	            customerInfo.put("PosInRoute", i);
+	            customerInfo.put("servedLocation", servedLoc);
+	            customerInfo.put("preferredLocation", preferredLoc);
+	            customerInfo.put("capacitySlot", capacitySlot);
+	            customerInfo.put("duration", duration);
+	            customerInfo.put("startServiceTime", startService);
+	            customerInfo.put("endServiceTime", endService);
+	            customerInfo.put("customersStartPlaningHorizon", customersStartTime);
+	            customerInfo.put("customersEndPlaningHorizon", customersEndTime);
+	            customerInfo.put("distPredLoc", distPred);
+	            customerInfo.put("distSuccLoc", distSucc);
+	            customerInfo.put("distToPreferredLoc", distToPreferredLoc);
+	            */
+	            
+	            customerInfo.add(customerId);
+	            customerInfo.add(originalCustomerId);
+	            customerInfo.add(i);
+	            customerInfo.add(servedLoc);
+	            customerInfo.add(preferredLoc);
+	            customerInfo.add(capacitySlot);
+	            customerInfo.add(duration);
+	            customerInfo.add(startService);
+	            customerInfo.add(endService);
+	            customerInfo.add(customersStartTime);
+	            customerInfo.add(customersEndTime);
+	            customerInfo.add(distPred);
+	            customerInfo.add(distSucc);
+	            customerInfo.add(distToPreferredLoc);
+	            
+	            
+	            double[] info = new double[]{customerId, originalCustomerId, i, servedLoc, preferredLoc,
+	            		capacitySlot, duration, startService, endService, customersStartTime,
+	            		customersEndTime, distPred, distSucc, distToPreferredLoc};
+	            
+	            customersArrInfo.add(customerInfo);
+	            // vehicleInfo.put(customerId, customerInfo);
+			}
+			
+			//tourInfo.put(vehicleId, vehicleInfo);
+			tourInfo.put(vehicleId, customersArrInfo);
+		}
+		allTours.put(it, tourInfo);
+	}
+	
+	
+	/**
+	 * Write out all tours being stored in the field variable 'allTours'.
+	 */
+	public static void writeAllTourInformation () {
+		try {
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			JsonParser jp = new JsonParser();
+			JsonElement je = jp.parse(allTours.toJSONString());
+			String prettyJsonString = gson.toJson(je);
+			writerAllTours.write(prettyJsonString);
+			writerAllTours.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	/**
 	 * Helper function for tracking the penalty feature vectors.
 	 * The method iterates the current GLS penalties and stores the in the class variable
 	 * 'penaltiesInfo'.
@@ -516,7 +627,7 @@ public class WriterUtils {
 	 * @param s: solution object
 	 */
 	public static void addToPenaltiesInformation (Integer it, Solution s) {
-		JSONArray customerArr = new JSONArray();
+		JSONObject customerCollection = new JSONObject();
 		for (int customer = 0; customer<s.getData().getGLSPenalties()[0].length; customer ++) {
 			JSONObject customerObj = new JSONObject();
 			JSONObject penaltyObj = new JSONObject();
@@ -524,14 +635,12 @@ public class WriterUtils {
 				penaltyObj.put(DataUtils.PenaltyIdx.values()[penaltyIdx],
 							   s.getData().getGLSPenalties()[penaltyIdx][customer]
 							   );
+				penaltyObj.put("originalCustomerID", s.getData().getOriginalCustomerIds()[customer]);
+				
 			}
-			customerObj.put(String.valueOf(customer), penaltyObj);
-			customerObj.put("originalCustomerID", s.getData().getOriginalCustomerIds()[customer]);
-			customerArr.add(customerObj);
+			customerCollection.put(String.valueOf(customer), penaltyObj);
 		}
-		JSONObject iterationInfo = new JSONObject();
-		iterationInfo.put(it, customerArr);
-		penaltiesInfo.add(iterationInfo);
+		penaltiesInfo.put(it, customerCollection);
 	}
 	
 	/**
@@ -547,6 +656,29 @@ public class WriterUtils {
 			writerPenaltiesDetailed.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public static void initializeIndividualPenaltiesLogging () {
+		try {
+			writerIndividualPenalties.write("iteration;penalty;customerID\n");
+			writerIndividualPenalties.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	public static void writeIndividualPenalties(Integer iteration, Solution solution) {
+		for (int[] penaltyInfo : solution.getListOfPenalties()) {
+			try {
+				writerIndividualPenalties.write(iteration + ";" + 
+											    DataUtils.PenaltyIdx.values()[penaltyInfo[0]] +  ";" + 
+												penaltyInfo[1] + "\n");
+				writerIndividualPenalties.flush();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	

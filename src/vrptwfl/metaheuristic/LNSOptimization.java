@@ -72,6 +72,14 @@ public class LNSOptimization {
 		Solution solutionCurr = solutionConstr.copyDeep();
 		
 		for (int iteration = 1; iteration<= 25; iteration ++) {
+			//TODO: Strafterm für not scheduled customer hoch setzen (Faktor für erhöhung/minimierung in config setzen)
+			//TODO: check, ob man LNS auch in ALNS verwurschteln kann 
+			//TODO: checkVehicleOpt() ist mit feasible check schon implizit abgedeckt
+			//TODO: Aussetzen der updateTemperature funktion für simulated annealing
+			//TODO: ! LNS phase arbeitet auch mit allen destroy/repair ops !
+			//TODO: 10 % der Gesamtiterationen wird für LNS-Phase verwendet
+			//TODO: Keine Adaption der Gewichte für die OPs in der LNS-Phase
+			
 			solutionTemp = solutionCurr.copyDeep();
 			
 			this.destroyOperator.destroy(solutionTemp);

@@ -13,6 +13,10 @@ check_interval_for_insertion: 0.25
 ### USAGE OF SAH, sequential allocation heuristic (SAH), Gartner et al, 2018
 use_sah: false
 
+### USAGE OF LNS for vehicle optimization as preprocessing step for ALNS
+use_lns_vehicle: true
+percentage_lns_vehicle_iters: 0.1
+
 ### PENALTY UPDATE - SETTINGS
 enable_gls: true
 enable_schiffer: false
