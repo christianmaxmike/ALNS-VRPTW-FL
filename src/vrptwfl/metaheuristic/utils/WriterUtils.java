@@ -72,16 +72,16 @@ public class WriterUtils {
 		try {
 			writerRemovals = new FileWriter(outDir + "removalProbabilities.txt", true);
 			writerRepairs = new FileWriter(outDir + "" + "repairProbabilities.txt", true);
-			writerPenalties = new FileWriter(outDir + "" + "logPenalties.txt");
+			writerPenalties = new FileWriter(outDir + "" + "logPenalties.csv");
 			writerResults = new FileWriter("./"+ parentDir +"/" + outputFile, true);
 			writerConfig = new FileWriter(outDir + "config.json");
 			writerFinalTour = new FileWriter(outDir + "finalTour.txt");
 			writerFinalTourCSV = new FileWriter(outDir + "finalTourCSV.csv");
 			writerInitialTourCSV = new FileWriter(outDir + "initialTourCSV.csv");
-			writerBacktracking = new FileWriter(outDir + "backTrackingLog.txt");
+			writerBacktracking = new FileWriter(outDir + "backTrackingLog.csv");
 			//writerBacktrackingPenalties = new FileWriter(outDir + "InitialPenalties.txt");
-			writerProcessLog = new FileWriter(outDir + "logCosts.txt");
-			writerSummary = new FileWriter(outDir + "summary.txt");
+			writerProcessLog = new FileWriter(outDir + "logCosts.csv");
+			writerSummary = new FileWriter(outDir + "summary.csv");
 			writerUnscheduled = new FileWriter(outDir + "unscheduledInfo.csv");
 			writerPenaltiesDetailed = new FileWriter(outDir + "penaltiesDetailed.json");
 			writerAllTours = new FileWriter(outDir + "allTours.json");

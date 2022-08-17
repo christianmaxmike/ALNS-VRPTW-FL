@@ -12,9 +12,11 @@ import vrptwfl.metaheuristic.utils.CalcUtils;
 
 
 /**
- * This class implements the random vehicle removal heuristic.
- * From the current scheduling, the procedure selects any vehicles and remove its
- * customers. 
+ * This class implements the favorited vehicle removal heuristic.
+ * From the current scheduling, the procedure selects vehicles with less skill and remove its
+ * customers. If skill levels do match, the second criteria is an ordering along the number
+ * of customers being scheduled within a vehicle. Less customers in a vehicle are preferred 
+ * for the removal.
  * 
  * @author Christian M.M. Frey
  *
@@ -36,15 +38,13 @@ public class FavVehicleRemoval extends AbstractRemoval {
 	 * Executes the removal.
 	 */
 	@Override
-	List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) throws ArgumentOutOfBoundsException {
-        //TODO: nach skill sortieren + Anzahl der momentanen gescheduldeten Customer
-		
+	List<Integer> operatorSpecificDestroy(Solution solution, int nRemovals) throws ArgumentOutOfBoundsException {		
 		// get number of removals based on parameters defined in config file
         List<Integer> removedCustomers = new ArrayList<>();
 
-        int nVehicles = solution.getVehicles().size();
+        // int nVehicles = solution.getVehicles().size();
         // List<Integer> shuffledVehicleIndices = CalcUtils.getSortedUniqueRandomNumbersInRange(nVehicles, 0, nVehicles-1);
-        List<Integer> shuffledVehicleIndices = CalcUtils.getShuffledUniqueRandomNumbersInRange(nVehicles, 0, nVehicles-1);
+        // List<Integer> shuffledVehicleIndices = CalcUtils.getShuffledUniqueRandomNumbersInRange(nVehicles, 0, nVehicles-1);
 
         
         solution.getVehicles().sort(new Comparator<Vehicle>() {
@@ -102,6 +102,6 @@ public class FavVehicleRemoval extends AbstractRemoval {
 	 */
 	@Override
 	public String getFormattedClassName() {
-		return "RandomVehicleRemoval";
+		return "FavVehicleRemoval";
 	}
 }
