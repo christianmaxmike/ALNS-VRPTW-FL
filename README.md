@@ -217,3 +217,24 @@ Import the project as Maven project by including the following dependencies:
 **Solomon-Instances** were taken from [here](http://web.cba.neu.edu/~msolomon/problems.html).
 
 **Hospital-Instances** are publicly available [here](https://zenodo.org/record/6772201#.YscDBZDP3Ko).
+
+
+## Cite
+
+Please cite [our paper](https://www.sciencedirect.com/science/article/abs/pii/S0377221722008888) if you use this code in your own work:
+
+```
+@article{FREY_2023,
+title = {The vehicle routing problem with time windows and flexible delivery locations},
+journal = {European Journal of Operational Research},
+volume = {308},
+number = {3},
+pages = {1142-1159},
+year = {2023},
+issn = {0377-2217},
+doi = {https://doi.org/10.1016/j.ejor.2022.11.029},
+url = {https://www.sciencedirect.com/science/article/pii/S0377221722008888},
+author = {Christian M.M. Frey and Alexander Jungwirth and Markus Frey and Rainer Kolisch},
+keywords = {Routing, Location capacity, Metaheuristic, OR in health services}
+}
+```
