@@ -214,7 +214,7 @@ Import the project as Maven project by including the following dependencies:
 
 ## Instances
 
-**Solomon-Instances** were taken from [here](http://web.cba.neu.edu/~msolomon/problems.html).
+**Solomon-Instances** were taken from [here](http://web.cba.neu.edu/~msolomon/problems.htm).
 
 **Hospital-Instances** are publicly available [here](https://zenodo.org/record/6772201#.YscDBZDP3Ko).
 
